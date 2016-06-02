@@ -1,0 +1,13 @@
+{
+  "name": "testnode",
+  "version": "1.0.0",
+  "description": "example Node app on Docker so I don't crash the Mac again",
+  "author": "Erin Nolan,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.13.3"
+  }
+}

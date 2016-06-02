@@ -1,3 +1,7 @@
 FROM node
+
 MAINTAINER Erin Nolan
-# RUN npm update
+
+RUN npm install
+EXPOSE 8080
+CMD ["npm","start"]
