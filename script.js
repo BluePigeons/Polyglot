@@ -11,7 +11,7 @@ map = L.map('map', {
 });
 
 var baseLayer = L.tileLayer.iiif(
-  'https://stacks.stanford.edu/image/iiif/cv770rd9515%2F0767_23A_SM/info.json'
+  'http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/UoEsha~3~3~54530~102219/info.json'
 ).addTo(map);
 
 //Leaflet Illustrate example with alterations
@@ -28,3 +28,4 @@ map.on('draw:created', function(evt) {
 		layer = evt.layer;
 	drawnItems.addLayer(layer);
 });
+

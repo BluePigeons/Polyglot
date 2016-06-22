@@ -47,6 +47,9 @@ if (L.Point) {
 		return this.clone()._abs();
 	};
 }
+
+
+
 L.RotatableMarker = L.Marker.extend({
 
 	options: {
@@ -84,9 +87,16 @@ L.RotatableMarker = L.Marker.extend({
 	}
 });
 
+
+
+
 L.rotatableMarker = function(latlng, options) {
 	return new L.RotatableMarker(latlng, options);
 };
+
+
+
+/*
 L.Illustrate.Pointer = L.Path.extend({
 
 	options: {
@@ -233,6 +243,8 @@ L.Illustrate.Pointer = L.Path.extend({
 		L.Path.prototype._updatePath.call(this);
 	}
 });
+
+
 L.Illustrate.Pointer = L.Illustrate.Pointer.extend({
 	_initElements: function() {
 		this._initPathRoot();
@@ -330,6 +342,10 @@ L.Illustrate.Pointer = L.Illustrate.Pointer.extend({
 		}
 	}
 });
+
+*/
+
+
 L.Illustrate.Textbox = L.RotatableMarker.extend({
 	statics: {
 		TYPE: 'textbox',
@@ -530,6 +546,14 @@ L.Illustrate.Textbox = L.RotatableMarker.extend({
 
 });
 
+
+
+
+
+
+
+
+
 /* Add GeoJSON Conversion */
 L.Illustrate.Textbox.prototype.toGeoJSON = function() {
 	var size = this.getSize(),
@@ -584,7 +608,9 @@ L.Illustrate.Selectable = L.Handler.extend({
 		L.DomEvent.stopPropagation(event);
 	}
 });
+
 L.Illustrate.Create = L.Illustrate.Create || {};
+
 L.Illustrate.Create.Pointer = L.Draw.Polyline.extend({
 	// Have *GOT* to refactor this.
 	// Really, I should get the layer point position on click, not the latlng.  There's no need to be endlessly
@@ -614,6 +640,13 @@ L.Illustrate.Create.Pointer = L.Draw.Polyline.extend({
 		L.Draw.Feature.prototype._fireCreatedEvent.call(this, pointer);
 	}
 });
+
+
+
+
+
+
+
 L.Illustrate.Create.Textbox = L.Draw.Rectangle.extend({
 	statics: {
 		TYPE: 'textbox'
@@ -677,6 +710,11 @@ L.Illustrate.Create.Textbox = L.Draw.Rectangle.extend({
 		});
 	}
 });
+
+
+
+
+
 L.Illustrate.Toolbar = L.Toolbar.extend({
 	statics: {
 		TYPE: 'illustrate'
@@ -684,7 +722,7 @@ L.Illustrate.Toolbar = L.Toolbar.extend({
 
 	options: {
 		textbox: {},
-		pointer: {}
+		//pointer: {}
 	},
 
 	initialize: function(options) {
@@ -708,11 +746,11 @@ L.Illustrate.Toolbar = L.Toolbar.extend({
 				handler: new L.Illustrate.Create.Textbox(map, this.options.textbox),
 				title: 'Add a textbox'
 			},
-			{
+			/*{
 				enabled: this.options.pointer,
 				handler: new L.Illustrate.Create.Pointer(map, this.options.pointer),
 				title: 'Add a pointer'
-			}
+			}*/
 		];
 	},
 
@@ -730,6 +768,8 @@ L.Illustrate.Toolbar = L.Toolbar.extend({
 		}
 	}
 });
+
+
 
 L.Illustrate.Control = L.Control.Draw.extend({
 	initialize: function(options) {
@@ -779,6 +819,8 @@ L.Map.addInitHook(function() {
 if (L.EditToolbar.Edit) {
 	L.EditToolbar.Edit.prototype._toggleMarkerHighlight = function() {};
 }
+
+
 L.Illustrate.tooltipText = {
 	create: {
 		toolbar: {
@@ -818,6 +860,8 @@ L.Illustrate.tooltipText = {
 		}
 	}
 };
+
+
 L.Illustrate.EditHandle = L.RotatableMarker.extend({
 	options: {
 		moveIcon: new L.DivIcon({
@@ -989,6 +1033,8 @@ L.Illustrate.MoveHandle = L.Illustrate.EditHandle.extend({
 		this._handled.setLatLng(handle.getLatLng());
 	}
 });
+
+/*
 L.Illustrate.PointerHandle = L.Illustrate.EditHandle.extend({
 	initialize: function(shape, options) {
 		L.Illustrate.EditHandle.prototype.initialize.call(this, shape, options);
@@ -1082,7 +1128,7 @@ L.Illustrate.PointerHandle = L.Illustrate.EditHandle.extend({
 			origin = pointer._map.latLngToLayerPoint(pointer.getLatLng()),
 			midpoint, latlng;
 
-		/* Update the positions of the two adjacent 'midpoint' handles. */
+		/* Update the positions of the two adjacent 'midpoint' handles. 
 		if ((this._id === id - 1) && i > 0) {
 			midpoint = edit._calculateMidpoint(i - 1, i).add(origin);
 			latlng = pointer._map.layerPointToLatLng(midpoint);
@@ -1093,7 +1139,9 @@ L.Illustrate.PointerHandle = L.Illustrate.EditHandle.extend({
 			this.setLatLng(latlng);
 		}
 	}
-});
+});*/
+
+
 L.Illustrate.ResizeHandle = L.Illustrate.EditHandle.extend({
 	options: {
 		TYPE: 'resize'
@@ -1143,6 +1191,8 @@ L.Illustrate.ResizeHandle = L.Illustrate.EditHandle.extend({
 		L.Illustrate.EditHandle.prototype.updateHandle.call(this);
 	}
 });
+
+/*
 L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 	options: {
 		TYPE: 'rotate'
@@ -1177,7 +1227,7 @@ L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 			theta = - Math.atan(point.x / point.y);
 		}
 
-		/* rotate the textbox */
+		/* rotate the textbox 
 		this._handled.setRotation(theta);
 	},
 
@@ -1218,7 +1268,13 @@ L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 		]);
 	}
 });
+*/
+
+
+
 L.Illustrate.Edit = L.Illustrate.Edit || {};
+
+/*
 
 L.Illustrate.Edit.Pointer = L.Edit.Poly.extend({
 	initialize: function(shape, options) {
@@ -1247,7 +1303,7 @@ L.Illustrate.Edit.Pointer = L.Edit.Poly.extend({
 				length = coordinates.length,
 				i;
 
-			/* Pointers are not rotatable, but EditHandles expect rotatable objects. */
+			/* Pointers are not rotatable, but EditHandles expect rotatable objects. 
 			this._shape.getRotation = function() { return 0; };
 
 			this._handleGroup = new L.FeatureGroup();
@@ -1283,7 +1339,7 @@ L.Illustrate.Edit.Pointer = L.Edit.Poly.extend({
 			delete removed[j];
 		}
 
-		/* Modify the path and redraw the pointer */
+		/* Modify the path and redraw the pointer 
 		coordinates.splice(i, 1);
 		pointer.setPoints(coordinates);
 
@@ -1299,7 +1355,7 @@ L.Illustrate.Edit.Pointer = L.Edit.Poly.extend({
 			i = this._handleIdToCoordIndex(addedId, handle._type),
 			before, after;
 
-		/* Modify the path and redraw the pointer. */
+		/* Modify the path and redraw the pointer. 
 		coordinates.splice(i + 1, 0, L.point(handle._handleOffset));
 		pointer.setPoints(coordinates);
 
@@ -1321,7 +1377,7 @@ L.Illustrate.Edit.Pointer = L.Edit.Poly.extend({
 		pointer.fire('edit:update-vertex', { 'handle': handle });
 	},
 
-	/* TODO: Move this into a subclass of L.Illustrate.PointerHandle */
+	/* TODO: Move this into a subclass of L.Illustrate.PointerHandle 
 	_createVertexHandle: function(index) {
 		var coordinates = this._shape.getPoints(),
 			vertexHandle = new L.Illustrate.PointerHandle(this._shape, {
@@ -1335,7 +1391,7 @@ L.Illustrate.Edit.Pointer = L.Edit.Poly.extend({
 		return vertexHandle;
 	},
 
-	/* TODO: Move this into a subclass of L.Illustrate.PointerHandle */
+	/* TODO: Move this into a subclass of L.Illustrate.PointerHandle 
 	_createMidpointHandle: function(index) {
 		var	midpointHandle = new L.Illustrate.PointerHandle(this._shape, {
 				offset: this._calculateMidpoint(index, index + 1),
@@ -1396,7 +1452,14 @@ L.Illustrate.Pointer.addInitHook(function() {
 		}
 	}
 });
+
+*/
+
 L.Illustrate.Edit = L.Illustrate.Edit || {};
+
+
+
+
 
 L.Illustrate.Edit.Textbox = L.Edit.SimpleShape.extend({
 	addHooks: function() {
@@ -1483,6 +1546,10 @@ L.Illustrate.Edit.Textbox = L.Edit.SimpleShape.extend({
 		}
 	}
 });
+
+
+
+
 
 L.Illustrate.Textbox.addInitHook(function() {
 	if (L.Illustrate.Edit.Textbox) {
