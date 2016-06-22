@@ -1,0 +1,41 @@
+{
+  "name": "playground",
+  "main": [
+    "leaflet-iiif.js",
+    "dist/Leaflet.Illustrate.js",
+    "dist/Leaflet.Illustrate.css",
+    "dist/images/spritesheet.png"
+  ],
+  "version": "0.0.1",
+  
+  "description": "A testbed for using IIIF and Leaflet Illustrate features",
+  "keywords": [
+    "leaflet",
+    "iiif",
+    "map",
+    "zoom",
+    "annotate",
+    "illustrate",
+    "draw"
+  ],
+
+  "authors": [
+    "Erin Nolan"
+  ],
+  "license": "none",
+
+  "ignore": [
+    "**/.*",
+    "examples",
+    "src",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "Gruntfile.js"
+  ],
+  
+  "dependencies": {
+    "leaflet-draw": "~2.3.0"
+  }
+}
