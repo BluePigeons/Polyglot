@@ -1,0 +1,148 @@
+{
+   "@context": "http://iiif.io/api/presentation/2/context.json",
+   "@id": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/manifest/85o774/manifest.json",
+   "@type": "sc:Manifest",
+   "label": "CRC Gallimaufry (Miscellaneous Images)",
+   "seeAlso": {
+      "@id": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/view/search?q=0010958&search=SUBMIT&QuickSearchA=QuickSearchA&sort=work_creator_details%2Cwork_shelfmark%2Cwork_source_page_no%2Cwork_title&pgs=50&res=1&cic=UoEgal%7E5%7E5",
+      "label": "Go to Source",
+      "format": "text/html"
+   },
+   "attribution": "CRC Gallimaufry (Miscellaneous Images)",
+   "logo": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/images/LUNAIIIF80.png",
+   "metadata": [
+      {
+         "label": "Created By",
+         "value": ""
+      }
+   ],
+   "sequences": [
+      {
+         "@id": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/85o774/sequence/s0",
+         "@type": "sc:Sequence",
+         "label": "Sequence s0",
+         "viewingHint": "individuals",
+         "canvases": [
+            {
+               "@id": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/UoEgal~5~5~72303~104796/canvas/c0",
+               "@type": "sc:Canvas",
+               "label": "Illustrations of Zoology, p.104",
+               "description": "",
+               "thumbnail": "http://images.is.ed.ac.uk/MediaManager/srvr?mediafile=/Size0/UoEgal-5-NA/1025/0010958c.jpg",
+               "height": 7520,
+               "width": 5656,
+               "metadata": [
+                  {
+                     "label": "Work Record ID",
+                     "value": "0010958"
+                  },
+                  {
+                     "label": "Shelfmark",
+                     "value": "JY 953"
+                  },
+                  {
+                     "label": "Holding Institution",
+                     "value": "University of Edinburgh"
+                  },
+                  {
+                     "label": "Title",
+                     "value": "Illustrations of Zoology"
+                  },
+                  {
+                     "label": "Subset Index",
+                     "value": "p.104"
+                  },
+                  {
+                     "label": "Creator",
+                     "value": "Wilson, James"
+                  },
+                  {
+                     "label": "Creator Role",
+                     "value": "Author"
+                  },
+                  {
+                     "label": "Location",
+                     "value": "Centre for Research Collections/Main Library"
+                  },
+                  {
+                     "label": "Subject Category",
+                     "value": "Archives"
+                  },
+                  {
+                     "label": "Subject Category",
+                     "value": "Biology"
+                  },
+                  {
+                     "label": "Subject Category",
+                     "value": "Science &amp; Natural History"
+                  },
+                  {
+                     "label": "Related Work Title",
+                     "value": "Illustrations of Zoology"
+                  },
+                  {
+                     "label": "Related Work Page No",
+                     "value": "p.104"
+                  },
+                  {
+                     "label": "Related Work Notes",
+                     "value": "Subset/Host Work"
+                  },
+                  {
+                     "label": "Rights Statement",
+                     "value": "© The University of Edinburgh"
+                  },
+                  {
+                     "label": "Keyword",
+                     "value": "Archives, Science &amp; Natural History, Biology"
+                  },
+                  {
+                     "label": "Repro File Type",
+                     "value": "Cropped Tiff"
+                  },
+                  {
+                     "label": "Repro File Size (bytes)",
+                     "value": "127662720"
+                  },
+                  {
+                     "label": "Repro Title",
+                     "value": "Illustrations of Zoology, p.104"
+                  },
+                  {
+                     "label": "Repro Description",
+                     "value": "Text about Gallinaceous Birds related to Plates 14 and 15 (the Aldrovandine Peacock)."
+                  },
+                  {
+                     "label": "Repro Rights Statement",
+                     "value": "© The University of Edinburgh"
+                  },
+                  {
+                     "label": "Repro Capture Date",
+                     "value": "2010:03:25 16:38:52"
+                  }
+               ],
+               "images": [
+                  {
+                     "@id": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/UoEgal~5~5~72303~104796/imageanno/ff2085d5-a9c7-412e-9dbe-dda87712228d",
+                     "@type": "oa:Annotation",
+                     "motivation": "sc:painting",
+                     "resource": {
+                        "@id": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/UoEgal~5~5~72303~104796/full/!1024,1024/0/default",
+                        "@type": "dcterms:Image",
+                        "format": "image/jpeg",
+                        "height": 7520,
+                        "width": 5656,
+                        "metadata": [],
+                        "description": [],
+                        "service": {
+                           "@id": "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/UoEgal~5~5~72303~104796",
+                           "profile": "http://iiif.io/api/image/2/level0.json"
+                        }
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
