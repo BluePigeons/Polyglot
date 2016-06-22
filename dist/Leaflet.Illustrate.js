@@ -30,6 +30,10 @@ if (L.DomUtil) {
 		}
 	};
 }
+
+
+
+
 L.Map.include({
 	_newLayerPointToLatLng: function(point, newZoom, newCenter) {
 		var topLeft = L.Map.prototype._getNewTopLeftPoint.call(this, newCenter, newZoom)
@@ -611,7 +615,7 @@ L.Illustrate.Selectable = L.Handler.extend({
 
 L.Illustrate.Create = L.Illustrate.Create || {};
 
-L.Illustrate.Create.Pointer = L.Draw.Polyline.extend({
+/*L.Illustrate.Create.Pointer = L.Draw.Polyline.extend({
 	// Have *GOT* to refactor this.
 	// Really, I should get the layer point position on click, not the latlng.  There's no need to be endlessly
 	// translating between latlng and layerpoint.
@@ -639,10 +643,7 @@ L.Illustrate.Create.Pointer = L.Draw.Polyline.extend({
 		pointer = new L.Illustrate.Pointer(latlngs[0], coordinates, this.options.shapeOptions);
 		L.Draw.Feature.prototype._fireCreatedEvent.call(this, pointer);
 	}
-});
-
-
-
+});*/
 
 
 
@@ -815,10 +816,21 @@ L.Map.addInitHook(function() {
 	}
 });
 
+
+
+
+
+
 /* Override the _toggleMarkerHighlight method to prevent annoying highlighting of textboxes. */
 if (L.EditToolbar.Edit) {
 	L.EditToolbar.Edit.prototype._toggleMarkerHighlight = function() {};
 }
+
+
+
+
+
+
 
 
 L.Illustrate.tooltipText = {
@@ -1192,7 +1204,7 @@ L.Illustrate.ResizeHandle = L.Illustrate.EditHandle.extend({
 	}
 });
 
-/*
+
 L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 	options: {
 		TYPE: 'rotate'
@@ -1227,7 +1239,7 @@ L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 			theta = - Math.atan(point.x / point.y);
 		}
 
-		/* rotate the textbox 
+		/* rotate the textbox*/
 		this._handled.setRotation(theta);
 	},
 
@@ -1268,7 +1280,7 @@ L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 		]);
 	}
 });
-*/
+
 
 
 
