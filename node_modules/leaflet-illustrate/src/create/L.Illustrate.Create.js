@@ -1,1 +1,0 @@
-L.Illustrate.Create = L.Illustrate.Create || {};
