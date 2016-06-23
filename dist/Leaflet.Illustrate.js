@@ -1251,7 +1251,7 @@ L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 		L.Illustrate.EditHandle.prototype.updateHandle.call(this);
 	},
 
-	_createPointer: function() {
+	/*_createPointer: function() {
 		var textarea = this._handled.getTextarea(),
 			borderWidth = L.DomUtil.getStyle(textarea, 'border-width'),
 			borderColor = L.DomUtil.getStyle(textarea, 'border-color'),
@@ -1278,7 +1278,7 @@ L.Illustrate.RotateHandle = L.Illustrate.EditHandle.extend({
 			this._textboxCoordsToLayerPoint(this._pointerStart).subtract(origin),
 			this._textboxCoordsToLayerPoint(this._handleOffset).subtract(origin)
 		]);
-	}
+	}*/
 });
 
 

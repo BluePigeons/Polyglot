@@ -5,8 +5,12 @@
   padding: 3px;
   resize: none;
   border: 2px solid rgba(0, 0, 0, 0);
-  background-color: rgba(0, 0, 0, 0);
+  background-color: rgba(255, 255, 255, 0.6);
+
+
   font-size: 14pt;
+
+
   color: #ededed;
   text-shadow: 0 0 0.2em #212121, 0 0 0.2em #212121, 0 0 0.2em #212121;
 }

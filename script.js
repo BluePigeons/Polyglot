@@ -1,5 +1,4 @@
 
-
 var map;
 
 //IIIF Viewer initial settings, not the Illustrate example settings
@@ -32,23 +31,16 @@ map.on('draw:created', function(evt) {
 	var type = evt.layerType,
 		layer = evt.layer;
 
-//if it's a textbox then export the text, remove it from image, and just add rectangle
-	/*if (type == 'textbox') {
-		var newAnno = L.Illustrate.textbox.getContent();
-		var fs = require('fs');
-		fs.writeFile("/tmp/test", newAnno, function(err) {
-		    if(err) {
-		        return console.log(err);
-		    }
-    		console.log("The file was saved!");
-		});
+	if (type == 'rectangle') {
+		///////
+	};
 
-		//L.Illustrate.textbox.setStyle();
-		L.Illustrate.textbox.setContent(" ");
-
-	}*/
 //add the layer to the layer group
 	drawnItems.addLayer(layer);
 
 });
+
+//whenever a new textbox is made, a new JSON file is created
+
+//whenever a textedit event is fired, the body field of text for that textbook is updated
 
