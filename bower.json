@@ -1,41 +1,24 @@
 {
-  "name": "playground",
-  "main": [
-    "leaflet-iiif.js",
-    "dist/Leaflet.Illustrate.js",
-    "dist/Leaflet.Illustrate.css",
-    "dist/images/spritesheet.png"
-  ],
+  "name": "polyglot",
+  "main": "app.js",
   "version": "0.0.1",
-  
-  "description": "A testbed for using IIIF and Leaflet Illustrate features",
+  "homepage": "https://github.com/BluePigeons/Polyglot",
+  "description": "A testbed for Leaflet Draw and IIIF and annotation",
   "keywords": [
     "leaflet",
     "iiif",
     "map",
-    "zoom",
-    "annotate",
-    "illustrate",
-    "draw"
+    "zoom"
   ],
-
   "authors": [
     "Erin Nolan"
   ],
-  "license": "none",
-
+  "license": "MIT",
   "ignore": [
     "**/.*",
-    "examples",
-    "src",
     "node_modules",
     "bower_components",
     "test",
-    "tests",
-    "Gruntfile.js"
-  ],
-  
-  "dependencies": {
-    "leaflet-draw": "~2.3.0"
-  }
+    "tests"
+  ]
 }
