@@ -92,4 +92,26 @@ app.use('/api', router);
 //tells the server where it should be listening for req and res
 app.listen(172.20.184.72:8080);
 
+/*
+    "jshint": "2.5.x",
+    "uglify-js": "~2.4.3",
+
+    "grunt": "~0.4.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-coffee": "~0.10.1",
+    "grunt-contrib-concat": "0.4.x",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-contrib-less": "~0.11.0",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-watch": ">=0.3.1",
+    "grunt-mocha": "~0.4.11",
+    "grunt-karma": "0.8.3",
+    "grunt-bump": "0.0.14",
+    "matchdep": "~0.3.0",
+  "peerDependencies": {
+    "grunt-cli": "0.1.13"
+  },
+
+*/
 

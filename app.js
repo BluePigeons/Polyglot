@@ -26,7 +26,8 @@ var controlOptions = {
     draw: {
 
 // disables the polyline feature as this is unnecessary for annotation of text as it cannot enclose it
-        polyline: false
+        polyline: false,
+        marker: false
 
     },
 //passes draw controlOptions to the FeatureGroup of editable layers
