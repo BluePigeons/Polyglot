@@ -32,9 +32,19 @@
     <script src="node_modules/leaflet-iiif/leaflet-iiif.js"></script>
 
 	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
-	
-	<!--<script src="node_modules/leaflet-illustrate/dist/Leaflet.Illustrate.js"></script>-->
 
+	<script src="node_modules/JSONstream/index.js"></script>
+
+	<script src="node_modules/request/index.js"></script>
+
+	<script src="node_modules/event-stream/index.js"></script>
+
+<!-- 
+	Will eventually use Browserify and bundle all final packages.
+	For now though I keep changing so I'm using node_module paths for most instead until packages are more finalised and tidied up more. WIll use it for node standard packages http, fs, stream etc though.
+-->
+
+	<script src="bundle.js"></script>
 
 </head>
 
@@ -49,6 +59,22 @@
 	<script src="app.js"></script>
 
 	<script src="annotator.min.js"></script>
+
+	<script>
+
+	    <!-- The main Annotator script -->
+
+      if (typeof annotator === 'undefined') {
+        alert("Oops! it looks like you haven't built Annotator. " +
+              "Either download a tagged release from GitHub, or build the " +
+              "package by running `make`");
+      } else {
+        var app = new annotator.App();
+        app.include(annotator.ui.main);
+        app.start();
+      }
+
+    </script>
 
 </body>
 

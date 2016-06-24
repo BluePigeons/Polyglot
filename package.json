@@ -3,56 +3,47 @@
   "version": "0.0.1",
   "description": "A testbed for integrating different IIIF and Leaflet Illustrate features",
   "main": "app.js",
-  
   "scripts": {
     "test": "./node_modules/.bin/karma start ./spec/karma.conf.js",
     "start": "./node_modules/.bin/http-server"
   },
-  
   "devDependencies": {
-
-    
     "http-server": "^0.9.0",
     "jquery": "^2.2.2",
-
     "chai": "1.9.1",
     "mocha": "~1.14.0",
     "sinon": "1.10.3",
-
     "jasmine": "^2.4.1",
     "karma": "^0.13.22",
     "karma-jasmine": "^0.3.7",
     "karma-phantomjs-launcher": "^1.0.0",
-
     "leaflet": "^0.7.7",
     "leaflet-draw": "0.2.3",
     "leaflet-iiif": "mejackreed/Leaflet-IIIF",
-    "leaflet-illustrate": "justinmanley/Leaflet.Illustrate",
     "jsonfile": "2.3.1",
     "formidable": "1.0.17",
-    "browserify": "13.0.1 ",
-
     "express": "4.14.0",
     "mongoose": "~3.6.13",
     "body-parser": "~1.0.1",
-
+    "request": "2.72.0",
+    "jsonstream": "dominictarr/JSONStream",
+    "event-stream": "dominictarr/event-stream",
     "phantomjs-prebuilt": "^2.1.5"
   },
-
   "directories": {
     "examples": "./examples",
     "distribution": "./dist",
     "source": "./src",
     "tests": "./test"
   },
-
   "author": "Erin Nolan",
   "license": "MIT",
   "readmeFilename": "README.md",
-  
-  "repository" :
-  { "type" : "git"
-  , "url" : "https://github.com/BluePigeons/Polyglot.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BluePigeons/Polyglot.git"
+  },
+  "dependencies": {
+    "http": "0.0.0"
   }
 }
-

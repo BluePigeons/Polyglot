@@ -1,10 +1,15 @@
 
-var express    = require('express');        // call express
-var bodyParser = require('body-parser');
+//var express    = require('express');        // call express
+//var bodyParser = require('body-parser');
 //Node module to specify server info
 var http = require('http');
 //Node file system module
 var fs = require('fs');
+var stream = require('stream');
+//var request = require('request');
+//var es = require('event-stream');
+//var JSONstream = require('JSONstream');
+
 //Package to parse multibody forms
 //var formidable = require("formidable");
 //Node module for debugging

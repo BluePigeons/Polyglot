@@ -1,0 +1,51 @@
+{
+
+	"@context": [
+		"https://examplestorage.ed.ac.uk/transcription/context.json",
+		"http://www.w3.org/ns/anno.jsonld"
+	],
+
+	"@id": "https://example.ed.ac.uk/transcription/transcription1",
+	"type": "Annotation",
+
+	"body": {
+		"id": "https://example.ed.ac.uk/transcription/body1.txt",
+		"format": "plain",
+		"language": "en"
+	},
+
+	"target": [
+		{
+			"id": "https://example.ed.ac.uk/markers/marker1.json",
+			"format": "application/json",
+		},
+		{
+			"id": "https://example.ed.ac.uk/trascriptions/transcription2"
+		}
+	],
+
+	"Annotation": "transcription",
+
+	"creator": {
+		"id": "https://example.ed.ac.uk/user100",
+		"name": "Rachel Doe",
+		"motivation":"identifying"
+	},
+	"created": "2015-01-28T12:00:00Z",
+	"modified": [
+		{
+			"id": "https://example.ed.ac.uk/user2",
+			"name":"Joe Blogg",
+			"motivation":"linking",
+		},
+		{
+			"id":"https://example.ed.ac.uk/user3",
+			"name":"Arthur Dent",
+			"motivation":"describing"
+		}
+	],
+
+	
+
+
+}

@@ -48,14 +48,37 @@ map.on('draw:created', function(evt) {
 //add the layer to the layer group
 	drawnItems.addLayer(layer);
 
-//whenever a new textbox is made, a new JSON file is created
+//a new geoJSON file is created
 	//var shape = layer.toGeoJSON()
 	
+//checks if this is was created to link to an existing transcription/translation anno
+
+//if it is, then the transcription/translation fields are updated
+
+//
 
 });
 
+//basic function to identify text that has been selected on a page
+function getSelectionText() {
 
-//var newAnno = new L.Illustrate.Textbox.getContent();
+  var textSelected = "";
+  if (window.getSelection) {
+      textSelected = window.getSelection().toString();
+  } 
+  else if (document.selection && document.selection.type != "Control") {
+      textSelected = document.selection.createRange().textSelected;
+  }
+    return textSelected;
+};
 
-//whenever a textedit event is fired, the body field of text for that textbook is updated
+//function to find the highest ranking child
+function highestChild()
 
+
+//function to update the ranking of 
+function updateRanks(parent, child, newRank) {
+
+
+
+};
