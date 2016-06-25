@@ -33,11 +33,13 @@
 
 	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
 
+<!--	
 	<script src="node_modules/JSONstream/index.js"></script>
 
 	<script src="node_modules/request/index.js"></script>
 
 	<script src="node_modules/event-stream/index.js"></script>
+-->
 
 <!-- 
 	Will eventually use Browserify and bundle all final packages.
@@ -52,29 +54,44 @@
 
 <body>
 
-	<p>Testing IIIF and Leaflet Illustrate combo </p>
+<!--The Page Content-->
+<div class="container">
 
-	<div id="map"></div>
+<div class="row">
+	<div id="websiteInfo" class="col-md-12">
+		<h1>THE POLYGLOT PROJECT</h1>
+		<p>Testing IIIF and Leaflet Illustrate combo </p>
+	</div>
+</div>
 
+<div class="row">
+
+	<div id="imageViewer" class="col-md-4">
+		<div id="map"></div>
+	</div>
+
+	<div id="transcriptionViewer" class="col-md-4">
+		<div class="meta-form"></div>
+		<div class="transcription-text">
+			<p>ipsum lorem</p>
+		</div>
+	</div>
+
+	<div id="translationViewer" class="col-md-4">
+		<div class="meta-form"></div>
+		<div class="translation-text">
+			<p>ipsum lorem too</p>
+		</div>
+	</div>
+
+</div>
+
+</div>
+
+<!-- The Javascript apps-->
+
+	<script src="annotator.min.js"></script>	
 	<script src="app.js"></script>
-
-	<script src="annotator.min.js"></script>
-
-	<script>
-
-	    <!-- The main Annotator script -->
-
-      if (typeof annotator === 'undefined') {
-        alert("Oops! it looks like you haven't built Annotator. " +
-              "Either download a tagged release from GitHub, or build the " +
-              "package by running `make`");
-      } else {
-        var app = new annotator.App();
-        app.include(annotator.ui.main);
-        app.start();
-      }
-
-    </script>
 
 </body>
 

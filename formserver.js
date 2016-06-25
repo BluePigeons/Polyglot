@@ -1,13 +1,13 @@
 
-//var express    = require('express');        // call express
-//var bodyParser = require('body-parser');
+var express    = require('express');        // call express
+var bodyParser = require('body-parser');
 //Node module to specify server info
 var http = require('http');
 //Node file system module
 var fs = require('fs');
 var stream = require('stream');
-//var request = require('request');
-//var es = require('event-stream');
+var request = require('request');
+var es = require('event-stream');
 //var JSONstream = require('JSONstream');
 
 //Package to parse multibody forms
@@ -89,13 +89,14 @@ var port = process.env.PORT || 8080;
 var router = express.Router();
 
 router.get('/', function(req, res) {
-    res.write({ message: 'hooray! welcome to our api!' });   
+    res.write({ message: 'hooray! welcome to our api!' });  
+    //console.log("testing") 
 });
 
 app.use('/api', router);
 
 //tells the server where it should be listening for req and res
-app.listen(172.20.184.72:8080);
+app.listen(8080);
 
 /*
     "jshint": "2.5.x",
