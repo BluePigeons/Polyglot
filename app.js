@@ -1,6 +1,6 @@
 
 //The main Annotator script
-
+/*
 if (typeof annotator === 'undefined') {
   alert("Oops! it looks like you haven't built Annotator. " +
         "Either download a tagged release from GitHub, or build the " +
@@ -10,10 +10,11 @@ if (typeof annotator === 'undefined') {
   app.include(annotator.ui.main);
   app.start();
 }
+*/
 
 var map;
 
-//IIIF Viewer initial settings, not the Illustrate example settings
+//IIIF Viewer initial settings
 
 map = L.map('map', {
   center: [0, 0],
@@ -24,8 +25,6 @@ map = L.map('map', {
 var baseLayer = L.tileLayer.iiif(
   'http://ids.lib.harvard.edu/ids/iiif/25286610/info.json'
 ).addTo(map);
-
-//Leaflet Illustrate example with alterations
 
 //initialises layer group called drawItems and adds it to the map - standard Leaflet Draw setup
 var drawnItems = new L.FeatureGroup();
@@ -55,16 +54,25 @@ new L.Control.Draw(controlOptions).addTo(map);
 var vectorSelected = "";
 
 //basic function to identify text that has been selected on a page
-function getSelectionText() {
+var textSelected = "";
 
-  var textSelected = "";
-  if (window.getSelection) {
-      textSelected = window.getSelection().toString();
-  } 
-  else if (document.selection && document.selection.type != "Control") {
-      textSelected = document.selection.createRange().textSelected;
-  }
-    return textSelected;
+/*if (window.getSelection) {
+    textSelected = window.getSelection().toString();
+} 
+else if (document.selection && document.selection.type != "Control") {
+    textSelected = document.selection.createRange().textSelected;
+};
+
+function selectingText() {
+  alert(textSelected);
+};
+
+var elem = document.getElementById('thing');
+elem.addEventListener('select', function() {
+  alert('Selection changed!');
+}, false);
+
+*/
 
 //look up parent text JSON for target
 
@@ -72,7 +80,6 @@ function getSelectionText() {
 
 //trigger popup
 
-};
 
 //whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
