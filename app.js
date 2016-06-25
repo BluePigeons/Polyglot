@@ -72,7 +72,18 @@ elem.addEventListener('select', function() {
   alert('Selection changed!');
 }, false);
 
+
+
+var gettext = (function () {
+    if (typeof global.Gettext === 'function') {
+        var _gettext = new global.Gettext({domain: "annotator"});
+        return function (msgid) { return _gettext.gettext(msgid); };
+    }
+
+    return function (msgid) { return msgid; };
+}());
 */
+
 
 //look up parent text JSON for target
 
@@ -146,6 +157,18 @@ function updateRanks(parent, child, newRank) {
 function compareChild(parentText, newChild) {
 
 };
+
+
+jsonfile.readFile(file, function(err, obj) {
+  
+})
+
+var file = 'data.json'
+var obj = {name: 'JP'}
+
+jsonfile.writeFile(file, obj, function (err) {
+  console.error(err)
+})
 
 //generate a new JSON-LD file and populate
 function newJSON(textSelected, currentVector) {

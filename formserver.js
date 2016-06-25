@@ -1,24 +1,21 @@
 
-var express    = require('express');        // call express
+var express    = require('express');
 var bodyParser = require('body-parser');
 //Node module to specify server info
-var http = require('http');
+//var http = require('http');
 //Node file system module
-var fs = require('fs');
-var stream = require('stream');
-var request = require('request');
-var es = require('event-stream');
+//var fs = require('fs');
+//var stream = require('stream');
+//var request = require('request');
+//var es = require('event-stream');
 //var JSONstream = require('JSONstream');
 
 //Package to parse multibody forms
 //var formidable = require("formidable");
-//Node module for debugging
-//var util = require('util');
-//Package to shortcut Node JSON interactions
-//var jsonfile = require('jsonfile');
 
+/*
 // create server called "server"
-/*var server = http.createServer(function (req, res) {
+var server = http.createServer(function (req, res) {
     
     //GET requests are processed by "displayForm" code
     if (req.method.toLowerCase() == 'get') {
@@ -30,9 +27,21 @@ var es = require('event-stream');
         submittingForm(req, res);
     }
 
-});*/
+});
 
-/*
+var jsonfile = require('jsonfile')
+
+var file = 'package.json'
+jsonfile.readFile(file, function(err, obj) {
+  console.dir(obj)
+})
+
+var file = 'data.json'
+var obj = {name: 'JP'}
+
+jsonfile.writeFile(file, obj, function (err) {
+  console.error(err)
+})
 
 function displayForm(res) {
 
@@ -82,42 +91,113 @@ function exampleFunction(err, fields, files) {
     };
 */
 
+var Bear     = require('./examples/bear');
+
 var app        = express();  
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 var port = process.env.PORT || 8080; 
 
+var mongoose   = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/testMongoDB'); // connect to our database
+
+//API ROUTES
+
 var router = express.Router();
 
-router.get('/', function(req, res) {
-    res.write({ message: 'hooray! welcome to our api!' });  
-    //console.log("testing") 
+// middleware to use for all requests
+router.use(function(req, res, next) {
+    // do logging
+    console.log('Something is happening.');
+    next(); // make sure we go to the next routes and don't stop here
 });
 
+
+//testing testing
+/*router.get('/', function(req, res) {
+
+    res.json({ message: 'hooray! welcome to our api!' });  
+
+});*/
+
+//route /api/vectors GET
+//get all vector JSONs
+
+//route /api/vectors POST
+//add a single new vector JSON
+
+//route /api/vectors/:vector_id GET
+//get specific vector JSON
+
+//route /api/vectors/:vector_id PUT
+//update vector JSON with new info
+
+//route /api/vectors/:vector_id DELETE
+//delete vector JSON
+/*
+router.route('/bears')
+
+    // create a bear (accessed at POST http://localhost:8080/api/bears)
+    .post(function(req, res) {
+        
+        var bear = new Bear();      // create a new instance of the Bear model
+        bear.name = req.body.name;  // set the bears name (comes from the request)
+
+        // save the bear and check for errors
+        bear.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Bear created!' });
+        });
+    });
+*/
+/*    
+    .get(function(req, res) {
+        Bear.find(function(err, bears) {
+            if (err)
+                res.send(err);
+
+            res.json(bears);
+        });
+
+    });
+
+    .get(function(req, res) {
+        Bear.findById(req.params.bear_id, function(err, bear) {
+            if (err)
+                res.send(err);
+            res.json(bear);
+        });
+    });
+
+    .put(function(req, res) {
+
+        // use our bear model to find the bear we want
+        Bear.findById(req.params.bear_id, function(err, bear) {
+
+            if (err)
+                res.send(err);
+
+            bear.name = req.body.name;  // update the bears info
+
+            // save the bear
+            bear.save(function(err) {
+                if (err)
+                    res.send(err);
+
+                res.json({ message: 'Bear updated!' });
+            });
+
+        });
+    });
+*/
 app.use('/api', router);
 
 //tells the server where it should be listening for req and res
 app.listen(8080);
 
-/*
-    "jshint": "2.5.x",
-    "uglify-js": "~2.4.3",
 
-    "grunt": "~0.4.2",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-coffee": "~0.10.1",
-    "grunt-contrib-concat": "0.4.x",
-    "grunt-contrib-jshint": "~0.6.3",
-    "grunt-contrib-less": "~0.11.0",
-    "grunt-contrib-nodeunit": "~0.2.0",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-watch": ">=0.3.1",
-    "grunt-mocha": "~0.4.11",
-    "grunt-karma": "0.8.3",
-    "grunt-bump": "0.0.14",
-    "matchdep": "~0.3.0",
-  "peerDependencies": {
-    "grunt-cli": "0.1.13"
-  },
-
-*/
 
