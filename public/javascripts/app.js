@@ -12,6 +12,25 @@ if (typeof annotator === 'undefined') {
 }
 */
 
+
+      $(document).ready(function(){
+        var name,hobby;
+        $("#submit").click(function(){
+          name=$("#name").val();
+          hobby=$("#hobby").val();
+          $.post("http://localhost:8080/api/bears",{name: name,hobby: hobby}, function(data){
+            if(data==='done')
+              {
+                alert("login success");
+              }
+          });
+        });
+      });
+
+
+
+///////LEAFLET 
+
 var map;
 
 //IIIF Viewer initial settings
@@ -102,7 +121,44 @@ map.on('draw:created', function(evt) {
 
 //a new geoJSON file is created
 	var shape = layer.toGeoJSON();
-  return shape
+
+/*    router.post('/vectors', function(req, res) {
+        
+        //use Vector.js Schema template
+
+        var newVector = new Vector();      
+        newVector.name = req.body.name; 
+
+        newVector.save(function(err) {
+            if (err)
+                res.send(err);
+
+            //res.json({ message: 'Vector JSON created!' });
+        });
+    });
+
+    router.put('vectors/:vector_id', function(req, res) {
+      
+      //merge geoJSON with new JSON created
+            Vector.findById(req.params.vector_id, function(err, newVector) {
+
+            if (err)
+                res.send(err);
+
+            newVector.name = req.body.name;  // update the bears info
+
+            // save the bear
+            newVector.save(function(err) {
+                if (err)
+                    res.send(err);
+
+                res.json({ message: 'Vector merged!' });
+            });
+
+        });
+
+    })
+*/
 	
 //check if selectingVector is blank
 
@@ -158,17 +214,6 @@ function compareChild(parentText, newChild) {
 
 };
 
-
-jsonfile.readFile(file, function(err, obj) {
-  
-})
-
-var file = 'data.json'
-var obj = {name: 'JP'}
-
-jsonfile.writeFile(file, obj, function (err) {
-  console.error(err)
-})
 
 //generate a new JSON-LD file and populate
 function newJSON(textSelected, currentVector) {
@@ -227,5 +272,7 @@ function newJSON(textSelected, currentVector) {
 //METADATA OPTIONS
 
 //html form submission
+
+
 
 

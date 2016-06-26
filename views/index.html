@@ -20,7 +20,7 @@
 
 	<!--<link rel="stylesheet" type="text/css" href="node_modules/leaflet-illustrate/dist/Leaflet.Illustrate.css" />-->
 
-	<link rel="stylesheet" type="text/css" href="style.css" />
+	<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
 
 <!-- Javascript libraries -->
 
@@ -29,27 +29,18 @@
 
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 
-    <script src="node_modules/leaflet-iiif/leaflet-iiif.js"></script>
+    <script src="javascripts/leaflet-iiif.js"></script>
 
 	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
 
-	<script src="node_modules/jsonfile/index.js"></script>
-
-<!--	
-
-	<script src="node_modules/JSONstream/index.js"></script>
-
-	<script src="node_modules/request/index.js"></script>
-
-	<script src="node_modules/event-stream/index.js"></script>
--->
 
 <!-- 
 	Will eventually use Browserify and bundle all final packages.
 	For now though I keep changing so I'm using node_module paths for most instead until packages are more finalised and tidied up more. WIll use it for node standard packages http, fs, stream etc though.
 -->
 
-	<script src="bundle.js"></script>
+<!--	<script src="javascripts/bundle.js"></script> -->
+
 
 </head>
 
@@ -79,6 +70,10 @@
 			<p>Transcription</p>
 			<textarea id="thing" onselect="selectingText()" >bdhfjbjhdfgskjjda</textarea>
 		</div>
+		    <h1>Hello people !</h1>
+		    <input type="TEXT" id="name" size="40"><br>
+		    <input type="TEXT" id="hobby" size="40"><br>
+		    <input type="button" id="submit" value="Submit">
 	</div>
 
 	<div id="translationViewer" class="col-md-4">
@@ -95,9 +90,9 @@
 
 <!-- The Javascript apps-->
 
-<!--	<script src="annotator.min.js"></script>	-->
+<!--	<script src="javascripts/annotator.min.js"></script>	-->
 
-	<script src="app.js"></script>
+<script src="javascripts/app.js"></script>
 
 </body>
 

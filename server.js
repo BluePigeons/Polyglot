@@ -2,7 +2,7 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
-var jsonfile = require('jsonfile')
+var jsonfile = require('jsonfile');
 //Node module to specify server info
 //var http = require('http');
 //Node file system module
@@ -15,85 +15,20 @@ var jsonfile = require('jsonfile')
 //Package to parse multibody forms
 //var formidable = require("formidable");
 
-/*
-// create server called "server"
-var server = http.createServer(function (req, res) {
-    
-    //GET requests are processed by "displayForm" code
-    if (req.method.toLowerCase() == 'get') {
-        displayForm(res);
-    } 
-
-    //POST requests are processed by "submittingForm" code
-    else if (req.method.toLowerCase() == 'post') {
-        submittingForm(req, res);
-    }
-
-});
-
-var file = 'package.json'
-jsonfile.readFile(file, function(err, obj) {
-  console.dir(obj)
-})
-
-var file = 'data.json'
-var obj = {name: 'JP'}
-
-jsonfile.writeFile(file, obj, function (err) {
-  console.error(err)
-})
-
-function displayForm(res) {
-
-    fs.readFile('form.html', function (err, data) {
-        res.writeHead(200, {
-            'Content-Type': 'text/html',
-                'Content-Length': data.length
-        });
-        res.write(data);
-        res.end();
-    });
-
-
-};
-
-function submittingForm(req, res) {
-
-	// creates new incoming form just called 'form'
-    var form = new formidable.IncomingForm();
-
-    form.encoding = 'utf-8';
-
-    // where uploaded files are stored
-    form.uploadDir = "/examples";
-
-    //parses incoming request called "req" and the callback on it is function "example"
-    form.parse(req, exampleFunction);
-
-
-
-};
-
-function exampleFunction(err, fields, files) {
-
-    // sends a header message back with (statusCode[, statusMessage][, headers])
-        res.writeHead(200, {
-            'content-type': 'text/plain'
-        });
-
-    //writeFile(filename, obj, [options], callback)
-	    jsonfile.writeFile("image.json", obj, function (err) {
-		  console.error(err)
-		})
-
-    // tells the server that this callback has ended
-        res.end();
-    };
-*/
-
 var Bear     = require('./examples/bear');
 
 var app        = express();  
+
+app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/views'));
+app.use(express.static(__dirname + '/examples'));
+
+
+app.get('/', function(req, res) {
+
+    res.sendFile(__dirname + "/index.html"); 
+
+});
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -113,14 +48,6 @@ router.use(function(req, res, next) {
     next(); // make sure we go to the next routes and don't stop here
 });
 
-
-//testing testing
-router.get('/', function(req, res) {
-
-    res.json({ message: 'hooray! welcome to our api!' });  
-
-});
-
 //route /api/vectors GET
 //get all vector JSONs
 
@@ -136,13 +63,12 @@ router.get('/', function(req, res) {
 //route /api/vectors/:vector_id DELETE
 //delete vector JSON
 
-
     // create a bear (accessed at POST http://localhost:8080/api/bears)
     router.post('/bears', function(req, res) {
         
         var bear = new Bear();      // create a new instance of the Bear model
         bear.name = req.body.name;  // set the bears name (comes from the request)
-
+        bear.hobby = req.body.hobby;
         // save the bear and check for errors
         bear.save(function(err) {
             if (err)
@@ -150,6 +76,7 @@ router.get('/', function(req, res) {
 
             res.json({ message: 'Bear created!' });
         });
+        res.end("yes");
     });
  
     router.get('/bears', function(req, res) {
@@ -172,6 +99,9 @@ router.get('/', function(req, res) {
         });
 
     });
+
+
+
 /*
 
 jsonfile.readFile(file, function(err, obj) {
