@@ -22,7 +22,10 @@ var transcriptionSchema   = new Schema({
 		},
 		"format": {
 			type: String,
-			default: "plain"
+			default: "TextualBody"
+		},
+		"text": {
+			type: String
 		},
 		"language": {
 			type: String,

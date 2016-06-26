@@ -13,12 +13,12 @@ if (typeof annotator === 'undefined') {
 */
 
 $(document).ready(function(){
-  var name;
+  var transcriptionText;
   $("#submit").click(function(){
-    name = $("#name").val();
+    transcriptionText = $("#name").val();
     $.post(
       "http://localhost:8080/api/transcriptions",
-      {transcription: transcription}, 
+      {body: {text: transcriptionText}}, 
       function(data){
         if(data ==='done')
           {

@@ -45,6 +45,8 @@ router.use(function(req, res, next) {
     next(); // need to go to the next routes and not stop here
 });
 
+//VECTOR API
+
 //route /api/vectors GET -> get all vector JSONs
 router.get('/vectors', vectors.findAll);
 
@@ -58,6 +60,22 @@ router.get('/vectors/:vector_id', vectors.getByID);
 router.put('/vectors/:vector_id', vectors.updateOne);
 
 //route /api/vectors/:vector_id DELETE -> delete vector JSON
+
+//TRANSCRIPTION API
+
+//route /api/transcriptions GET -> get all transcriptions JSONs
+router.get('/transcriptions', transcriptions.findAll);
+
+//route /api/transcriptions POST -> add a single new transcription JSON
+router.post('/transcriptions', transcriptions.addNew);
+
+//route /api/transcriptions/:transcriptions_id GET -> get specific transcription JSON
+router.get('/transcriptions/:transcription_id', transcriptions.getByID);
+
+//route /api/transcriptions/:transcriptions_id PUT -> update transcription JSON with new info
+router.put('/transcriptions/:transcription_id', transcriptions.updateOne);
+
+//route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
 
 
 app.use('/api', router);
