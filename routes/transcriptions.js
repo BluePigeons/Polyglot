@@ -50,7 +50,8 @@ exports.updateOne = function(req, res) {
         if (err)
             res.send(err);
 
-        transcription.name = req.body.name; 
+        transcription.body.text = req.body.body.text; 
+        transcription.target.id = req.body.target._id;
 
         transcription.save(function(err) {
             if (err)
@@ -74,3 +75,12 @@ exports.deleteOne = function(req, res) {
         });
 };
 
+exports.getByVectorTarget = function(req, res) {
+    vectorSelected = req.params.vector_target;
+    newTranscription.findOne({'target': {'id': vectorSelected}});
+};
+
+exports.getByTextTarget = function(req, res) {
+    textSelected = req.params.text_target;
+    newTranslation.findOne({'target': {'id': textSelected}})
+};

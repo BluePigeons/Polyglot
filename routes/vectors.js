@@ -51,7 +51,8 @@ exports.updateOne = function(req, res) {
         if (err)
             res.send(err);
 
-        vector.name = req.body.name; 
+        vector.body.text = req.body.body.text; 
+        vector.target.id = req.body.target._id;
 
         vector.save(function(err) {
             if (err)
@@ -63,3 +64,6 @@ exports.updateOne = function(req, res) {
     });
 };
 
+exports.getByCRS = function(req, res) {
+
+};

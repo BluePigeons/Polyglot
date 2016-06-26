@@ -12,24 +12,110 @@ if (typeof annotator === 'undefined') {
 }
 */
 
+var vectorSelected = "";
+//var findTranscriptionByVector = $.get();
+//var findTranslationByVector = $.get();
+
+var textSelected = "";
+//var findTranscriptionByText ;
+//var findTranscriptionByVector ;
+
+//POPUP OPTIONS
+
+//popup opened and checking to see options displayed
+var popupMenu = function () {
+
+};
+
+//VIEW TRANSCRIPTION OPTIONS clicked
+var viewTranscription = function () {
+  if (vectorSelected != "") {
+    findTranscriptionByVector.select('body');
+    findTranscriptionByVector.exec(function(err, transcription){
+      if (err) return handleError(err);
+
+//open the body text in a display textarea
+
+    })
+  }
+  else if (textSelected != "") {
+
+    findTranscriptionByText.select('body');
+    findTranscriptionByText.exec(function(err, transcription){
+      if (err) return handleError(err);
+
+//open the body text in a display textarea
+
+    })
+  }
+  else {
+    alert("What are you viewing the transcription of?")
+  }
+};
+
+//VIEW TRANSLATION OPTIONS clicked
+var viewTranslation = function (){
+
+};
+
+//ADD VECTOR clicked
+var linkVector = function () {
+  selectingVector = "trans";
+};
+
+//ADD TRANSCRIPTION OPTION
+
+//ADD TRANSLATION OPTION
+
+//METADATA OPTIONS
+
+
+
+var selectingVector = "";
+
 $(document).ready(function(){
+
   var transcriptionText;
-  $("#submit").click(function(){
-    transcriptionText = $("#transcription").val();
-    //alert(transcriptionText);
-    $.post(
-      "http://localhost:8080/api/transcriptions",
 
-      {body: {text: transcriptionText}}, 
+  $(".addTranscription").click(function(){
+      transcriptionText = $("#transcription").val();
+      //alert(transcriptionText);
+      $.post(
+        "http://localhost:8080/api/transcriptions",
+        {body: {text: transcriptionText}},
+        null
+      );
 
-      function(data){
-        if(data ==='done')
-          {
-            console.log("login success");
-          }
-      }
-    );
+  //if textSelected is not empty
+
+  //find textSelected JSON file
+
+  //READ textSelected relevant fields
+
+  //PUSH shared values to new JSON file
+
+  //PUSH target field of text fragment
+
+  //else if currentVector is not empty
+
+  //find currentVector JSON file
+
+  //READ currentVector relevant fields
+
+  //PUSH shared values to new JSON file
+
+  //PUSH target field of geoJSON
+
+  //else return error
+
   });
+
+  $(".linkVector").click(linkVector());
+
+  $('.viewTranscription').click(viewTranscription());
+
+  $('.viewTranslation').click(viewTranslation());
+
 });
 
 
@@ -69,13 +155,6 @@ var controlOptions = {
 //adds new draw control features to the map
 new L.Control.Draw(controlOptions).addTo(map);
 
-//blank if no vector has been selected
-//otherwise contains JSON id url of most recently selected vector
-var vectorSelected = "";
-
-//basic function to identify text that has been selected on a page
-var textSelected = "";
-
 /*if (window.getSelection) {
     textSelected = window.getSelection().toString();
 } 
@@ -112,7 +191,7 @@ var gettext = (function () {
 //trigger popup
 
 
-//whenever a new vector is created within the app
+////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
 	var type = evt.layerType;
 	var layer = evt.layer;
@@ -129,47 +208,88 @@ map.on('draw:created', function(evt) {
   //alert(vectorType);
   $.post(
       "http://localhost:8080/api/vectors",
-      
-      {coordinates: [coordinates]}
+
+      {coordinates: [coordinates]}, 
+
+      null
 
       );
 
   //$.put("http://localhost:8080/api/vectors" + vector_id);
 
 //check if selectingVector is blank
-
+  if (selectingVector == "") {
 //if it is then generate both translation and transcription JSONs
+//  $.post("http://localhost:8080/api/transcriptions");
+//  $.post("http://localhost:8080/api/translations");
 
+  }
+
+  else if (selectingVector == "trans") {
 //if it has "trans" then look up transcription and translation JSONs currently selected
 
 //update transcription and translation JSONs target{} field
 
-//set selectingVector to blank
+  }
 
-//else return error
+//otherwise it's an error
+
+  else {
+
+  }
+
+//reset selectingVector to blank
+  selectingVector = "";
 
 });
 
-//whenever a vector is clicked
-//map.vector.on('click', function(vec, selectingVector) {
+/////whenever a vector is clicked
+drawnItems.on('click', function(vec) {
+
+  currentCRS = vec.layer.toGeoJSON().geometry.coordinates;
+  //alert(currentCRS);
 
 //identify JSON id of vector selected
+  var findByCrs = newVector.findOne({'coordinates': currentCRS});
+  findByCRS.select('_id @id');
 
-//set currentVector to id
+//set vectorSelected to id
+  findByCRS.exec(function (err, vector){
+    if (err) return handleError(err);
+    vectorSelected = vector._id;
+  });
+  //alert(vectorSelected);
 
 //check if selectingVector is blank 
-
+  if (selectingVector == "") {
 //if it is then trigger popup
+    popupMenu();
+  }
 
 //if it has "trans" then look up transcription and translation JSONs currently selected
+  else if (selectingVector == "trans") {
 
-//update transcription and translation JSONs target{} field
+//update transcription JSON target{} field
+    findTranscriptionByVector.select('_id @id');
+    findTranscriptionByVector.exec(function(err, transcription){
+      if (err) return handleError(err);
+
+  //    $.put();
+
+      })
+
+//update translation JSON target{} field
 
 //set selectingVector to blank
+    selectingVector = "";
+
+  }
 
 //else return error
-
-//});
+  else {
+    return handleError(err);
+  };
+});
 
 
 //find the highest ranking child
@@ -185,70 +305,13 @@ function updateRanks(parent, child, newRank) {
 
 };
 
-//check if 
+//check if the text fragment in parent body is the same as child text
 function compareChild(parentText, newChild) {
 
 };
 
-
-//generate a new JSON-LD file and populate
-function newJSON(textSelected, currentVector) {
-
-//create a new JSON file and POST to database
-
-//PUSH template to create fields
-
-//if textSelected is not empty
-
-//find textSelected JSON file
-
-//READ textSelected relevant fields
-
-//PUSH shared values to new JSON file
-
-//PUSH target field of text fragment
-
-//else if currentVector is not empty
-
-//find currentVector JSON file
-
-//READ currentVector relevant fields
-
-//PUSH shared values to new JSON file
-
-//PUSH target field of geoJSON
-
-//else return error
-
-
-};
-
-//generate new transcription JSON
-
-//generate new translation JSON
-
 //when vote up added
 
 //when vote down added
-
-//POPUP OPTIONS
-
-//popup opened and checking to see options displayed
-
-//VIEW TRANSCRIPTION OPTIONS clicked
-
-//VIEW TRANSLATION OPTIONS clicked
-
-//ADD MARKER clicked
-
-//ADD TRANSCRIPTION OPTION
-
-//ADD TRANSLATION OPTION
-
-//METADATA OPTIONS
-
-//html form submission
-
-
 
 
