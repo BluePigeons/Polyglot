@@ -76,7 +76,7 @@ router.use(function(req, res, next) {
 
             res.json({ message: 'Bear created!' });
         });
-        res.end("yes");
+
     });
  
     router.get('/bears', function(req, res) {
