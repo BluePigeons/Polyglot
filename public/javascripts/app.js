@@ -21,7 +21,7 @@ $(document).ready(function(){
       "http://localhost:8080/api/transcriptions",
 
       {body: {text: transcriptionText}}, 
-      
+
       function(data){
         if(data ==='done')
           {
@@ -56,16 +56,13 @@ map.addLayer(drawnItems);
 var controlOptions = {
 
     draw: {
-
 // disables the polyline feature as this is unnecessary for annotation of text as it cannot enclose it
         polyline: false,
         marker: false
-
     },
 //passes draw controlOptions to the FeatureGroup of editable layers
     edit: {
-        featureGroup: drawnItems 
-        
+        featureGroup: drawnItems        
     }
 };
 
@@ -124,11 +121,13 @@ map.on('draw:created', function(evt) {
 	drawnItems.addLayer(layer);
 
 //a new geoJSON file is created
-	var shape = layer.toGeoJSON();
+  var shape = layer.toGeoJSON();
+
   $.post(
       "http://localhost:8080/api/vectors",
       shape
       );
+  
   //$.put("http://localhost:8080/api/vectors" + vector_id);
 
 //check if selectingVector is blank
