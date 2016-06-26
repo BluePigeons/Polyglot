@@ -17,8 +17,8 @@ $(document).ready(function(){
   $("#submit").click(function(){
     name = $("#name").val();
     $.post(
-      "http://localhost:8080/api/vectors",
-      {name: name}, 
+      "http://localhost:8080/api/transcriptions",
+      {transcription: transcription}, 
       function(data){
         if(data ==='done')
           {
@@ -114,16 +114,20 @@ var gettext = (function () {
 
 //whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
-	var type = evt.layerType,
-		layer = evt.layer;
+	var type = evt.layerType;
+	var layer = evt.layer;
 
 //add the layer to the layer group
 	drawnItems.addLayer(layer);
 
 //a new geoJSON file is created
 	var shape = layer.toGeoJSON();
+  $.post(
+      "http://localhost:8080/api/vectors",
+      shape
+      );
+  //$.put("http://localhost:8080/api/vectors" + vector_id);
 
-	
 //check if selectingVector is blank
 
 //if it is then generate both translation and transcription JSONs

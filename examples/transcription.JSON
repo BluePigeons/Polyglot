@@ -1,11 +1,11 @@
 {
 
 	"@context": [
-		"https://examplestorage.ed.ac.uk/transcription/context.json",
+		"http://127.0.0.1:8080/context.json",
 		"http://www.w3.org/ns/anno.jsonld"
 	],
 
-	"@id": "https://example.ed.ac.uk/transcription/transcription1",
+	"@id": "http://127.0.0.1:8080/transcription/:transcription_id",
 	"type": "Annotation",
 
 	"body": {
