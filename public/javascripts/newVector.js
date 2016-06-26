@@ -17,7 +17,7 @@ var vectorSchema   = new Schema({
     	type: String
     },
     "coordinates": {
-    	type: Schema.Types.Mixed
+    	type: []
     },
 	"body": {
 		"id": {

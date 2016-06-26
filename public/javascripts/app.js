@@ -122,10 +122,16 @@ map.on('draw:created', function(evt) {
 
 //a new geoJSON file is created
   var shape = layer.toGeoJSON();
+  var coordinates = shape.geometry.coordinates;
+  //alert(coordinates);
 
+  var vectorType = shape.geometry.type;
+  //alert(vectorType);
   $.post(
       "http://localhost:8080/api/vectors",
-      shape
+      
+      {coordinates: [coordinates]}
+
       );
 
   //$.put("http://localhost:8080/api/vectors" + vector_id);

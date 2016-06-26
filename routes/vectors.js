@@ -22,8 +22,8 @@ exports.findAll = function(req, res) {
 exports.addNew = function(req, res) {
     
     var vector = new newVector();  
-    vector.body.coordinates = req.body.geometry.coordinates;
-    vector.body.type = req.body.geometry.type;
+    vector.body.coordinates = req.body.coordinates;
+    //vector.body.type = req.body.type;
 
     vector.save(function(err) {
         if (err)
