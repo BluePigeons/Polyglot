@@ -23,7 +23,8 @@
     "express": "4.14.0",
     "mongoose": "~3.6.13",
     "body-parser": "~1.0.1",
-    "phantomjs-prebuilt": "^2.1.5"
+    "phantomjs-prebuilt": "^2.1.5",
+    "cors": "~2.7.1"
   },
   "directories": {
     "examples": "./examples",

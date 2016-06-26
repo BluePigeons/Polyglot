@@ -4,6 +4,7 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
+var cors = require('cors');
 
 var newVector     = require('./examples/newVector');
 var newTranslate    = require('./examples/newTranslation');
@@ -20,6 +21,9 @@ var app        = express();
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 app.use(express.static(__dirname + '/examples'));
+
+//Currently using cors for all origins just for development but will need to be specific for actual deployment
+app.use(cors());
 
 app.get('/', function(req, res) {
 
@@ -41,6 +45,7 @@ var router = express.Router();
 // middleware to use for all requests
 router.use(function(req, res, next) {
     //should have proper logging here but for now just to console
+
     console.log('Something is happening.');
     next(); // need to go to the next routes and not stop here
 });

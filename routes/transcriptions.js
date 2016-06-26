@@ -10,7 +10,7 @@ var newTranscription    = require('../examples/newTranscription');
 //ROUTE FUNCTIONS
 
 exports.findAll = function(req, res) {
-    newVector.find(function(err, transcriptions) {
+    newTranscription.find(function(err, transcriptions) {
         if (err)
             res.send(err);
 
