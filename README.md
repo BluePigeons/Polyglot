@@ -4,7 +4,7 @@ This is a project aiming to enable to crowdsourced transcription and translation
 
 Currently being built in NodeJS around [IIIF](http://iiif.io) with [Leaflet JS](http://leafletjs.com) as both viewer and adding additional canvas layers.
 
-Annotations are built using [Leaflet Draw](https://github.com/Leaflet/Leaflet.draw) and [Leaflet Illustrate](https://github.com/justinmanley/Leaflet.Illustrate) to allow users to input but with my own adaptations for the needs of this project.
+Annotations are built using [Leaflet Draw](https://github.com/Leaflet/Leaflet.draw) to allow users to input but with my own adaptations for the needs of this project.
 
 If you want to use and can forgive my chaotic jumble of testing packages all on top of each other (that I plan one day to pay attention to and actually constructively use) then simply clone this project into your own folder.
 
