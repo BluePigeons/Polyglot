@@ -127,7 +127,7 @@ map.on('draw:created', function(evt) {
       "http://localhost:8080/api/vectors",
       shape
       );
-  
+
   //$.put("http://localhost:8080/api/vectors" + vector_id);
 
 //check if selectingVector is blank
