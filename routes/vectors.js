@@ -3,9 +3,9 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 
-var newVector     = require('../examples/newVector');
-var newTranslate    = require('../examples/newTranslation');
-var newTranscription    = require('../examples/newTranscription');
+var newVector     = require('../public/javascripts/newVector');
+var newTranslate    = require('../public/javascripts/newTranslation');
+var newTranscription    = require('../public/javascripts/newTranscription');
 
 //ROUTE FUNCTIONS
 

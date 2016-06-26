@@ -6,9 +6,9 @@ var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
 var cors = require('cors');
 
-var newVector     = require('./examples/newVector');
-var newTranslate    = require('./examples/newTranslation');
-var newTranscription    = require('./examples/newTranscription');
+var newVector     = require('./public/javascripts/newVector');
+var newTranslate    = require('./public/javascripts/newTranslation');
+var newTranscription    = require('./public/javascripts/newTranscription');
 
 var vectors = require('./routes/vectors');
 var transcriptions = require('./routes/transcriptions');
@@ -65,6 +65,7 @@ router.get('/vectors/:vector_id', vectors.getByID);
 router.put('/vectors/:vector_id', vectors.updateOne);
 
 //route /api/vectors/:vector_id DELETE -> delete vector JSON
+//router.delete('vectors/:vector_id', vectors.deleteOne);
 
 //TRANSCRIPTION API
 
@@ -81,7 +82,7 @@ router.get('/transcriptions/:transcription_id', transcriptions.getByID);
 router.put('/transcriptions/:transcription_id', transcriptions.updateOne);
 
 //route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
-
+router.delete('transcriptions/:transcription_id', transcriptions.deleteOne);
 
 app.use('/api', router);
 
