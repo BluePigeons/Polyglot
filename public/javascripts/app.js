@@ -243,9 +243,7 @@ var addTranscription = function(){
 
 //need to save the id of the JSON just created as a variable
 //    var createdTranscription = "";
-
   );
-
 //  var createdTranscriptionURL = transcriptionURL.concat(createdTranscription);
 
   if (textSelected != "") {

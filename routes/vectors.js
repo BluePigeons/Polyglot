@@ -66,6 +66,18 @@ exports.updateOne = function(req, res) {
     });
 };
 
+exports.deleteOne = function(req, res) {
+        newVector.remove({
+            _id: req.params.vector_id
+        }, 
+        function(err, vector) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted' });
+        });
+};
+
 exports.getByCRS = function(req, res) {
 
     newVector.findOne(req.params.coordinates, function(err, vector) {
@@ -73,6 +85,5 @@ exports.getByCRS = function(req, res) {
         if (err)
             res.send(err);
 
-        {'coordinates': currentCRS}
     })
 };
