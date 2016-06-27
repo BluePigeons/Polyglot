@@ -30,6 +30,8 @@ exports.addNew = function(req, res) {
             res.send(err);
 
         res.json({ message: 'JSON created!' });
+//need a response that sends the id of the JSON just created
+
     });
 
 };
@@ -66,4 +68,11 @@ exports.updateOne = function(req, res) {
 
 exports.getByCRS = function(req, res) {
 
+    newVector.findOne(req.params.coordinates, function(err, vector) {
+
+        if (err)
+            res.send(err);
+
+        {'coordinates': currentCRS}
+    })
 };

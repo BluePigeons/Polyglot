@@ -11,14 +11,71 @@ if (typeof annotator === 'undefined') {
   app.start();
 }
 */
+var vectorURL = "http://localhost:8080/api/vectors/";
+var transcriptionURL = "http://localhost:8080/api/transcriptions/";
+var translationURL = "http://localhost:8080/api/translations/";
 
 var vectorSelected = "";
-//var findTranscriptionByVector = $.get();
-//var findTranslationByVector = $.get();
-
 var textSelected = "";
-//var findTranscriptionByText ;
-//var findTranscriptionByVector ;
+var textTypeSelected = "";
+var currentCRS;
+
+var vectorSelectedURL = vectorURL.concat(vectorSelected);
+
+/*
+var getVectorByCRS = function(CRS) {
+  var currentCRSurl = vectorURL.concat(CRS);
+//  var vector = $.get(currentCRSurl);
+//  return vector;
+};
+*/
+var getTranscriptionByVector = function(vector) {
+    var targetVectorURL = transcriptionURL.concat(vector);
+//  var vectorParent = $.get(targetVectorURL);
+//    return vectorParent;
+};
+
+var getTranslationByVector = function(vector) {
+    var targetVectorURL = translationURL.concat(vector);
+//  var vectorParent = $.get(targetVectorURL);
+//    return vectorParent;
+};
+
+var getTranscriptionByText = function(text) {
+    var targetTextURL = transcriptionURL.concat(text);
+//    var textParent = $.get(targetTextURL);
+//    return textParent;
+};
+
+var getTranslationByText = function(text) {
+    var targetTextURL = translationURL.concat(text);
+//    var textParent = $.get(targetTextURL);
+//    return textParent;
+};
+
+var updateVectorSelection = function() {
+
+  if (selectingVector == "transcription") {
+
+//    var textSelectedURL = transcriptionURL.concat(textSelected);
+//    var parentTranscription = $.put(textSelectedURL, {target: vectorSelectedURL});
+//    selectingVector = "";
+
+  }
+
+  else if (selectingVector == "translation") {
+
+//    var textSelectedURL = translationURL.concat(textSelected);
+//    var parentTranslation = $.put(textSelectedURL, {target: vectorSelectedURL});
+//    selectingVector = "";
+
+  }
+
+  else {
+    return handleError(err);
+  }
+
+};
 
 //POPUP OPTIONS
 
@@ -30,23 +87,19 @@ var popupMenu = function () {
 //VIEW TRANSCRIPTION OPTIONS clicked
 var viewTranscription = function () {
   if (vectorSelected != "") {
-    findTranscriptionByVector.select('body');
-    findTranscriptionByVector.exec(function(err, transcription){
-      if (err) return handleError(err);
 
-//open the body text in a display textarea
+//    var transcriptionText = getTranscriptionByVector(vectorSelected).body.text;
 
-    })
+//generate display with content
+
+
   }
   else if (textSelected != "") {
 
-    findTranscriptionByText.select('body');
-    findTranscriptionByText.exec(function(err, transcription){
-      if (err) return handleError(err);
+//    var transcriptionText = getTranscriptionByText(textSelected).body.text;
 
-//open the body text in a display textarea
+//generate display with content
 
-    })
   }
   else {
     alert("What are you viewing the transcription of?")
@@ -54,21 +107,59 @@ var viewTranscription = function () {
 };
 
 //VIEW TRANSLATION OPTIONS clicked
-var viewTranslation = function (){
 
-};
-
-//ADD VECTOR clicked
-var linkVector = function () {
-  selectingVector = "trans";
-};
 
 //ADD TRANSCRIPTION OPTION
+var addTranscription = function(){
+
+  transcriptionText = $("#transcription").val();
+  //alert(transcriptionText);
+  $.post(
+    "http://localhost:8080/api/transcriptions",
+    {body: {text: transcriptionText}},
+    null
+
+//need to save the id of the JSON just created as a variable
+//    var createdTranscription = "";
+
+  );
+
+//  var createdTranscriptionURL = transcriptionURL.concat(createdTranscription);
+
+  //if textSelected is not empty
+  if (textSelected != "") {
+
+    if (textTypeSelected == "transcription") {
+      var textSelectedURL = transcriptionURL.concat(textSelected);
+    }
+    else if (textTypeSelected == "translation") {
+      var textSelectedURL = translationURL.concat(textSelected);
+    }
+    else {
+      alert("Please only add transcriptions to the document and not the website");
+    };
+
+//  $.put(createdTranscriptionURL, {target: {id: textSelectedURL}, {format: "text Fragment"}}, null);
+
+//PUT shared metadata
+
+  }
+  //else if currentVector is not empty
+  else if (vectorSelected != "") {
+
+//  $.put(createdTranslationURL, {target: {id: vectorSelectedURL}, {format: "text Fragment"}}, null);
+
+  //PUSH shared metadata
+
+  }
+
+  else {
+    alert("What are you adding the transcription of?");
+  };
+
+};
 
 //ADD TRANSLATION OPTION
-
-//METADATA OPTIONS
-
 
 
 var selectingVector = "";
@@ -77,40 +168,23 @@ $(document).ready(function(){
 
   var transcriptionText;
 
-  $(".addTranscription").click(function(){
-      transcriptionText = $("#transcription").val();
-      //alert(transcriptionText);
-      $.post(
-        "http://localhost:8080/api/transcriptions",
-        {body: {text: transcriptionText}},
-        null
-      );
+  $(".addTranscription").click(addTranscription());
 
-  //if textSelected is not empty
+  $(".linkVectorTranscription").click(function(){
 
-  //find textSelected JSON file
+    selectingVector = "transcription";
 
-  //READ textSelected relevant fields
-
-  //PUSH shared values to new JSON file
-
-  //PUSH target field of text fragment
-
-  //else if currentVector is not empty
-
-  //find currentVector JSON file
-
-  //READ currentVector relevant fields
-
-  //PUSH shared values to new JSON file
-
-  //PUSH target field of geoJSON
-
-  //else return error
+  //highlight or emphasise image viewer
 
   });
 
-  $(".linkVector").click(linkVector());
+  $(".linkVectorTranslation").click(function(){
+
+    selectingVector = "translation";
+
+  //highlight or emphasise image viewer
+
+  });
 
   $('.viewTranscription').click(viewTranscription());
 
@@ -196,99 +270,64 @@ map.on('draw:created', function(evt) {
 	var type = evt.layerType;
 	var layer = evt.layer;
 
-//add the layer to the layer group
 	drawnItems.addLayer(layer);
 
-//a new geoJSON file is created
+//a new geoJSON file is always created
   var shape = layer.toGeoJSON();
-  var coordinates = shape.geometry.coordinates;
-  //alert(coordinates);
+  currentCRS = shape.geometry.coordinates;
+  //alert(currentCRS);
 
   var vectorType = shape.geometry.type;
-  //alert(vectorType);
+
   $.post(
       "http://localhost:8080/api/vectors",
 
-      {coordinates: [coordinates]}, 
+      {coordinates: [currentCRS]}, 
 
       null
 
+//need to save the id of the JSON just created as a variable
+//      createdVector = "";
+
       );
 
-  //$.put("http://localhost:8080/api/vectors" + vector_id);
+//identify JSON id of vector just created??
+//  vectorSelected = getVectorByCRS(currentCRS)._id;
+//  vectorSelected = createdVector;
 
-//check if selectingVector is blank
   if (selectingVector == "") {
-//if it is then generate both translation and transcription JSONs
-//  $.post("http://localhost:8080/api/transcriptions");
-//  $.post("http://localhost:8080/api/translations");
+
+//  $.post("http://localhost:8080/api/transcriptions", {target:{id: vectorSelectedURL}}, null);
+//  $.post("http://localhost:8080/api/translations", {target:{id: vectorSelectedURL}}, null);
+
+    popupMenu();
 
   }
-
-  else if (selectingVector == "trans") {
-//if it has "trans" then look up transcription and translation JSONs currently selected
-
-//update transcription and translation JSONs target{} field
-
-  }
-
-//otherwise it's an error
 
   else {
-
+    updateVectorSelection();
   }
-
-//reset selectingVector to blank
-  selectingVector = "";
 
 });
 
 /////whenever a vector is clicked
 drawnItems.on('click', function(vec) {
 
-  currentCRS = vec.layer.toGeoJSON().geometry.coordinates;
+  var shape = vec.layer.toGeoJSON();
+  var currentCRS = shape.geometry.coordinates;
   //alert(currentCRS);
 
-//identify JSON id of vector selected
-  var findByCrs = newVector.findOne({'coordinates': currentCRS});
-  findByCRS.select('_id @id');
+//find id of vector selected
+  vectorSelected = getVectorByCRS(currentCRS)._id;
 
-//set vectorSelected to id
-  findByCRS.exec(function (err, vector){
-    if (err) return handleError(err);
-    vectorSelected = vector._id;
-  });
-  //alert(vectorSelected);
-
-//check if selectingVector is blank 
   if (selectingVector == "") {
-//if it is then trigger popup
     popupMenu();
   }
 
-//if it has "trans" then look up transcription and translation JSONs currently selected
-  else if (selectingVector == "trans") {
-
-//update transcription JSON target{} field
-    findTranscriptionByVector.select('_id @id');
-    findTranscriptionByVector.exec(function(err, transcription){
-      if (err) return handleError(err);
-
-  //    $.put();
-
-      })
-
-//update translation JSON target{} field
-
-//set selectingVector to blank
-    selectingVector = "";
-
+  else {
+    updateVectorSelection();
   }
 
-//else return error
-  else {
-    return handleError(err);
-  };
 });
 
 

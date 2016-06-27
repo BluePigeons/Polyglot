@@ -78,6 +78,7 @@ exports.deleteOne = function(req, res) {
 exports.getByVectorTarget = function(req, res) {
     vectorSelected = req.params.vector_target;
     newTranscription.findOne({'target': {'id': vectorSelected}});
+    
 };
 
 exports.getByTextTarget = function(req, res) {
