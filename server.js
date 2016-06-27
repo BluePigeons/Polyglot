@@ -60,13 +60,13 @@ router.post('/vectors', vectors.addNew);
 
 //route /api/vectors/:vector_id GET -> get specific vector JSON
 router.get('/vectors/:vector_id', vectors.getByID);
-router.get('/vectors/:coordinates', vectors.getByCRS);
+//router.get('/vectors/:coordinates', vectors.getByCRS);
 
 //route /api/vectors/:vector_id PUT -> update vector JSON with new info
 router.put('/vectors/:vector_id', vectors.updateOne);
 
 //route /api/vectors/:vector_id DELETE -> delete vector JSON
-//router.delete('vectors/:vector_id', vectors.deleteOne);
+router.delete('vectors/:vector_id', vectors.deleteOne);
 
 //TRANSCRIPTION API
 
@@ -78,6 +78,7 @@ router.post('/transcriptions', transcriptions.addNew);
 
 //route /api/transcriptions/:transcriptions_id GET -> get specific transcription JSON
 router.get('/transcriptions/:transcription_id', transcriptions.getByID);
+
 router.get('transcriptions/:vector_target', transcriptions.getByVectorTarget);
 router.get('transcriptions/:text_target', transcriptions.getByTextTarget);
 

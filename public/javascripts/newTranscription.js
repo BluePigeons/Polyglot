@@ -15,6 +15,18 @@ var transcriptionSchema   = new Schema({
     "type": {
     	type: []
     },
+    "parent": {
+    	type: String
+    },
+    "children": {
+    	type: []
+    },
+    "translation": {
+    	type: String
+    },
+    "transcription": {
+    	type: String
+    },
 	"body": {
 		"id": {
 			type: String,

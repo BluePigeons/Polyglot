@@ -19,6 +19,18 @@ var vectorSchema   = new Schema({
     "coordinates": {
     	type: []
     },
+    "parent": {
+    	type: String
+    },
+    "children": {
+    	type: []
+    },
+    "translation": {
+    	type: String
+    },
+    "transcription": {
+    	type: String
+    },
 	"body": {
 		"id": {
 			type: String,

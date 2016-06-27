@@ -75,13 +75,30 @@ exports.deleteOne = function(req, res) {
         });
 };
 
+//fix these functions
+
 exports.getByVectorTarget = function(req, res) {
     vectorSelected = req.params.vector_target;
-    newTranscription.findOne({'target': {'id': vectorSelected}});
-    
+    newTranscription.findOne(
+        {'target': {'id': vectorSelected}},
+        function(err, transcription) {
+            if (err)
+                res.send(err);
+            res.json(transcription);           
+        }
+    );
+
 };
 
 exports.getByTextTarget = function(req, res) {
     textSelected = req.params.text_target;
-    newTranslation.findOne({'target': {'id': textSelected}})
+    newTranslation.findOne(
+        {'target': {'id': textSelected}},
+        function(err, transcription) {
+            if (err)
+                res.send(err);
+            res.json(transcription);
+        }
+    );
 };
+

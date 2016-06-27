@@ -16,11 +16,20 @@ var transcriptionURL = "http://localhost:8080/api/transcriptions/";
 var translationURL = "http://localhost:8080/api/translations/";
 
 var vectorSelected = "";
-var textSelected = "";
-var textTypeSelected = "";
+//the coordinates of the current vector selected
 var currentCRS;
 
-var vectorSelectedURL = vectorURL.concat(vectorSelected);
+var textSelected = "";
+var textSelectedFragment = "";
+var textTypeSelected = "";
+
+//Boolean to indicate if the currently selected text already has children or not
+var childrenText = false;
+
+//used to indicate if the user is currently searching for a vector to link or not
+var selectingVector = "";
+
+///// API FUNCTIONS
 
 /*
 var getVectorByCRS = function(CRS) {
@@ -31,13 +40,13 @@ var getVectorByCRS = function(CRS) {
 */
 var getTranscriptionByVector = function(vector) {
     var targetVectorURL = transcriptionURL.concat(vector);
-//  var vectorParent = $.get(targetVectorURL);
+//  $.get(targetVectorURL);
 //    return vectorParent;
 };
 
 var getTranslationByVector = function(vector) {
     var targetVectorURL = translationURL.concat(vector);
-//  var vectorParent = $.get(targetVectorURL);
+//  $.get(targetVectorURL);
 //    return vectorParent;
 };
 
@@ -53,12 +62,43 @@ var getTranslationByText = function(text) {
 //    return textParent;
 };
 
-var updateVectorSelection = function() {
+var checkForTranscription = function(target) {
+
+  field = $.get(target).transcription;
+  if (field == "") {
+    return false;
+  }
+  else {
+    return field;
+  };
+
+};
+
+var checkForTranslation = function(target) {
+
+  field = $.get(target).translation;
+  if (field == "") {
+    return false;
+  }
+  else {
+    return field;
+  };
+
+};
+
+var updateVectorSelection = function(vectorURL) {
 
   if (selectingVector == "transcription") {
 
 //    var textSelectedURL = transcriptionURL.concat(textSelected);
-//    var parentTranscription = $.put(textSelectedURL, {target: vectorSelectedURL});
+
+//    $.put(textSelectedURL, {target: {id: vectorURL}}, null);
+//    $.put(vectorURL, {transcription: textSelectedURL}, null);
+
+/*    
+
+*/
+
 //    selectingVector = "";
 
   }
@@ -66,7 +106,13 @@ var updateVectorSelection = function() {
   else if (selectingVector == "translation") {
 
 //    var textSelectedURL = translationURL.concat(textSelected);
-//    var parentTranslation = $.put(textSelectedURL, {target: vectorSelectedURL});
+
+//    $.put(textSelectedURL, {target: vectorURL}, null);
+//    $.put(vectorURL, {translation: textSelectedURL});
+
+//    var partnerTranscription = $.get(textSelectedURL).transcription;
+//    $.put(partnerTranscription, {target: {id: vectorURL}}, null);
+
 //    selectingVector = "";
 
   }
@@ -77,45 +123,121 @@ var updateVectorSelection = function() {
 
 };
 
-//POPUP OPTIONS
+//////POPUP OPTIONS
 
-//popup opened and checking to see options displayed
-var popupMenu = function () {
+var popupTranscriptionChildrenMenu = function () {
+
+  var textSelectedURL = transcriptionURL.concat(textSelected);
+
+  //VIEW OTHER TRANSCRIPTIONS
+  //openTranscriptionMenu(textSelectedURL);
 
 };
 
-//VIEW TRANSCRIPTION OPTIONS clicked
-var viewTranscription = function () {
+var popupTranscriptionMenu = function () {
+
+  var textSelectedURL = transcriptionURL.concat(textSelected);
+
+  //ADD NEW TRANSCRIPTION
+  //openTranscriptionMenu(textSelectedURL);
+
+};
+
+var popupTranslationChildrenMenu = function () {
+
+  var textSelectedURL = translationURL.concat(textSelected);
+
+  //VIEW OTHER TRANSLATIONS
+  //openTranslationMenu(textSelectedURL);
+
+};
+
+var popupTranslationMenu = function () {
+
+  var textSelectedURL = translationURL.concat(textSelected);
+
+  //ADD NEW TRANSLATION
+  //openTranslationMenu(textSelectedURL);
+
+};
+
+
+var popupVectorMenu = function (vector) {
+
+  //OPEN TRANSCRIPTION 
+  //contains .openTranscriptionMenu
+
+  //OPEN TRANSLATION 
+  // contains .openTranslationMenu
+
+/*
+  $(document).ready(function(){
+    $(".openTranslationMenu").click(openTranslationMenu(vector));
+    $(".openTranscriptionMenu").click(openTranscriptionMenu(vector));
+  });
+*/
+
+};
+
+///// VIEWER WINDOWS
+
+var openTranscriptionMenu = function (target) {
+
+  if (checkForTranscription(target) == false) {
+
+    //enable the ADD TRANSCRIPTION input option and display textarea blank
+
+  };
+
+  var theText = viewTranscription(target);
+
+  //set textarea contents to theText
+  //load display of children transcriptions highlighted
+
+  //META DATA OPTIONS
+
+  //LINK VECTOR 
+  //contains ".linkVectorTranscription" class
+
+};
+
+
+var openTranslationMenu = function (target) {
+
+
+
+};
+
+///// TRANSLATION AND TRANSCRIPTION FUNCTIONS
+
+var viewTranscription = function (target) {
   if (vectorSelected != "") {
-
-//    var transcriptionText = getTranscriptionByVector(vectorSelected).body.text;
-
-//generate display with content
-
-
+    var transcriptionText = getTranscriptionByVector(target).body.text;
+    vectorSelected = "";
+    return transcriptionText;
   }
   else if (textSelected != "") {
-
-//    var transcriptionText = getTranscriptionByText(textSelected).body.text;
-
-//generate display with content
-
+    var transcriptionText = getTranscriptionByText(target).body.text;
+    textSelected = "";
+    return transcriptionText;
   }
   else {
     alert("What are you viewing the transcription of?")
   }
+
 };
 
-//VIEW TRANSLATION OPTIONS clicked
+var viewTranslation = function() {
+
+};
 
 
-//ADD TRANSCRIPTION OPTION
 var addTranscription = function(){
 
-  transcriptionText = $("#transcription").val();
+  var transcriptionText = $("#transcription").val();
   //alert(transcriptionText);
   $.post(
-    "http://localhost:8080/api/transcriptions",
+    transcriptionURL,
     {body: {text: transcriptionText}},
     null
 
@@ -126,30 +248,25 @@ var addTranscription = function(){
 
 //  var createdTranscriptionURL = transcriptionURL.concat(createdTranscription);
 
-  //if textSelected is not empty
   if (textSelected != "") {
 
-    if (textTypeSelected == "transcription") {
-      var textSelectedURL = transcriptionURL.concat(textSelected);
-    }
-    else if (textTypeSelected == "translation") {
-      var textSelectedURL = translationURL.concat(textSelected);
-    }
-    else {
-      alert("Please only add transcriptions to the document and not the website");
-    };
+    var textSelectedURL = transcriptionURL.concat(textSelected);
 
 //  $.put(createdTranscriptionURL, {target: {id: textSelectedURL}, {format: "text Fragment"}}, null);
+//  $.put(createdTranscriptionURL, {parent: textSelectedURL}, null);
 
-//PUT shared metadata
+//  $.put(textSelectedURL, {children: [createdTranscriptionURL]}, null);
+
+    textSelected = "";
 
   }
-  //else if currentVector is not empty
+
   else if (vectorSelected != "") {
 
-//  $.put(createdTranslationURL, {target: {id: vectorSelectedURL}, {format: "text Fragment"}}, null);
+//  var vectorSelectedURL = vectorURL.concat(vectorSelected);
+//  $.put(createdTranscriptionURL, {target: {id: vectorSelectedURL}, {format: "text Fragment"}}, null);
 
-  //PUSH shared metadata
+    vectorSelected = "";
 
   }
 
@@ -160,15 +277,45 @@ var addTranscription = function(){
 };
 
 //ADD TRANSLATION OPTION
+var addTranslation = function() {
+
+};
+
+//find the highest ranking child
+function highestChild() {
+
+};
 
 
-var selectingVector = "";
+//update the ranking of a set of children
+function updateRanks(parent, child, newRank) {
+
+
+
+};
+
+//check if the text fragment in parent body is the same as child text
+function compareChild(parentText, newChild) {
+
+};
+
+
+//when vote up added
+var votedUp = function () {
+
+};
+
+//when vote down added
+var votedDown = function () {
+
+};
+
 
 $(document).ready(function(){
 
-  var transcriptionText;
+  $(".addTranscriptionSubmit").click(addTranscription());
 
-  $(".addTranscription").click(addTranscription());
+  $('.addTranslationSubmit').click(addTranslation());
 
   $(".linkVectorTranscription").click(function(){
 
@@ -186,9 +333,9 @@ $(document).ready(function(){
 
   });
 
-  $('.viewTranscription').click(viewTranscription());
+  $('.votedUp').click(votedUp());
 
-  $('.viewTranslation').click(viewTranslation());
+  $('.votedDown').click(votedDown());
 
 });
 
@@ -229,6 +376,69 @@ var controlOptions = {
 //adds new draw control features to the map
 new L.Control.Draw(controlOptions).addTo(map);
 
+
+
+////whenever a new vector is created within the app
+map.on('draw:created', function(evt) {
+	var type = evt.layerType;
+	var layer = evt.layer;
+
+	drawnItems.addLayer(layer);
+
+//a new geoJSON file is always created
+  var shape = layer.toGeoJSON();
+  currentCRS = shape.geometry.coordinates;
+  //alert(currentCRS);
+
+  var vectorType = shape.geometry.type;
+
+  $.post(
+      "http://localhost:8080/api/vectors",
+
+      {coordinates: [currentCRS]}, 
+
+      null
+
+//need to save the id of the JSON just created as a variable
+//      createdVector = "";
+
+      );
+
+//identify JSON id of vector just created??
+//  vectorSelected = getVectorByCRS(currentCRS)._id;
+//  vectorSelected = createdVector;
+//  var vectorSelectedURL = vectorURL.concat(vectorSelected);
+
+    if (selectingVector != "") {
+      updateVectorSelection(vectorSelectedURL);
+    }
+
+});
+
+/////whenever a vector is clicked
+drawnItems.on('click', function(vec) {
+
+  var shape = vec.layer.toGeoJSON();
+  var currentCRS = shape.geometry.coordinates;
+  //alert(currentCRS);
+
+//find id of vector selected
+  vectorSelected = getVectorByCRS(currentCRS)._id;
+  var vectorSelectedURL = vectorURL.concat(vectorSelected);
+
+  if (selectingVector == "") {
+    popupVectorMenu(vectorSelectedURL);
+  }
+
+  else {
+    updateVectorSelection(vectorSelectedURL);
+  }
+
+});
+
+
+///// TEXT SELECTION
+
 /*if (window.getSelection) {
     textSelected = window.getSelection().toString();
 } 
@@ -263,94 +473,4 @@ var gettext = (function () {
 //store fragment selector info as textSelected
 
 //trigger popup
-
-
-////whenever a new vector is created within the app
-map.on('draw:created', function(evt) {
-	var type = evt.layerType;
-	var layer = evt.layer;
-
-	drawnItems.addLayer(layer);
-
-//a new geoJSON file is always created
-  var shape = layer.toGeoJSON();
-  currentCRS = shape.geometry.coordinates;
-  //alert(currentCRS);
-
-  var vectorType = shape.geometry.type;
-
-  $.post(
-      "http://localhost:8080/api/vectors",
-
-      {coordinates: [currentCRS]}, 
-
-      null
-
-//need to save the id of the JSON just created as a variable
-//      createdVector = "";
-
-      );
-
-//identify JSON id of vector just created??
-//  vectorSelected = getVectorByCRS(currentCRS)._id;
-//  vectorSelected = createdVector;
-
-  if (selectingVector == "") {
-
-//  $.post("http://localhost:8080/api/transcriptions", {target:{id: vectorSelectedURL}}, null);
-//  $.post("http://localhost:8080/api/translations", {target:{id: vectorSelectedURL}}, null);
-
-    popupMenu();
-
-  }
-
-  else {
-    updateVectorSelection();
-  }
-
-});
-
-/////whenever a vector is clicked
-drawnItems.on('click', function(vec) {
-
-  var shape = vec.layer.toGeoJSON();
-  var currentCRS = shape.geometry.coordinates;
-  //alert(currentCRS);
-
-//find id of vector selected
-  vectorSelected = getVectorByCRS(currentCRS)._id;
-
-  if (selectingVector == "") {
-    popupMenu();
-  }
-
-  else {
-    updateVectorSelection();
-  }
-
-});
-
-
-//find the highest ranking child
-function highestChild() {
-
-};
-
-
-//update the ranking of a set of children
-function updateRanks(parent, child, newRank) {
-
-
-
-};
-
-//check if the text fragment in parent body is the same as child text
-function compareChild(parentText, newChild) {
-
-};
-
-//when vote up added
-
-//when vote down added
-
 
