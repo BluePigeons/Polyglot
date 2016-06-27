@@ -7,6 +7,24 @@ var newVector     = require('../public/javascripts/newVector');
 var newTranslate    = require('../public/javascripts/newTranslation');
 var newTranscription    = require('../public/javascripts/newTranscription');
 
+//find the highest ranking child
+function highestChild() {
+
+};
+
+
+//update the ranking of a set of children
+function updateRanks(parent, child, newRank) {
+
+
+
+};
+
+//check if the text fragment in parent body is the same as child text
+function compareChild(parentText, newChild) {
+
+};
+
 //ROUTE FUNCTIONS
 
 exports.findAll = function(req, res) {

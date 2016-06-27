@@ -39,26 +39,26 @@ var getVectorByCRS = function(CRS) {
 };
 */
 var getTranscriptionByVector = function(vector) {
-    var targetVectorURL = transcriptionURL.concat(vector);
-//  $.get(targetVectorURL);
+    var targetVectorURL = vectorURL.concat(vector);
+//  var vectorParent = $.get(targetVectorURL).transcription;
 //    return vectorParent;
 };
 
 var getTranslationByVector = function(vector) {
-    var targetVectorURL = translationURL.concat(vector);
-//  $.get(targetVectorURL);
+    var targetVectorURL = vectorURL.concat(vector);
+//  var vectorParent = $.get(targetVectorURL).translation;
 //    return vectorParent;
 };
 
 var getTranscriptionByText = function(text) {
     var targetTextURL = transcriptionURL.concat(text);
-//    var textParent = $.get(targetTextURL);
+//    var textParent = $.get(targetTextURL).parent;
 //    return textParent;
 };
 
 var getTranslationByText = function(text) {
     var targetTextURL = translationURL.concat(text);
-//    var textParent = $.get(targetTextURL);
+//    var textParent = $.get(targetTextURL).parent;
 //    return textParent;
 };
 
@@ -86,6 +86,18 @@ var checkForTranslation = function(target) {
 
 };
 
+var checkForParent = function(target) {
+
+  field = $.get(target).parent;
+  if (field == "") {
+    return false;
+  }
+  else {
+    return field;
+  };
+
+};
+
 var updateVectorSelection = function(vectorURL) {
 
   if (selectingVector == "transcription") {
@@ -94,10 +106,6 @@ var updateVectorSelection = function(vectorURL) {
 
 //    $.put(textSelectedURL, {target: {id: vectorURL}}, null);
 //    $.put(vectorURL, {transcription: textSelectedURL}, null);
-
-/*    
-
-*/
 
 //    selectingVector = "";
 
@@ -109,9 +117,6 @@ var updateVectorSelection = function(vectorURL) {
 
 //    $.put(textSelectedURL, {target: vectorURL}, null);
 //    $.put(vectorURL, {translation: textSelectedURL});
-
-//    var partnerTranscription = $.get(textSelectedURL).transcription;
-//    $.put(partnerTranscription, {target: {id: vectorURL}}, null);
 
 //    selectingVector = "";
 
@@ -181,15 +186,15 @@ var popupVectorMenu = function (vector) {
 
 ///// VIEWER WINDOWS
 
-var openTranscriptionMenu = function (target) {
+var openTranscriptionMenu = function (target, targetType) {
 
   if (checkForTranscription(target) == false) {
 
-    //enable the ADD TRANSCRIPTION input option and display textarea blank
+    //display textarea blank and open input form
 
   };
 
-  var theText = viewTranscription(target);
+  var theText = viewTranscription(target, targetType);
 
   //set textarea contents to theText
   //load display of children transcriptions highlighted
@@ -197,7 +202,26 @@ var openTranscriptionMenu = function (target) {
   //META DATA OPTIONS
 
   //LINK VECTOR 
-  //contains ".linkVectorTranscription" class
+
+//    $(".linkVectorTranscription").click(linkVectorTranscription(target));
+//    $(".voteUp").click(voteUp(target));
+
+  //ADD NEW TRANSCRIPTION
+  //open input form
+
+    /*
+    $(document).ready(function(){
+
+      $(".addTranscriptionSubmit").click(addTranscription(target));
+
+    });
+    */
+
+  //var voteEnabled = checkForVoting(target, targetType, "transcription");
+  //if (voteEnabled == true) {
+      //VOTING UP
+      //VOTING DOWN
+//  };
 
 };
 
@@ -210,21 +234,55 @@ var openTranslationMenu = function (target) {
 
 ///// TRANSLATION AND TRANSCRIPTION FUNCTIONS
 
-var viewTranscription = function (target) {
-  if (vectorSelected != "") {
-    var transcriptionText = getTranscriptionByVector(target).body.text;
-    vectorSelected = "";
-    return transcriptionText;
+var linkVectorTranscription = function(target){
+
+      textSelected = target;
+      selectingVector = "transcription";
+
+    //highlight or emphasise image viewer
+
+};
+
+var linkVectorTranslation = function(target) {
+
+};
+
+var checkForVoting = function(target, targetType, parentType) {
+  var targetJSON = "";
+  if (parentType == "transcription") {
+    if (targetType == "vector") {
+      targetJSON = getTranscriptionByVector(target);
+    }
+    else if (targetType == "transcription") {
+      targetJSON = getTranscriptionByText(target);
+    };
   }
-  else if (textSelected != "") {
-    var transcriptionText = getTranscriptionByText(target).body.text;
-    textSelected = "";
-    return transcriptionText;
+  else if (parentType == "translation") {
+    if (targetType == "vector") {
+      targetJSON = getTranslationByVector(target);
+    }
+    else if (targetType == "transcription") {
+      targetJSON = getTranslationByText(target);
+    };   
+  };
+  var answer = checkForParent(targetJSON);
+  return answer;
+};
+
+var viewTranscription = function(target, targetType) {
+  var transcriptionText = "";
+
+  if (targetType == "vector") {
+    transcriptionText = getTranscriptionByVector(target).body.text;
+  }
+  else if (targetType == "transcription") {
+    transcriptionText = getTranscriptionByText(target).body.text;
   }
   else {
     alert("What are you viewing the transcription of?")
-  }
+  };
 
+  return transcriptionText;
 };
 
 var viewTranslation = function() {
@@ -232,7 +290,16 @@ var viewTranslation = function() {
 };
 
 
-var addTranscription = function(){
+var addTranscription = function(target){
+
+  var isItFirst;
+
+  if (checkForTranscription(target) == false) {
+    isItFirst = true;
+  }
+  else {
+    isItFirst = false;
+  };
 
   var transcriptionText = $("#transcription").val();
   //alert(transcriptionText);
@@ -248,12 +315,39 @@ var addTranscription = function(){
 
   if (textSelected != "") {
 
-    var textSelectedURL = transcriptionURL.concat(textSelected);
+    var textSelectedURL = transcriptionURL.concat(target);
 
 //  $.put(createdTranscriptionURL, {target: {id: textSelectedURL}, {format: "text Fragment"}}, null);
 //  $.put(createdTranscriptionURL, {parent: textSelectedURL}, null);
 
-//  $.put(textSelectedURL, {children: [createdTranscriptionURL]}, null);
+    if (isItFirst == true) {
+
+//add a new location to the children array of parent text
+/*    $.put(   , 
+        {children: 
+          {id:textSelectedURL
+          fragment: {
+            id: createdTranscriptionURL,
+            rank: 1.0}
+          }
+        })
+*/
+    }
+
+    else {
+
+//add to the existing location in the children array of parent text
+/*    $.put(   , 
+        {children: 
+          {id:textSelectedURL
+          fragment: {
+            id: createdTranscriptionURL,
+            rank: 1.0}
+          }
+        })
+*/
+
+    };
 
     textSelected = "";
 
@@ -261,7 +355,7 @@ var addTranscription = function(){
 
   else if (vectorSelected != "") {
 
-//  var vectorSelectedURL = vectorURL.concat(vectorSelected);
+    var vectorSelectedURL = vectorURL.concat(target);
 //  $.put(createdTranscriptionURL, {target: {id: vectorSelectedURL}, {format: "text Fragment"}}, null);
 
     vectorSelected = "";
@@ -272,6 +366,7 @@ var addTranscription = function(){
     alert("What are you adding the transcription of?");
   };
 
+
 };
 
 //ADD TRANSLATION OPTION
@@ -279,57 +374,32 @@ var addTranslation = function() {
 
 };
 
-//find the highest ranking child
-function highestChild() {
-
-};
-
-
-//update the ranking of a set of children
-function updateRanks(parent, child, newRank) {
-
-
-
-};
-
-//check if the text fragment in parent body is the same as child text
-function compareChild(parentText, newChild) {
-
-};
-
 
 //when vote up added
-var votedUp = function () {
-
+var votedUp = function (target) {
+/*    $.put(target, 
+        {children: 
+          {id:textSelectedURL
+          fragment: {
+            id: createdTranscriptionURL,
+            rank: 1.0}
+          }
+        })
+*/
 };
 
 //when vote down added
-var votedDown = function () {
+var votedDown = function (target) {
 
 };
 
+//JQUERY 
 
 $(document).ready(function(){
 
-  $(".addTranscriptionSubmit").click(addTranscription());
+  $(".addTranscriptionSubmit").click(addTranscription("test"));
 
   $('.addTranslationSubmit').click(addTranslation());
-
-  $(".linkVectorTranscription").click(function(){
-
-    selectingVector = "transcription";
-
-  //highlight or emphasise image viewer
-
-  });
-
-  $(".linkVectorTranslation").click(function(){
-
-    selectingVector = "translation";
-
-  //highlight or emphasise image viewer
-
-  });
 
   $('.votedUp').click(votedUp());
 
@@ -436,6 +506,9 @@ drawnItems.on('click', function(vec) {
 
 
 ///// TEXT SELECTION
+
+//whenever text is selected in 
+
 
 /*if (window.getSelection) {
     textSelected = window.getSelection().toString();
