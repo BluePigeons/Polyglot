@@ -44,13 +44,22 @@ var currentImage = getIIIFjson(imageSelected);
 
 ///// API FUNCTIONS
 
-/*
-var getVectorByCRS = function(CRS) {
-  var currentCRSurl = vectorURL.concat(CRS);
-//  var vector = $.get(currentCRSurl);
-//  return vector;
+
+var getVectorByCords = function(coordinates) {
+
+  var serialisedCoords = JSON.stringify(coordinates);
+  var coordinatesQuery = $.param(serialisedCoords);
+
+  var currentCoordsURL = vectorURL.concat("?coordinates="+coordinatesQuery);
+  alert(currentCoordsURL);
+  var vector;
+  $.get(currentCoordsURL, function(data) {
+    alert(data.id);
+    vector = vectorURL.concat(data.id);
+  });
+  return vector;
 };
-*/
+
 var getTranscriptionByVector = function(vector) {
     var targetVectorURL = vectorURL.concat(vector);
 //  var vectorParent = $.get(targetVectorURL).transcription;
@@ -182,6 +191,7 @@ var popupTranslationMenu = function () {
 
 var popupVectorMenu = function (vector) {
 
+//  alert("popupVectorMenu is doing something");
   //OPEN TRANSCRIPTION 
   //contains .openTranscriptionMenu
 
@@ -332,7 +342,7 @@ var addTranscription = function(target){
       }
   });
 
-  alert(createdTranscription);
+//  alert(createdTranscription);
 
   if (textSelected != "") {
 
@@ -501,18 +511,15 @@ drawnItems.on('click', function(vec) {
   var shape = vec.layer.toGeoJSON();
   var currentCoords = shape.geometry.coordinates;
 
-  //alert(currentCRS);
-
-//find id of vector selected
-  vectorSelected = getVectorByCRS(currentCRS)._id;
-  var vectorSelectedURL = vectorURL.concat(vectorSelected);
+//find id url of vector selected
+  vectorSelected = getVectorByCords(currentCoords);
 
   if (selectingVector == "") {
-    popupVectorMenu(vectorSelectedURL);
+    popupVectorMenu(vectorSelected);
   }
 
   else {
-    updateVectorSelection(vectorSelectedURL);
+    updateVectorSelection(vectorSelected);
   }
 
 });

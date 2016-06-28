@@ -106,14 +106,23 @@ exports.deleteOne = function(req, res) {
         });
 };
 
-exports.getByCoords = function(req, res) {
+exports.getByCoords = function(req, res, next, coordinates) {
+    
+    var vectorFound;
 
-    newVector.findOne(req.params.coordinates, function(err, vector) {
-
-        if (err)
-            res.send(err);
-
-        res.json(vector._id);
-
-    })
+    newVector.findOne({"feature.geometry.coordinates":coordinates}, function(err, vector) {
+        if (err) {res.send(err)};
+        vectorFound = vector;
+    });
+    console.dir(vectorFound);
+    req.vector = vectorFound;
+    return next();
 };
+
+exports.returnVector = function(req, res) {
+    var theID = req.vector.id;
+    console.log("showing"+theID);
+    res.json({"id": theID});
+};
+
+

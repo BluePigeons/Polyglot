@@ -52,6 +52,8 @@ router.use(function(req, res, next) {
 
 //VECTOR API
 
+app.param('coordinates', vectors.getByCoords);
+
 //route /api/vectors GET -> get all vector JSONs
 router.get('/vectors', vectors.findAll);
 
@@ -60,7 +62,8 @@ router.post('/vectors', vectors.addNew);
 
 //route /api/vectors/:vector_id GET -> get specific vector JSON
 router.get('/vectors/:vector_id', vectors.getByID);
-router.get('/vectors/:coordinates', vectors.getByCoords);
+
+router.get('/vectors/:coordinates', vectors.returnVector);
 
 //route /api/vectors/:vector_id PUT -> update vector JSON with new info
 router.put('/vectors/:vector_id', vectors.updateOne);
