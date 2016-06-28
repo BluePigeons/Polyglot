@@ -57,7 +57,6 @@ exports.addNew = function(req, res) {
 
     vector.save(function(err, vector) {
         if (err) {res.send(err)};
-        res.json(vector.id);
     });
 
     newVector.findByIdAndUpdate(
@@ -65,9 +64,11 @@ exports.addNew = function(req, res) {
         { $set: { "@id": newVectorURL }}, 
         function (err) {
             if (err) {res.send(err)};
-            console.log("updating @id field")
+//            console.log("updating @id field")
         }
     );
+
+    res.json({ "field": newVectorURL});
 
 };
 

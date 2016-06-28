@@ -461,19 +461,19 @@ map.on('draw:created', function(evt) {
 
 //a new geoJSON file is always created
   var shape = layer.toGeoJSON().geometry;
-  currentCoords = shape.coordinates;
-  var createdVector;
 
-  $.post(
-      "http://localhost:8080/api/vectors",
-      shape, 
+  $.ajax({
+    type: "POST",
+    url: "http://localhost:8080/api/vectors",
+    async: false,
+    data: shape,
+    success: 
       function (data) {
-        createdVector = data;
-      }
-  );
+        vectorSelected = data.field;
 
-  alert(createdVector);
-  vectorSelected = createdVector;
+      }
+  });
+
   var vectorSelectedURL = vectorURL.concat(vectorSelected);
 
     if (selectingVector != "") {
