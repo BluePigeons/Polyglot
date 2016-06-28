@@ -60,7 +60,7 @@ router.post('/vectors', vectors.addNew);
 
 //route /api/vectors/:vector_id GET -> get specific vector JSON
 router.get('/vectors/:vector_id', vectors.getByID);
-//router.get('/vectors/:coordinates', vectors.getByCRS);
+router.get('/vectors/:coordinates', vectors.getByCoords);
 
 //route /api/vectors/:vector_id PUT -> update vector JSON with new info
 router.put('/vectors/:vector_id', vectors.updateOne);

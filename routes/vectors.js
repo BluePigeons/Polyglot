@@ -7,6 +7,10 @@ var newVector     = require('../public/javascripts/newVector');
 var newTranslate    = require('../public/javascripts/newTranslation');
 var newTranscription    = require('../public/javascripts/newTranscription');
 
+var vectorURL = "http://localhost:8080/api/vectors/";
+var transcriptionURL = "http://localhost:8080/api/transcriptions/";
+var translationURL = "http://localhost:8080/api/translations/";
+
 //find the highest ranking child
 function highestChild() {
 
@@ -39,18 +43,31 @@ exports.findAll = function(req, res) {
 
 exports.addNew = function(req, res) {
     
-    var vector = new newVector();  
-    vector.body.coordinates = req.body.coordinates;
-    //vector.body.type = req.body.type;
+    var vector = new newVector(); 
+    var newVectorID;
+    var theGeometry = req.body.geometry;
+
+    vector.feature.push(theGeometry);
 
     vector.save(function(err) {
-        if (err)
-            res.send(err);
 
-        res.json({ message: 'JSON created!' });
-//need a response that sends the id of the JSON just created
+        if (err) {res.send(err)};
 
+        newVectorID = vector._id;
+        res.json(vector._id);
     });
+
+    var newVectorURL = vectorURL.concat(newVectorID);
+
+    newVector.findById(newVectorID, function(err, vector) {
+        if (err) {res.send(err)};
+        vector.update(
+            $set: {
+                "@id": newVectorURL,
+                "body.id": newVectorURL
+            };
+        );
+    })
 
 };
 
@@ -66,22 +83,16 @@ exports.getByID = function(req, res) {
 
 exports.updateOne = function(req, res) {
 
-    newVector.findById(req.params.vector_id, function(err, vector) {
-
+    var newInfo = req.body;
+    var updateDoc = newVector.findById(req.params.vector_id); 
+    updateDoc.exec(function(err, vector) {
         if (err)
             res.send(err);
 
-        vector.body.text = req.body.body.text; 
-        vector.target.id = req.body.target._id;
 
-        vector.save(function(err) {
-            if (err)
-                res.send(err);
 
-            res.json({ message: 'JSON updated!' });
-        });
-
-    });
+        res.json(vector);}
+    );
 };
 
 exports.deleteOne = function(req, res) {
@@ -96,12 +107,14 @@ exports.deleteOne = function(req, res) {
         });
 };
 
-exports.getByCRS = function(req, res) {
+exports.getByCoords = function(req, res) {
 
     newVector.findOne(req.params.coordinates, function(err, vector) {
 
         if (err)
             res.send(err);
+
+        res.json(vector._id);
 
     })
 };

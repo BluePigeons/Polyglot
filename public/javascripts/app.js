@@ -14,10 +14,13 @@ if (typeof annotator === 'undefined') {
 var vectorURL = "http://localhost:8080/api/vectors/";
 var transcriptionURL = "http://localhost:8080/api/transcriptions/";
 var translationURL = "http://localhost:8080/api/translations/";
+var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"
+
+var imageSelected = "UoEsha~3~3~54530~102219";
 
 var vectorSelected = "";
 //the coordinates of the current vector selected
-var currentCRS;
+var currentCoords;
 
 var textSelected = "";
 var textSelectedFragment = "";
@@ -28,6 +31,13 @@ var childrenText = false;
 
 //used to indicate if the user is currently searching for a vector to link or not
 var selectingVector = "";
+
+///Image Handling
+var getIIIFjson = function (image_id) {
+  imageURL.concat(image_id).concat("/info.json")
+};
+
+var currentImage = getIIIFjson(imageSelected);
 
 ///// API FUNCTIONS
 
@@ -303,15 +313,17 @@ var addTranscription = function(target){
 
   var transcriptionText = $("#transcription").val();
   //alert(transcriptionText);
+  var createdTranscription;
+
   $.post(
     transcriptionURL,
     {body: {text: transcriptionText}},
-    null
-
-//need to save the id of the JSON just created as a variable
-//    var createdTranscription = "";
+    function (data) {
+      createdTranscription = data;
+    }
   );
-//  var createdTranscriptionURL = transcriptionURL.concat(createdTranscription);
+
+  var createdTranscriptionURL = transcriptionURL.concat(createdTranscription);
 
   if (textSelected != "") {
 
@@ -395,18 +407,13 @@ var votedDown = function (target) {
 
 //JQUERY 
 
-$(document).ready(function(){
+//$('.addTranslationSubmit').click(addTranslation());
 
-  $(".addTranscriptionSubmit").click(addTranscription("test"));
+$('.votedUp').click(votedUp());
 
-  $('.addTranslationSubmit').click(addTranslation());
+$('.votedDown').click(votedDown());
 
-  $('.votedUp').click(votedUp());
-
-  $('.votedDown').click(votedDown());
-
-});
-
+$("#addTranscriptionSubmit").on("click", addTranscription("http://127.0.0.1:8080/api/vectors/5770501940cb40851b000001"));
 
 ///////LEAFLET 
 
@@ -445,7 +452,6 @@ var controlOptions = {
 new L.Control.Draw(controlOptions).addTo(map);
 
 
-
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
 	var type = evt.layerType;
@@ -455,27 +461,22 @@ map.on('draw:created', function(evt) {
 
 //a new geoJSON file is always created
   var shape = layer.toGeoJSON();
-  currentCRS = shape.geometry.coordinates;
-  //alert(currentCRS);
-
+  currentCoords = shape.geometry.coordinates;
+  //alert(currentCoords);
   var vectorType = shape.geometry.type;
+
+  var createdVector;
 
   $.post(
       "http://localhost:8080/api/vectors",
+      shape, 
+      function (data) {
+        createdVector = data;
+      }
+  );
 
-      {coordinates: [currentCRS]}, 
-
-      null
-
-//need to save the id of the JSON just created as a variable
-//      createdVector = "";
-
-      );
-
-//identify JSON id of vector just created??
-//  vectorSelected = getVectorByCRS(currentCRS)._id;
-//  vectorSelected = createdVector;
-//  var vectorSelectedURL = vectorURL.concat(vectorSelected);
+  vectorSelected = createdVector;
+  var vectorSelectedURL = vectorURL.concat(vectorSelected);
 
     if (selectingVector != "") {
       updateVectorSelection(vectorSelectedURL);
@@ -487,7 +488,8 @@ map.on('draw:created', function(evt) {
 drawnItems.on('click', function(vec) {
 
   var shape = vec.layer.toGeoJSON();
-  var currentCRS = shape.geometry.coordinates;
+  var currentCoords = shape.geometry.coordinates;
+
   //alert(currentCRS);
 
 //find id of vector selected

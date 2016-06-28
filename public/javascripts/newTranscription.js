@@ -18,9 +18,21 @@ var transcriptionSchema   = new Schema({
     "parent": {
     	type: String
     },
-    "children": {
-    	type: []
-    },
+    "children": [{
+
+    	"id": {
+    		type: String
+    	},
+    	"fragment": [{
+    		"id": {
+    			type: String
+    		},
+    		"rank": {
+    			type: Number
+    		}
+    	}]
+
+    }],
     "translation": {
     	type: String
     },
@@ -37,14 +49,15 @@ var transcriptionSchema   = new Schema({
 			default: "TextualBody"
 		},
 		"text": {
-			type: String
+			type: String,
+			default: ""
 		},
 		"language": {
 			type: String,
 			default: "en"
 		}
 	},
-	"target": {
+	"target": [{
 		"id": {
 			type: String,
 			default: "https://127.0.0.1:8080/transcriptions/"
@@ -57,7 +70,7 @@ var transcriptionSchema   = new Schema({
 			type: String,
 			default: "en"
 		}
-	},
+	}],
 	"created": { type: Date, default: Date.now },
 	"creator": {
 		"id": {

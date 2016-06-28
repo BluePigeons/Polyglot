@@ -7,6 +7,10 @@ var newVector     = require('../public/javascripts/newVector');
 var newTranslate    = require('../public/javascripts/newTranslation');
 var newTranscription    = require('../public/javascripts/newTranscription');
 
+var vectorURL = "http://localhost:8080/api/vectors/";
+var transcriptionURL = "http://localhost:8080/api/transcriptions/";
+var translationURL = "http://localhost:8080/api/translations/";
+
 //ROUTE FUNCTIONS
 
 exports.findAll = function(req, res) {
@@ -22,14 +26,30 @@ exports.findAll = function(req, res) {
 exports.addNew = function(req, res) {
     
     var transcription = new newTranscription();  
+    var newTransID;
+
     transcription.body.text = req.body.body.text;  
 
     transcription.save(function(err) {
         if (err)
             res.send(err);
-
-        res.json({ message: 'JSON created!' });
+        newTransID = transcription._id;
+        res.json(transcription._id);
     });
+
+    var transURL = transcriptionURL.concat(newTransID);
+
+    transcription.update(
+        { "_id": newTransID},
+        {$set: {
+            "@id": transURL,
+            "body.id": transURL
+            };
+        },
+        function (err) {
+            console.log("updated IDs too!")
+        }
+    );
 
 };
 
@@ -45,23 +65,21 @@ exports.getByID = function(req, res) {
 
 exports.updateOne = function(req, res) {
 
-    newTranscription.findById(req.params.transcription_id, function(err, transcription) {
+    var updateDoc = newTranscription.findById(req.params.transcription_id);
+    updateDoc.exec(function(err, transcription) {
 
-        if (err)
-            res.send(err);
+        if (err) {res.send(err)};
 
-        transcription.body.text = req.body.body.text; 
-        transcription.target.id = req.body.target._id;
+        transcription.body.text = req.body.body.text;
 
         transcription.save(function(err) {
             if (err)
                 res.send(err);
-
-            res.json({ message: 'JSON updated!' });
         });
-
     });
+
 };
+
 
 exports.deleteOne = function(req, res) {
         newTranscription.remove({

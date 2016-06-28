@@ -13,12 +13,21 @@ var vectorSchema   = new Schema({
 		type: String,
 		default: "http://127.0.0.1:8080/vectors/" 
 	},
-    "type": {
-    	type: String
-    },
-    "coordinates": {
-    	type: []
-    },
+    "feature": [{
+	    "geometry": {
+
+	    	"type": {
+	    		type: String
+	    	},
+	    	"coordinates": {
+	    		type: []
+	    	},
+	    	"crs": {
+	    		"type": String,
+	    		"properties": String
+	    	}
+	    }
+	}]
     "parent": {
     	type: String
     },
@@ -38,25 +47,24 @@ var vectorSchema   = new Schema({
 		},
 		"format": {
 			type: String,
-			default: "SVG"
+			default: "application/json"
 		},
-		"language": {
-			type: String,
-			default: "en"
-		}
 	},
-	"target": {
-		"id": {
-			type: String,
-			default: "https://127.0.0.1:8080/images/"
-		},
-		"format": {
-			type: String,
-		},
-		"language": {
-			type: String,
-		}
-	},
+	"target": 
+		[{
+			"id": {
+				type: String,
+				default: "https://127.0.0.1:8080/images/"
+			},
+			"format": {
+				type: String,
+				default: "applicaiton/json"
+			},
+			"language": {
+				type: String
+			}
+		}]
+	,
 	"created": { type: Date, default: Date.now },
 	"creator": {
 		"id": {
