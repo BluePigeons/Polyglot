@@ -25,34 +25,20 @@ exports.findAll = function(req, res) {
 
 exports.addNew = function(req, res) {
     
-    var transcription = new newTranscription();  
-    var newTransID;
+    var transcription = new newTranscription(); 
 
-    transcription.body.text = req.body.body.text;  
+    var newTransID = transcription.id;
+    var transURL = transcriptionURL.concat(newTransID);
+
+    transcription.body.text = req.body.body.text; 
+    transcription.body.id = transURL; 
 
     transcription.save(function(err) {
         if (err)
             res.send(err);
-        newTransID = transcription._id;
-        res.json(transcription._id);
+
+        res.json(transcription.id);
     });
-
-    var transURL = transcriptionURL.concat(newTransID);
-
-    transcription.update(
-        { "_id": newTransID},
-
-//this bit isn't working
-
-        {
-            "@id": transURL,
-            "body.id": transURL
-        },
-        function (err) {
-            if (err) {res.send(err)};
-            console.log("updated IDs too!");
-        }
-    );
 
 };
 

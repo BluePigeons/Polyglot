@@ -51,22 +51,21 @@ exports.addNew = function(req, res) {
     );
 
     var newVectorID = vector.id;
+    var newVectorURL = vectorURL.concat(newVectorID);
+
+    vector.body.id = newVectorURL;
 
     vector.save(function(err, vector) {
         if (err) {res.send(err)};
         res.json(vector.id);
     });
 
-    var newVectorURL = vectorURL.concat(newVectorID);
-
-    vector.update(
-        {"_id": newVectorID},
-        {$set: {
-            "@id": newVectorURL,
-            "body.id": newVectorURL
-        }},
+    newVector.findByIdAndUpdate(
+        newVectorID,
+        { $set: { "@id": newVectorURL }}, 
         function (err) {
-            console.log("updated IDs too!")
+            if (err) {res.send(err)};
+            console.log("updating @id field")
         }
     );
 

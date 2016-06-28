@@ -472,7 +472,7 @@ map.on('draw:created', function(evt) {
       }
   );
 
-//  alert(createdVector);
+  alert(createdVector);
   vectorSelected = createdVector;
   var vectorSelectedURL = vectorURL.concat(vectorSelected);
 
