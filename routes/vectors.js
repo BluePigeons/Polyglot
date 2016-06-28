@@ -64,7 +64,6 @@ exports.addNew = function(req, res) {
         { $set: { "@id": newVectorURL }}, 
         function (err) {
             if (err) {res.send(err)};
-//            console.log("updating @id field")
         }
     );
 

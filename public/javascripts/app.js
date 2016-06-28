@@ -26,6 +26,9 @@ var textSelected = "";
 var textSelectedFragment = "";
 var textTypeSelected = "";
 
+//just for testing
+textSelected = "http://127.0.0.1:8080/api/vectors/5770501940cb40851b000001";
+
 //Boolean to indicate if the currently selected text already has children or not
 var childrenText = false;
 
@@ -301,7 +304,10 @@ var viewTranslation = function() {
 
 
 var addTranscription = function(target){
-/*
+
+//  alert("the addTranscription function is running")
+
+
   var isItFirst;
 
   if (checkForTranscription(target) == false) {
@@ -315,52 +321,55 @@ var addTranscription = function(target){
   //alert(transcriptionText);
   var createdTranscription;
 
-  $.post(
-    transcriptionURL,
-    {body: {text: transcriptionText}},
-    function (data) {
-      createdTranscription = data;
-    }
-  );
+  $.ajax({
+    type: "POST",
+    url: transcriptionURL,
+    async: false,
+    data: {body: {text: transcriptionText}},
+    success: 
+      function (data) {
+        createdTranscription = data.url;
+      }
+  });
 
-  var createdTranscriptionURL = transcriptionURL.concat(createdTranscription);
+  alert(createdTranscription);
 
   if (textSelected != "") {
 
     var textSelectedURL = transcriptionURL.concat(target);
 
-//  $.put(createdTranscriptionURL, {target: {id: textSelectedURL}, {format: "text Fragment"}}, null);
-//  $.put(createdTranscriptionURL, {parent: textSelectedURL}, null);
+//  $.put(createdTranscription, {target: {id: textSelectedURL}, {format: "text Fragment"}}, null);
+//  $.put(createdTranscription, {parent: textSelectedURL}, null);
 
-    if (isItFirst == true) {
+    if (isItFirst == true) {}
 
 //add a new location to the children array of parent text
 /*    $.put(   , 
         {children: 
           {id:textSelectedURL
           fragment: {
-            id: createdTranscriptionURL,
+            id: createdTranscription,
             rank: 1.0}
           }
         })
 
     }
-
-    else {
+*/
+    else {};
 
 //add to the existing location in the children array of parent text
 /*    $.put(   , 
         {children: 
           {id:textSelectedURL
           fragment: {
-            id: createdTranscriptionURL,
+            id: createdTranscription,
             rank: 1.0}
           }
         })
 
 
     };
-
+*/
     textSelected = "";
 
   }
@@ -378,7 +387,7 @@ var addTranscription = function(target){
     alert("What are you adding the transcription of?");
   };
 
-*/
+
 };
 
 //ADD TRANSLATION OPTION
@@ -413,7 +422,11 @@ $('.votedUp').click(votedUp());
 
 $('.votedDown').click(votedDown());
 
-$("#addTranscriptionSubmit").on("click", addTranscription("http://127.0.0.1:8080/api/vectors/5770501940cb40851b000001"));
+$('.addTranscriptionSubmit').on("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  addTranscription(textSelected)
+});
 
 ///////LEAFLET 
 
@@ -464,7 +477,7 @@ map.on('draw:created', function(evt) {
 
   $.ajax({
     type: "POST",
-    url: "http://localhost:8080/api/vectors",
+    url: vectorURL,
     async: false,
     data: shape,
     success: 

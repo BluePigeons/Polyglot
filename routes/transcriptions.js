@@ -36,9 +36,17 @@ exports.addNew = function(req, res) {
     transcription.save(function(err) {
         if (err)
             res.send(err);
-
-        res.json(transcription.id);
     });
+
+    newTranscription.findByIdAndUpdate(
+        newTransID,
+        { $set: { "@id": transURL }}, 
+        function (err) {
+            if (err) {res.send(err)};
+        }
+    );
+
+    res.json({ "url": transURL });
 
 };
 
