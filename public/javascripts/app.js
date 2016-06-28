@@ -301,7 +301,7 @@ var viewTranslation = function() {
 
 
 var addTranscription = function(target){
-
+/*
   var isItFirst;
 
   if (checkForTranscription(target) == false) {
@@ -343,7 +343,7 @@ var addTranscription = function(target){
             rank: 1.0}
           }
         })
-*/
+
     }
 
     else {
@@ -357,7 +357,7 @@ var addTranscription = function(target){
             rank: 1.0}
           }
         })
-*/
+
 
     };
 
@@ -378,7 +378,7 @@ var addTranscription = function(target){
     alert("What are you adding the transcription of?");
   };
 
-
+*/
 };
 
 //ADD TRANSLATION OPTION
@@ -460,11 +460,8 @@ map.on('draw:created', function(evt) {
 	drawnItems.addLayer(layer);
 
 //a new geoJSON file is always created
-  var shape = layer.toGeoJSON();
-  currentCoords = shape.geometry.coordinates;
-  //alert(currentCoords);
-  var vectorType = shape.geometry.type;
-
+  var shape = layer.toGeoJSON().geometry;
+  currentCoords = shape.coordinates;
   var createdVector;
 
   $.post(
@@ -475,6 +472,7 @@ map.on('draw:created', function(evt) {
       }
   );
 
+//  alert(createdVector);
   vectorSelected = createdVector;
   var vectorSelectedURL = vectorURL.concat(vectorSelected);
 

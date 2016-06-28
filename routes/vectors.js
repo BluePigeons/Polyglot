@@ -44,30 +44,31 @@ exports.findAll = function(req, res) {
 exports.addNew = function(req, res) {
     
     var vector = new newVector(); 
-    var newVectorID;
-    var theGeometry = req.body.geometry;
+    var theCoords = req.body.coordinates;
 
-    vector.feature.push(theGeometry);
+    vector.feature.geometry.coordinates.push(
+        req.body.coordinates
+    );
 
-    vector.save(function(err) {
+    var newVectorID = vector.id;
 
+    vector.save(function(err, vector) {
         if (err) {res.send(err)};
-
-        newVectorID = vector._id;
-        res.json(vector._id);
+        res.json(vector.id);
     });
 
     var newVectorURL = vectorURL.concat(newVectorID);
 
-    newVector.findById(newVectorID, function(err, vector) {
-        if (err) {res.send(err)};
-        vector.update(
-            $set: {
-                "@id": newVectorURL,
-                "body.id": newVectorURL
-            };
-        );
-    })
+    vector.update(
+        {"_id": newVectorID},
+        {$set: {
+            "@id": newVectorURL,
+            "body.id": newVectorURL
+        }},
+        function (err) {
+            console.log("updated IDs too!")
+        }
+    );
 
 };
 
@@ -88,7 +89,6 @@ exports.updateOne = function(req, res) {
     updateDoc.exec(function(err, vector) {
         if (err)
             res.send(err);
-
 
 
         res.json(vector);}

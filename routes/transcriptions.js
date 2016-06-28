@@ -41,13 +41,16 @@ exports.addNew = function(req, res) {
 
     transcription.update(
         { "_id": newTransID},
-        {$set: {
+
+//this bit isn't working
+
+        {
             "@id": transURL,
             "body.id": transURL
-            };
         },
         function (err) {
-            console.log("updated IDs too!")
+            if (err) {res.send(err)};
+            console.log("updated IDs too!");
         }
     );
 

@@ -13,11 +13,12 @@ var vectorSchema   = new Schema({
 		type: String,
 		default: "http://127.0.0.1:8080/vectors/" 
 	},
-    "feature": [{
+    "feature": {
 	    "geometry": {
 
 	    	"type": {
-	    		type: String
+	    		type: String,
+	    		default: "Polygon"
 	    	},
 	    	"coordinates": {
 	    		type: []
@@ -27,7 +28,7 @@ var vectorSchema   = new Schema({
 	    		"properties": String
 	    	}
 	    }
-	}]
+	},
     "parent": {
     	type: String
     },
