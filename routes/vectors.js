@@ -42,7 +42,7 @@ exports.addNew = function(req, res) {
         if (err) {res.send(err)};
     });
 
-    $set: { "'@id'": newVectorURL };
+//    $set: { "'@id'": newVectorURL };
 
     vector.save(function(err, vector) {
         if (err) {res.send(err)};

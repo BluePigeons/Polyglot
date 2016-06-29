@@ -42,7 +42,7 @@ var getIIIFjsonURL = function (image_id) {
   imageURL.concat(image_id).concat("/info.json")
 };
 
-var currentImage = getIIIFjson(imageSelected);
+var currentImage = getIIIFjsonURL(imageSelected);
 
 ///// API FUNCTIONS
 
@@ -73,8 +73,9 @@ var getBodyText = function(target) {
 var checkForTranscription = function(target) {
 
   var targetChecking = getTargetJSON(target);
+  var JSONtranscription = targetChecking.transcription;
 
-  var targetTranscription = JSON.stringify(targetChecking.transcription);
+  var targetTranscription = JSON.stringify(JSONtranscription);
 
   if (targetTranscription == '""') {
     return false;
@@ -276,12 +277,15 @@ var addTranscription = function(target){
     $.ajax({
       type: "POST",
       url: transcriptionURL,
+      dataType: "json",
       async: false,
-      data: {
-        {body: {text: transcriptionText}},
-        {target: {id: vectorSelected}, {format: "SVG"}},
-        {parent: textSelected}
-      },
+      contentType: "application/json",
+//      processData: false,
+      data: JSON.stringify({body: {text: transcriptionText},target: {id: vectorSelected, format: "SVG"}}),
+        /*{
+        body: {text: transcriptionText},
+        target: {id: vectorSelected}, format: "SVG"},
+      }*/
       success: 
         function (data) {
           createdTranscription = data.url;
@@ -298,11 +302,12 @@ var addTranscription = function(target){
       type: "POST",
       url: transcriptionURL,
       async: false,
-      data: {
-        {body: {text: transcriptionText}},
-        {target: {id: textSelected}, {format: "text Fragment"}},
-        {parent: textSelected}
-      },
+      data: JSON.stringify({body: {text: transcriptionText},target: {id: textSelected, format: "text Fragment"},parent: textSelected}),
+      /*{
+        body: {text: transcriptionText},
+        target: {id: textSelected, format: "text Fragment"},
+        parent: textSelected
+      }*/
       success: 
         function (data) {
           createdTranscription = data.url;
@@ -313,14 +318,15 @@ var addTranscription = function(target){
       type: "PUT",
       url: target,
       async: false,
-      data: {
+      data: JSON.stringify({children: {id: textSelectedURL,fragment: {id: createdTranscription,rank: 1.0}}}),
+      /*{
         children: 
           {id: textSelectedURL,
           fragment: {
             id: createdTranscription,
             rank: 1.0}
           }
-      },
+      }*/
       success:
         function (data) {}
     });
