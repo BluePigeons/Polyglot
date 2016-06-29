@@ -10,24 +10,7 @@ var newTranscription    = require('../public/javascripts/newTranscription');
 var vectorURL = "http://localhost:8080/api/vectors/";
 var transcriptionURL = "http://localhost:8080/api/transcriptions/";
 var translationURL = "http://localhost:8080/api/translations/";
-
-//find the highest ranking child
-function highestChild() {
-
-};
-
-
-//update the ranking of a set of children
-function updateRanks(parent, child, newRank) {
-
-
-
-};
-
-//check if the text fragment in parent body is the same as child text
-function compareChild(parentText, newChild) {
-
-};
+var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"
 
 //ROUTE FUNCTIONS
 
@@ -58,23 +41,27 @@ exports.addNew = function(req, res) {
     vector.save(function(err, vector) {
         if (err) {res.send(err)};
     });
+//this bit isn't working for some reason
 
     newVector.findByIdAndUpdate(
         newVectorID,
-        { $set: { "@id": newVectorURL }}, 
+        { $set: { "'@id'": newVectorURL }}, 
         function (err) {
             if (err) {res.send(err)};
         }
     );
+//
 
-    res.json({ "field": newVectorURL});
+    res.json({ "url": newVectorURL});
 
 };
 
 exports.getByID = function(req, res) {
-    newVector.findById(req.params.vector_id, function(err, vector) {
+    newVector.findById(req.params.vector_id).lean().exec( function(err, vector) {
         if (err)
             res.send(err);
+//      console.dir(vector);        
+
         res.json(vector);
         
     });
@@ -88,7 +75,6 @@ exports.updateOne = function(req, res) {
     updateDoc.exec(function(err, vector) {
         if (err)
             res.send(err);
-
 
         res.json(vector);}
     );
@@ -105,7 +91,7 @@ exports.deleteOne = function(req, res) {
             res.json({ message: 'Successfully deleted' });
         });
 };
-
+/*
 exports.getByCoords = function(req, res, next, coordinates) {
     
     var vectorFound;
@@ -118,10 +104,12 @@ exports.getByCoords = function(req, res, next, coordinates) {
     req.vector = vectorFound;
     return next();
 };
+*/
 
 exports.returnVector = function(req, res) {
     var theID = req.vector.id;
     console.log("showing"+theID);
+
     res.json({"id": theID});
 };
 

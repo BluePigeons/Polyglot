@@ -36,10 +36,12 @@ var vectorSchema   = new Schema({
     	type: []
     },
     "translation": {
-    	type: String
+    	type: String,
+    	default: ""
     },
     "transcription": {
-    	type: String
+    	type: String,
+    	default: ""
     },
 	"body": {
 		"id": {

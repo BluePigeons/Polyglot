@@ -10,6 +10,7 @@ var newTranscription    = require('../public/javascripts/newTranscription');
 var vectorURL = "http://localhost:8080/api/vectors/";
 var transcriptionURL = "http://localhost:8080/api/transcriptions/";
 var translationURL = "http://localhost:8080/api/translations/";
+var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"
 
 //ROUTE FUNCTIONS
 

@@ -16,7 +16,7 @@ var transcriptionURL = "http://localhost:8080/api/transcriptions/";
 var translationURL = "http://localhost:8080/api/translations/";
 var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"
 
-var imageSelected = "UoEsha~3~3~54530~102219";
+var imageViewing = "UoEsha~3~3~54530~102219";
 
 var vectorSelected = "";
 //the coordinates of the current vector selected
@@ -27,7 +27,7 @@ var textSelectedFragment = "";
 var textTypeSelected = "";
 
 //just for testing
-textSelected = "http://127.0.0.1:8080/api/vectors/5770501940cb40851b000001";
+//textSelected = "http://127.0.0.1:8080/api/vectors/5770501940cb40851b000001";
 
 //Boolean to indicate if the currently selected text already has children or not
 var childrenText = false;
@@ -35,8 +35,10 @@ var childrenText = false;
 //used to indicate if the user is currently searching for a vector to link or not
 var selectingVector = "";
 
+var imageSelected = imageURL.concat(imageViewing);
+
 ///Image Handling
-var getIIIFjson = function (image_id) {
+var getIIIFjsonURL = function (image_id) {
   imageURL.concat(image_id).concat("/info.json")
 };
 
@@ -44,79 +46,58 @@ var currentImage = getIIIFjson(imageSelected);
 
 ///// API FUNCTIONS
 
+var getTargetJSON = function(target) {
 
-var getVectorByCords = function(coordinates) {
+  var targetJSON;
 
-  var serialisedCoords = JSON.stringify(coordinates);
-  var coordinatesQuery = $.param(serialisedCoords);
-
-  var currentCoordsURL = vectorURL.concat("?coordinates="+coordinatesQuery);
-  alert(currentCoordsURL);
-  var vector;
-  $.get(currentCoordsURL, function(data) {
-    alert(data.id);
-    vector = vectorURL.concat(data.id);
+  $.ajax({
+  type: "GET",
+  dataType: "json",
+  url: target,
+  async: false,
+  success: 
+    function (data) {
+      targetJSON = data;
+    }
   });
-  return vector;
+
+  return targetJSON;
 };
 
-var getTranscriptionByVector = function(vector) {
-    var targetVectorURL = vectorURL.concat(vector);
-//  var vectorParent = $.get(targetVectorURL).transcription;
-//    return vectorParent;
-};
+var getBodyText = function(target) {
 
-var getTranslationByVector = function(vector) {
-    var targetVectorURL = vectorURL.concat(vector);
-//  var vectorParent = $.get(targetVectorURL).translation;
-//    return vectorParent;
-};
+  var theText = JSON.stringify(getTargetJSON(target).body.text);
 
-var getTranscriptionByText = function(text) {
-    var targetTextURL = transcriptionURL.concat(text);
-//    var textParent = $.get(targetTextURL).parent;
-//    return textParent;
-};
-
-var getTranslationByText = function(text) {
-    var targetTextURL = translationURL.concat(text);
-//    var textParent = $.get(targetTextURL).parent;
-//    return textParent;
 };
 
 var checkForTranscription = function(target) {
 
-  field = $.get(target).transcription;
-  if (field == "") {
+  var targetChecking = getTargetJSON(target);
+
+  var targetTranscription = JSON.stringify(targetChecking.transcription);
+  alert(targetTranscription);
+
+  if (targetTranscription == '""') {
+    alert("nope no transcription");
+    return false;
+  }
+  else if (targetTranscription == "") {
+    alert("nope no transcription");
     return false;
   }
   else {
-    return field;
+    return targetTranscription;
   };
 
 };
 
 var checkForTranslation = function(target) {
 
-  field = $.get(target).translation;
-  if (field == "") {
-    return false;
-  }
-  else {
-    return field;
-  };
 
 };
 
 var checkForParent = function(target) {
 
-  field = $.get(target).parent;
-  if (field == "") {
-    return false;
-  }
-  else {
-    return field;
-  };
 
 };
 
@@ -188,39 +169,27 @@ var popupTranslationMenu = function () {
 
 };
 
-
-var popupVectorMenu = function (vector) {
-
-//  alert("popupVectorMenu is doing something");
-  //OPEN TRANSCRIPTION 
-  //contains .openTranscriptionMenu
-
-  //OPEN TRANSLATION 
-  // contains .openTranslationMenu
-
-/*
-  $(document).ready(function(){
-    $(".openTranslationMenu").click(openTranslationMenu(vector));
-    $(".openTranscriptionMenu").click(openTranscriptionMenu(vector));
-  });
-*/
-
-};
-
 ///// VIEWER WINDOWS
 
 var openTranscriptionMenu = function (target, targetType) {
 
-  if (checkForTranscription(target) == false) {
+  var targetTranscription = checkForTranscription(target);
 
-    //display textarea blank and open input form
+  if (targetTranscription == false) {
+
+    alert("nothing there");
+
+  }
+  else {
+
+    var theText = getBodyText(target);
+
+    alert("this function will display "+theText);
+
+    $("h2.firstTitle").html("TRANSCRIPTION");
+    $("textarea.testLoading").html(theText);
 
   };
-
-  var theText = viewTranscription(target, targetType);
-
-  //set textarea contents to theText
-  //load display of children transcriptions highlighted
 
   //META DATA OPTIONS
 
@@ -290,26 +259,6 @@ var checkForVoting = function(target, targetType, parentType) {
   };
   var answer = checkForParent(targetJSON);
   return answer;
-};
-
-var viewTranscription = function(target, targetType) {
-  var transcriptionText = "";
-
-  if (targetType == "vector") {
-    transcriptionText = getTranscriptionByVector(target).body.text;
-  }
-  else if (targetType == "transcription") {
-    transcriptionText = getTranscriptionByText(target).body.text;
-  }
-  else {
-    alert("What are you viewing the transcription of?")
-  };
-
-  return transcriptionText;
-};
-
-var viewTranslation = function() {
-
 };
 
 
@@ -424,20 +373,6 @@ var votedDown = function (target) {
 
 };
 
-//JQUERY 
-
-//$('.addTranslationSubmit').click(addTranslation());
-
-$('.votedUp').click(votedUp());
-
-$('.votedDown').click(votedDown());
-
-$('.addTranscriptionSubmit').on("click", function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  addTranscription(textSelected)
-});
-
 ///////LEAFLET 
 
 var map;
@@ -474,9 +409,9 @@ var controlOptions = {
 //adds new draw control features to the map
 new L.Control.Draw(controlOptions).addTo(map);
 
-
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
+
 	var type = evt.layerType;
 	var layer = evt.layer;
 
@@ -492,15 +427,18 @@ map.on('draw:created', function(evt) {
     data: shape,
     success: 
       function (data) {
-        vectorSelected = data.field;
-
+        vectorSelected = data.url;
       }
   });
 
-  var vectorSelectedURL = vectorURL.concat(vectorSelected);
+  var popupVectorMenu = L.popup()
+    .setContent('<div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
+
+  layer._leaflet_id = vectorSelected;
+  layer.bindPopup(popupVectorMenu).openPopup();
 
     if (selectingVector != "") {
-      updateVectorSelection(vectorSelectedURL);
+      updateVectorSelection(vectorSelected);
     }
 
 });
@@ -512,10 +450,12 @@ drawnItems.on('click', function(vec) {
   var currentCoords = shape.geometry.coordinates;
 
 //find id url of vector selected
-  vectorSelected = getVectorByCords(currentCoords);
+  vectorSelected = vec.layer._leaflet_id;
+//  alert(vectorSelected);
 
   if (selectingVector == "") {
-    popupVectorMenu(vectorSelected);
+    vec.layer.openPopup();
+
   }
 
   else {
@@ -564,4 +504,50 @@ var gettext = (function () {
 //store fragment selector info as textSelected
 
 //trigger popup
+
+//JQUERY 
+
+//$('.addTranslationSubmit').click(addTranslation());
+
+$('.votedUp').click(votedUp());
+
+$('.votedDown').click(votedDown());
+
+$('.addTranscriptionSubmit').on("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  addTranscription(textSelected)
+});
+
+$('.addTranslationSubmit').on("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  addTranslation(textSelected)
+});
+/*
+$('.openTranscriptionMenu').on("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  openTranscriptionMenu(textSelected,"text");
+});
+
+$('.openTranslationMenu').on("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  openTranslationMenu(textSelected, "text");
+});
+*/
+map.on('popupopen', function() {
+
+  $('.openTranscriptionMenu').on("click", function(event) {
+    openTranscriptionMenu(vectorSelected, "vector");
+  });
+
+  $('.openTranslationMenu').on("click", function(event) {
+    openTranslationMenu(vectorSelected, "vector");
+  });
+
+
+});
+
 
