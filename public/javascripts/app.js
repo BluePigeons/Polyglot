@@ -73,9 +73,7 @@ var getBodyText = function(target) {
 var checkForTranscription = function(target) {
 
   var targetChecking = getTargetJSON(target);
-  var JSONtranscription = targetChecking.transcription;
-
-  var targetTranscription = JSON.stringify(JSONtranscription);
+  var targetTranscription = targetChecking.transcription;
 
   if (targetTranscription == '""') {
     return false;
@@ -93,7 +91,7 @@ var checkForTranslation = function(target) {
 
   var targetChecking = getTargetJSON(target);
 
-  var targetTranslation = JSON.stringify(targetChecking.translation);
+  var targetTranslation = targetChecking.translation;
 
   if (targetTranslation == '""') {
     return false;
@@ -111,7 +109,7 @@ var checkForParent = function(target) {
 
   var targetChecking = getTargetJSON(target);
 
-  var parent = JSON.stringify(targetChecking.parent);
+  var parent = targetChecking.parent;
 
   if (parent == '""') {
     return false;
@@ -266,8 +264,6 @@ var linkVectorTranslation = function(target) {
 };
 
 var addTranscription = function(target){
-
-  var existingTranscription = checkForTranscription(target);
 
   var transcriptionText = $("#transcription").val();
   var createdTranscription;

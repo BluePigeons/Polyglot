@@ -33,20 +33,24 @@ exports.addNew = function(req, res) {
 
     transcription.body.text = req.body.body.text; 
     transcription.body.id = transURL; 
+    transcription.target.push(
+        {"id": req.body.target.id,
+        "format": req.body.target.format}
+    );
 
     transcription.save(function(err) {
         if (err)
             res.send(err);
     });
 
-    newTranscription.findByIdAndUpdate(
+/*    newTranscription.findByIdAndUpdate(
         newTransID,
         { $set: { "@id": transURL }}, 
         function (err) {
             if (err) {res.send(err)};
         }
     );
-
+*/
     res.json({ "url": transURL });
 
 };
