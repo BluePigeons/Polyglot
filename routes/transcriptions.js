@@ -71,8 +71,8 @@ exports.updateOne = function(req, res) {
         transcription.body.text = req.body.body.text;
 
         transcription.save(function(err) {
-            if (err)
-                res.send(err);
+            if (err) {res.send(err)};
+            res.json(transcription);
         });
     });
 

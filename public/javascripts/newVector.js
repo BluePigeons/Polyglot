@@ -56,12 +56,11 @@ var vectorSchema   = new Schema({
 	"target": 
 		[{
 			"id": {
-				type: String,
-				default: "https://127.0.0.1:8080/images/"
+				type: String
 			},
 			"format": {
 				type: String,
-				default: "applicaiton/json"
+				default: "application/json"
 			},
 			"language": {
 				type: String

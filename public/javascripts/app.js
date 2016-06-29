@@ -75,14 +75,11 @@ var checkForTranscription = function(target) {
   var targetChecking = getTargetJSON(target);
 
   var targetTranscription = JSON.stringify(targetChecking.transcription);
-  alert(targetTranscription);
 
   if (targetTranscription == '""') {
-    alert("nope no transcription");
     return false;
   }
   else if (targetTranscription == "") {
-    alert("nope no transcription");
     return false;
   }
   else {
@@ -93,11 +90,40 @@ var checkForTranscription = function(target) {
 
 var checkForTranslation = function(target) {
 
+  var targetChecking = getTargetJSON(target);
+
+  var targetTranslation = JSON.stringify(targetChecking.translation);
+
+  if (targetTranslation == '""') {
+    return false;
+  }
+  else if (targetTranslation == "") {
+    return false;
+  }
+  else {
+    return targetTranslation;
+  };
 
 };
 
 var checkForParent = function(target) {
 
+  var targetChecking = getTargetJSON(target);
+
+  var parent = JSON.stringify(targetChecking.parent);
+
+  if (parent == '""') {
+    return false;
+  }
+  else if (parent == "") {
+    return false;
+  }
+  else if (parent == false) {
+    return false;
+  }
+  else {
+    return parent;
+  };
 
 };
 
@@ -173,6 +199,10 @@ var popupTranslationMenu = function () {
 
 var openTranscriptionMenu = function (target, targetType) {
 
+  //jquery to generate new window
+  //open in centre third or right third?
+  //trigger closing of other windows?
+
   var targetTranscription = checkForTranscription(target);
 
   if (targetTranscription == false) {
@@ -196,23 +226,18 @@ var openTranscriptionMenu = function (target, targetType) {
   //LINK VECTOR 
 
 //    $(".linkVectorTranscription").click(linkVectorTranscription(target));
-//    $(".voteUp").click(voteUp(target));
 
   //ADD NEW TRANSCRIPTION
   //open input form
 
-    /*
-    $(document).ready(function(){
+//      $(".addTranscriptionSubmit").click(addTranscription(target));
 
-      $(".addTranscriptionSubmit").click(addTranscription(target));
-
-    });
-    */
-
-  //var voteEnabled = checkForVoting(target, targetType, "transcription");
-  //if (voteEnabled == true) {
+  //var voteEnabled = checkForParent(target);
+  //if (voteEnabled != false) {
       //VOTING UP
+      //    $(".voteUp").click(voteUp(target));
       //VOTING DOWN
+      //    $(".voteDown").click(voteDown(target));
 //  };
 
 };
@@ -239,113 +264,74 @@ var linkVectorTranslation = function(target) {
 
 };
 
-var checkForVoting = function(target, targetType, parentType) {
-  var targetJSON = "";
-  if (parentType == "transcription") {
-    if (targetType == "vector") {
-      targetJSON = getTranscriptionByVector(target);
-    }
-    else if (targetType == "transcription") {
-      targetJSON = getTranscriptionByText(target);
-    };
-  }
-  else if (parentType == "translation") {
-    if (targetType == "vector") {
-      targetJSON = getTranslationByVector(target);
-    }
-    else if (targetType == "transcription") {
-      targetJSON = getTranslationByText(target);
-    };   
-  };
-  var answer = checkForParent(targetJSON);
-  return answer;
-};
-
-
 var addTranscription = function(target){
 
-//  alert("the addTranscription function is running")
-
-
-  var isItFirst;
-
-  if (checkForTranscription(target) == false) {
-    isItFirst = true;
-  }
-  else {
-    isItFirst = false;
-  };
+  var existingTranscription = checkForTranscription(target);
 
   var transcriptionText = $("#transcription").val();
-  //alert(transcriptionText);
   var createdTranscription;
 
-  $.ajax({
-    type: "POST",
-    url: transcriptionURL,
-    async: false,
-    data: {body: {text: transcriptionText}},
-    success: 
-      function (data) {
-        createdTranscription = data.url;
-      }
-  });
+  if (vectorSelected != "") {
 
-//  alert(createdTranscription);
+    $.ajax({
+      type: "POST",
+      url: transcriptionURL,
+      async: false,
+      data: {
+        {body: {text: transcriptionText}},
+        {target: {id: vectorSelected}, {format: "SVG"}},
+        {parent: textSelected}
+      },
+      success: 
+        function (data) {
+          createdTranscription = data.url;
+        }
+    });
 
-  if (textSelected != "") {
-
-    var textSelectedURL = transcriptionURL.concat(target);
-
-//  $.put(createdTranscription, {target: {id: textSelectedURL}, {format: "text Fragment"}}, null);
-//  $.put(createdTranscription, {parent: textSelectedURL}, null);
-
-    if (isItFirst == true) {}
-
-//add a new location to the children array of parent text
-/*    $.put(   , 
-        {children: 
-          {id:textSelectedURL
-          fragment: {
-            id: createdTranscription,
-            rank: 1.0}
-          }
-        })
-
-    }
-*/
-    else {};
-
-//add to the existing location in the children array of parent text
-/*    $.put(   , 
-        {children: 
-          {id:textSelectedURL
-          fragment: {
-            id: createdTranscription,
-            rank: 1.0}
-          }
-        })
-
-
-    };
-*/
-    textSelected = "";
+    vectorSelected = "";
 
   }
 
-  else if (vectorSelected != "") {
+  else if (textSelected != "") {
 
-    var vectorSelectedURL = vectorURL.concat(target);
-//  $.put(createdTranscriptionURL, {target: {id: vectorSelectedURL}, {format: "text Fragment"}}, null);
+    $.ajax({
+      type: "POST",
+      url: transcriptionURL,
+      async: false,
+      data: {
+        {body: {text: transcriptionText}},
+        {target: {id: textSelected}, {format: "text Fragment"}},
+        {parent: textSelected}
+      },
+      success: 
+        function (data) {
+          createdTranscription = data.url;
+        }
+    });
 
-    vectorSelected = "";
+    $.ajax({
+      type: "PUT",
+      url: target,
+      async: false,
+      data: {
+        children: 
+          {id: textSelectedURL,
+          fragment: {
+            id: createdTranscription,
+            rank: 1.0}
+          }
+      },
+      success:
+        function (data) {}
+    });
+
+    textSelected = "";
 
   }
 
   else {
     alert("What are you adding the transcription of?");
   };
-
 
 };
 
@@ -464,6 +450,12 @@ drawnItems.on('click', function(vec) {
 
 });
 
+//////update DB whenever vector coordinates are changed
+//drawItems.on();
+
+//////update DB whenever vector is deleted
+//drawnItems.on();
+
 
 ///// TEXT SELECTION
 
@@ -507,12 +499,6 @@ var gettext = (function () {
 
 //JQUERY 
 
-//$('.addTranslationSubmit').click(addTranslation());
-
-$('.votedUp').click(votedUp());
-
-$('.votedDown').click(votedDown());
-
 $('.addTranscriptionSubmit').on("click", function(event) {
   event.preventDefault();
   event.stopPropagation();
@@ -537,6 +523,7 @@ $('.openTranslationMenu').on("click", function(event) {
   openTranslationMenu(textSelected, "text");
 });
 */
+
 map.on('popupopen', function() {
 
   $('.openTranscriptionMenu').on("click", function(event) {
@@ -546,7 +533,6 @@ map.on('popupopen', function() {
   $('.openTranslationMenu').on("click", function(event) {
     openTranslationMenu(vectorSelected, "vector");
   });
-
 
 });
 

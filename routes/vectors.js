@@ -41,16 +41,12 @@ exports.addNew = function(req, res) {
     vector.save(function(err, vector) {
         if (err) {res.send(err)};
     });
-//this bit isn't working for some reason
 
-    newVector.findByIdAndUpdate(
-        newVectorID,
-        { $set: { "'@id'": newVectorURL }}, 
-        function (err) {
-            if (err) {res.send(err)};
-        }
-    );
-//
+    $set: { "'@id'": newVectorURL };
+
+    vector.save(function(err, vector) {
+        if (err) {res.send(err)};
+    });
 
     res.json({ "url": newVectorURL});
 
@@ -59,8 +55,7 @@ exports.addNew = function(req, res) {
 exports.getByID = function(req, res) {
     newVector.findById(req.params.vector_id).lean().exec( function(err, vector) {
         if (err)
-            res.send(err);
-//      console.dir(vector);        
+            res.send(err);      
 
         res.json(vector);
         
@@ -70,14 +65,29 @@ exports.getByID = function(req, res) {
 
 exports.updateOne = function(req, res) {
 
-    var newInfo = req.body;
+    var newInfo = req.params;
     var updateDoc = newVector.findById(req.params.vector_id); 
     updateDoc.exec(function(err, vector) {
-        if (err)
-            res.send(err);
+        if (err) {res.send(err)};
 
-        res.json(vector);}
-    );
+//        vector.feature.geometry.coordinates = req.params.coordinates;
+
+        vector.target.push({
+            "id": req.params.target.id,
+            "language": req.params.target.language,
+            "format": req.params.target.format
+        });
+
+        vector.transcription.update(req.params.transcription);
+        vector.translation.update(req.params.translation);
+
+//        vector.children.push()
+        
+        vector.save(function(err, vector) {
+            if (err) {res.send(err)};
+            res.json(vector);
+        })
+    });
 };
 
 exports.deleteOne = function(req, res) {
@@ -90,27 +100,6 @@ exports.deleteOne = function(req, res) {
 
             res.json({ message: 'Successfully deleted' });
         });
-};
-/*
-exports.getByCoords = function(req, res, next, coordinates) {
-    
-    var vectorFound;
-
-    newVector.findOne({"feature.geometry.coordinates":coordinates}, function(err, vector) {
-        if (err) {res.send(err)};
-        vectorFound = vector;
-    });
-    console.dir(vectorFound);
-    req.vector = vectorFound;
-    return next();
-};
-*/
-
-exports.returnVector = function(req, res) {
-    var theID = req.vector.id;
-    console.log("showing"+theID);
-
-    res.json({"id": theID});
 };
 
 
