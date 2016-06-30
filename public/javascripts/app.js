@@ -45,7 +45,35 @@ var getIIIFjsonURL = function (image_id) {
   imageURL.concat(image_id).concat("/info.json")
 };
 
-var currentImage = getIIIFjsonURL(imageSelected);
+var imageSelectedIIIF = getIIIFjsonURL(imageSelected);
+
+var getImageVectors = function(target) {
+
+  var imageVectors;
+
+  var targetParam = encodeURIComponent(target);
+
+  var imageSearch = vectorURL.concat("targets/"+targetParam);
+
+  $.ajax({
+    type: "GET",
+    dataType: "json",
+    url: imageSearch,
+//    data: targetParam,
+    async: false,
+    success: 
+      function (data) {
+        imageVectors = data.list;
+      }
+  });
+
+  return imageVectors;
+
+};
+
+var existingVectors = getImageVectors(imageSelected);
+
+//alert(JSON.stringify(existingVectors[0]));
 
 ///// API FUNCTIONS
 
@@ -69,11 +97,11 @@ var getTargetJSON = function(target) {
 
 var getBodyText = function(target) {
 
-  var bodyText = getTargetJSON(target).body.text;
+  var bodyText = getTargetJSON(target);
 
-  alert(bodyText);
+  alert(JSON.stringify(bodyText));
 
-  var theText = JSON.stringify(bodyText);
+  var theText = bodyText.body.text;
 
   alert(theText);
 
@@ -222,7 +250,7 @@ var openTranscriptionMenu = function (target, targetType) {
 
     var theText = getBodyText(target);
 
-    alert("this function will display "+theText);
+//    alert("this function will display "+theText);
 
     $("h2.firstTitle").html("TRANSCRIPTION");
     $("textarea.testLoading").html(theText);
@@ -274,25 +302,19 @@ var linkVectorTranslation = function(target) {
 
 var addTranscription = function(target){
 
+  //generate the relevant data to be posted
+
   var newText = $("#transcription").val();
   var createdTranscription;
   var transcriptionData;
-  var targetData;
+  var targetDataJSON;
 
   if (targetType == "vector") {
-
     transcriptionData = {body: {text: newText}, target: {id: target, format: "SVG"}};
-
-    targetData = {transcription: createdTranscription};
-
   }
 
   else if (targetType == "transcription") {
-
     transcriptionData = {body: {text: transcriptionText},target: {id: textSelected, format: "text Fragment"},parent: textSelected};
-
-    targetData = {children: {id: textSelected,fragment: {id: createdTranscription,rank: 1.0}}};
-
   }
 
   else {
@@ -310,7 +332,15 @@ var addTranscription = function(target){
       }
   });
 
-  alert(targetData);
+  //update relevant files with new transcription info
+
+  if (targetType == "vector") {
+    targetData = {transcription: createdTranscription};
+  }
+
+  else if (targetType == "transcription") {
+    targetData = {children: {id: textSelected,fragment: {id: createdTranscription,rank: 1.0}}};
+  }; 
 
   $.ajax({
     type: "PUT",
@@ -386,6 +416,18 @@ var controlOptions = {
 //adds new draw control features to the map
 new L.Control.Draw(controlOptions).addTo(map);
 
+
+//load the existing vectors
+existingVectors.forEach(function(vector) {
+
+  var theFeature = vector.feature;
+
+  existingVectorFeature = L.geoJson(theFeature).addTo(map);
+
+  drawnItems.addLayer(existingVectorFeature);
+
+});
+
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
 
@@ -395,8 +437,8 @@ map.on('draw:created', function(evt) {
 	drawnItems.addLayer(layer);
 
 //a new geoJSON file is always created
-  var shape = layer.toGeoJSON().geometry;
-  currentCoords = shape.coordinates;
+  var shape = layer.toGeoJSON();
+  currentCoords = shape.geometry.coordinates;
 
   $.ajax({
     type: "POST",
@@ -423,7 +465,7 @@ map.on('draw:created', function(evt) {
   });
 
   var popupVectorMenu = L.popup()
-    .setContent('<div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
+    .setContent('<div class="deleteVector button"><p>DELETE</p></div><br><div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
 
   layer._leaflet_id = vectorSelected;
   layer.bindPopup(popupVectorMenu).openPopup();
@@ -461,7 +503,16 @@ drawnItems.on('click', function(vec) {
 //drawItems.on();
 
 //////update DB whenever vector is deleted
-//drawnItems.on();
+drawnItems.on('remove', function(vec){
+
+  $.ajax({
+    type: "DELETE",
+    url: vectorSelected,
+    success:
+      function (data) {}
+  });
+
+});
 
 
 ///// TEXT SELECTION
@@ -541,6 +592,14 @@ $('.openTranslationMenu').on("click", function(event) {
 //$('')
 
 map.on('popupopen', function() {
+
+  var vectorInUse = this;
+
+  $('.deleteVector').on("click", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    map.removeLayer(vectorInUse);
+  });
 
   $('.openTranscriptionMenu').on("click", function(event) {
     openTranscriptionMenu(vectorSelected, "vector");

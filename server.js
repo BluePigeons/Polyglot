@@ -16,11 +16,7 @@ var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
 var cors = require('cors');
 
-var newVector     = require('./public/javascripts/newVector');
-var newTranslate    = require('./public/javascripts/newTranslation');
-var newTranscription    = require('./public/javascripts/newTranscription');
-//var IIIFmongoose = require('./public/IIIFmongoose');
-
+var annotations = require('./routes/annotations');
 var vectors = require('./routes/vectors');
 var transcriptions = require('./routes/transcriptions');
 //var translations = require('./routes/translations');
@@ -60,6 +56,7 @@ router.use(function(req, res, next) {
     //should have proper logging here but for now just to console
 
     console.log('Something is happening.');
+
     next(); 
 });
 
@@ -83,6 +80,8 @@ app.get('/thegame', function(req, res) {
 //app.param('parent', annotations.parentParams);
 //make a generic trigger for updating rankings?
 
+//app.param('imageTarget', annotations.findImageTarget);
+
 //VECTOR API
 
 //app.param('coordinates', vectors.getByCoords);
@@ -96,13 +95,16 @@ router.post('/vectors', vectors.addNew);
 //route /api/vectors/:vector_id GET -> get specific vector JSON
 router.get('/vectors/:vector_id', vectors.getByID);
 
-//router.get('/vectors/:coordinates', vectors.returnVector);
+router.get('/vectors/targets/:target', vectors.findAllTargetVectors);
 
 //route /api/vectors/:vector_id PUT -> update vector JSON with new info
 router.put('/vectors/:vector_id', vectors.updateOne);
 
 //route /api/vectors/:vector_id DELETE -> delete vector JSON
 router.delete('/vectors/:vector_id', vectors.deleteOne);
+
+//exists mainly for testing purposes
+router.delete('/vectors', vectors.deleteAll);
 
 //TRANSCRIPTION API
 
@@ -123,6 +125,8 @@ router.put('/transcriptions/:transcription_id', transcriptions.updateOne);
 
 //route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
 router.delete('/transcriptions/:transcription_id', transcriptions.deleteOne);
+
+router.delete('/transcriptions', transcriptions.deleteAll);
 
 //IMAGE API
 

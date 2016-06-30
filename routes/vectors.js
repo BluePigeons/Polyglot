@@ -3,9 +3,10 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 
-var newVector     = require('../public/javascripts/newVector');
-var newTranslate    = require('../public/javascripts/newTranslation');
-var newTranscription    = require('../public/javascripts/newTranscription');
+var newVector     = require('./newVector');
+var newTranslate    = require('./newTranslation');
+var newTranscription    = require('./newTranscription');
+var IIIFmongoose = require('./IIIFmongoose');
 
 var vectorURL = "http://localhost:8080/api/vectors/";
 var transcriptionURL = "http://localhost:8080/api/transcriptions/";
@@ -15,11 +16,47 @@ var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"
 //ROUTE FUNCTIONS
 
 exports.findAll = function(req, res) {
+      
     newVector.find(function(err, vectors) {
-        if (err)
-            res.send(err);
-
+        if (err) {res.send(err)};
         res.json(vectors);
+    }); 
+};
+
+exports.deleteAll = function(req, res) {
+      
+    newVector.find(function(err, vectors) {
+        if (err) {res.send(err)};
+
+        vectors.forEach(function(vector){
+            newVector.remove({_id: vector._id},
+            function(err){
+                if (err) {res.send(err)};
+            })
+        });
+
+        res.send("all gone");
+    }); 
+};
+
+exports.findAllTargetVectors = function(req, res) {
+
+    var vectorAnnos = [];
+
+    var targetID = req.params.target;
+
+    var vectorSearch = newVector.find({'target.id': targetID});
+    vectorSearch.limit(10);
+    vectorSearch.exec(function(err, vectors){
+
+        if (err) {res.send(err)};
+
+        vectors.forEach(function(vectorJSON){
+            var vectorID = vectorJSON.body.id;
+            vectorAnnos.push(vectorJSON);
+        });
+
+        res.json({list: vectorAnnos});
     });
 
 };
@@ -28,9 +65,9 @@ exports.addNew = function(req, res) {
     
     var vector = new newVector(); 
 
-    vector.feature.geometry.coordinates.push(
-        req.body.coordinates
-    );
+    req.body.geometry.coordinates[0].forEach(function(coordinatesPair){
+        vector.feature.geometry.coordinates.push(coordinatesPair);
+    })
 
     var newVectorID = vector.id;
     var newVectorURL = vectorURL.concat(newVectorID);
@@ -68,8 +105,6 @@ exports.updateOne = function(req, res) {
 
     var newInfo = req.body;
 
-    console.dir(newInfo);
-
     var updateDoc = newVector.findById(req.params.vector_id); 
     updateDoc.exec(function(err, vector) {
         if (err) {res.send(err)};
@@ -77,7 +112,7 @@ exports.updateOne = function(req, res) {
 //        vector.feature.geometry.coordinates = req.params.coordinates;
 
         if (typeof newInfo.target != 'undefined' || newInfo.target != null) {
-            
+
             vector.target.push({
                 "id": req.body.target.id,
                 "language": req.body.target.language,

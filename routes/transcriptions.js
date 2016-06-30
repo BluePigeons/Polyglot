@@ -3,9 +3,10 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 
-var newVector     = require('../public/javascripts/newVector');
-var newTranslate    = require('../public/javascripts/newTranslation');
-var newTranscription    = require('../public/javascripts/newTranscription');
+var newVector     = require('./newVector');
+var newTranslate    = require('./newTranslation');
+var newTranscription    = require('./newTranscription');
+var IIIFmongoose = require('./IIIFmongoose');
 
 var vectorURL = "http://localhost:8080/api/vectors/";
 var transcriptionURL = "http://localhost:8080/api/transcriptions/";
@@ -22,6 +23,22 @@ exports.findAll = function(req, res) {
         res.json(transcriptions);
     });
 
+};
+
+exports.deleteAll = function(req, res) {
+      
+    newTranscription.find(function(err, transcriptions) {
+        if (err) {res.send(err)};
+
+        transcriptions.forEach(function(transcription){
+            newTranscription.remove({_id: transcription._id},
+            function(err){
+                if (err) {res.send(err)};
+            })
+        });
+
+        res.send("all gone");
+    }); 
 };
 
 exports.addNew = function(req, res) {
