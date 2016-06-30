@@ -26,8 +26,11 @@ var textSelected = "";
 var textSelectedFragment = "";
 var textTypeSelected = "";
 
-//just for testing
-//textSelected = "http://127.0.0.1:8080/api/vectors/5770501940cb40851b000001";
+var targetSelected = "";
+var targetType = ""; 
+
+var bodySelected = ""; 
+var bodyType = "";
 
 //Boolean to indicate if the currently selected text already has children or not
 var childrenText = false;
@@ -66,7 +69,13 @@ var getTargetJSON = function(target) {
 
 var getBodyText = function(target) {
 
-  var theText = JSON.stringify(getTargetJSON(target).body.text);
+  var bodyText = getTargetJSON(target).body.text;
+
+  alert(bodyText);
+
+  var theText = JSON.stringify(bodyText);
+
+  alert(theText);
 
 };
 
@@ -202,9 +211,9 @@ var openTranscriptionMenu = function (target, targetType) {
   //open in centre third or right third?
   //trigger closing of other windows?
 
-  var targetTranscription = checkForTranscription(target);
+  var targetsTranscription = checkForTranscription(target);
 
-  if (targetTranscription == false) {
+  if (targetsTranscription == false) {
 
     alert("nothing there");
 
@@ -265,75 +274,55 @@ var linkVectorTranslation = function(target) {
 
 var addTranscription = function(target){
 
-  var transcriptionText = $("#transcription").val();
+  var newText = $("#transcription").val();
   var createdTranscription;
+  var transcriptionData;
+  var targetData;
 
-  if (vectorSelected != "") {
+  if (targetType == "vector") {
 
-    $.ajax({
-      type: "POST",
-      url: transcriptionURL,
-      dataType: "json",
-      async: false,
-      contentType: "application/json",
-//      processData: false,
-      data: JSON.stringify({body: {text: transcriptionText},target: {id: vectorSelected, format: "SVG"}}),
-        /*{
-        body: {text: transcriptionText},
-        target: {id: vectorSelected}, format: "SVG"},
-      }*/
-      success: 
-        function (data) {
-          createdTranscription = data.url;
-        }
-    });
+    transcriptionData = {body: {text: newText}, target: {id: target, format: "SVG"}};
 
-    vectorSelected = "";
+    targetData = {transcription: createdTranscription};
 
   }
 
-  else if (textSelected != "") {
+  else if (targetType == "transcription") {
 
-    $.ajax({
-      type: "POST",
-      url: transcriptionURL,
-      async: false,
-      data: JSON.stringify({body: {text: transcriptionText},target: {id: textSelected, format: "text Fragment"},parent: textSelected}),
-      /*{
-        body: {text: transcriptionText},
-        target: {id: textSelected, format: "text Fragment"},
-        parent: textSelected
-      }*/
-      success: 
-        function (data) {
-          createdTranscription = data.url;
-        }
-    });
+    transcriptionData = {body: {text: transcriptionText},target: {id: textSelected, format: "text Fragment"},parent: textSelected};
 
-    $.ajax({
-      type: "PUT",
-      url: target,
-      async: false,
-      data: JSON.stringify({children: {id: textSelectedURL,fragment: {id: createdTranscription,rank: 1.0}}}),
-      /*{
-        children: 
-          {id: textSelectedURL,
-          fragment: {
-            id: createdTranscription,
-            rank: 1.0}
-          }
-      }*/
-      success:
-        function (data) {}
-    });
-
-    textSelected = "";
+    targetData = {children: {id: textSelected,fragment: {id: createdTranscription,rank: 1.0}}};
 
   }
 
   else {
     alert("What are you adding the transcription of?");
   };
+
+  $.ajax({
+    type: "POST",
+    url: transcriptionURL,
+    async: false,
+    data: transcriptionData,
+    success: 
+      function (data) {
+        createdTranscription = data.url;
+      }
+  });
+
+  alert(targetData);
+
+  $.ajax({
+    type: "PUT",
+    url: target,
+    async: false,
+    data: targetData,
+    success:
+      function (data) {}
+  });
+
+  targetSelected = "";
+  targetType = "";
 
 };
 
@@ -407,6 +396,7 @@ map.on('draw:created', function(evt) {
 
 //a new geoJSON file is always created
   var shape = layer.toGeoJSON().geometry;
+  currentCoords = shape.coordinates;
 
   $.ajax({
     type: "POST",
@@ -416,7 +406,20 @@ map.on('draw:created', function(evt) {
     success: 
       function (data) {
         vectorSelected = data.url;
+        targetSelected = data.url;
+        targetType = "vector";
       }
+  });
+
+  var targetData = {target: {id: imageSelected, format: "application/json"}};
+
+  $.ajax({
+    type: "PUT",
+    url: vectorSelected,
+    async: false,
+    data: targetData,
+    success:
+      function (data) {}
   });
 
   var popupVectorMenu = L.popup()
@@ -439,6 +442,8 @@ drawnItems.on('click', function(vec) {
 
 //find id url of vector selected
   vectorSelected = vec.layer._leaflet_id;
+  targetSelected = vec.layer._leaflet_id;
+  targetType = "vector";
 //  alert(vectorSelected);
 
   if (selectingVector == "") {
@@ -504,14 +509,20 @@ var gettext = (function () {
 $('.addTranscriptionSubmit').on("click", function(event) {
   event.preventDefault();
   event.stopPropagation();
-  addTranscription(textSelected)
+  addTranscription(targetSelected)
 });
 
 $('.addTranslationSubmit').on("click", function(event) {
   event.preventDefault();
   event.stopPropagation();
-  addTranslation(textSelected)
+  addTranslation(targetSelected)
 });
+
+$('textarea').on("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+//  targetSelected = textarea;
+})
 /*
 $('.openTranscriptionMenu').on("click", function(event) {
   event.preventDefault();
@@ -526,14 +537,19 @@ $('.openTranslationMenu').on("click", function(event) {
 });
 */
 
+//whenever the transcription or translation viewer is clicked on, or any child DOMs then the target selected has to change to their target
+//$('')
+
 map.on('popupopen', function() {
 
   $('.openTranscriptionMenu').on("click", function(event) {
     openTranscriptionMenu(vectorSelected, "vector");
+    map.closePopup();
   });
 
   $('.openTranslationMenu').on("click", function(event) {
     openTranslationMenu(vectorSelected, "vector");
+    map.closePopup();
   });
 
 });

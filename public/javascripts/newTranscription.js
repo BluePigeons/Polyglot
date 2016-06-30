@@ -36,9 +36,6 @@ var transcriptionSchema   = new Schema({
     "translation": {
     	type: String
     },
-    "transcription": {
-    	type: String
-    },
 	"body": {
 		"id": {
 			type: String,

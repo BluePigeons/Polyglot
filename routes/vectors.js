@@ -27,7 +27,6 @@ exports.findAll = function(req, res) {
 exports.addNew = function(req, res) {
     
     var vector = new newVector(); 
-    var theCoords = req.body.coordinates;
 
     vector.feature.geometry.coordinates.push(
         req.body.coordinates
@@ -37,16 +36,18 @@ exports.addNew = function(req, res) {
     var newVectorURL = vectorURL.concat(newVectorID);
 
     vector.body.id = newVectorURL;
+//    vector.'@id' = newVectorURL;
 
     vector.save(function(err, vector) {
         if (err) {res.send(err)};
     });
 
-//    $set: { "'@id'": newVectorURL };
+/*    $set: { "'@id'": newVectorURL };
 
     vector.save(function(err, vector) {
         if (err) {res.send(err)};
     });
+*/
 
     res.json({ "url": newVectorURL});
 
@@ -65,21 +66,31 @@ exports.getByID = function(req, res) {
 
 exports.updateOne = function(req, res) {
 
-    var newInfo = req.params;
+    var newInfo = req.body;
+
+    console.dir(newInfo);
+
     var updateDoc = newVector.findById(req.params.vector_id); 
     updateDoc.exec(function(err, vector) {
         if (err) {res.send(err)};
 
 //        vector.feature.geometry.coordinates = req.params.coordinates;
 
-        vector.target.push({
-            "id": req.params.target.id,
-            "language": req.params.target.language,
-            "format": req.params.target.format
-        });
+        if (typeof newInfo.target != 'undefined' || newInfo.target != null) {
+            
+            vector.target.push({
+                "id": req.body.target.id,
+                "language": req.body.target.language,
+                "format": req.body.target.format
+            });
+        };
+        if (typeof newInfo.transcription != 'undefined' || newInfo.transcription != null) {
+            vector.transcription = req.body.transcription;
+        };
 
-        vector.transcription.update(req.params.transcription);
-        vector.translation.update(req.params.translation);
+        if (typeof newInfo.transcription != 'undefined' || newInfo.transcription != null) {
+            vector.translation = req.body.translation;
+        };
 
 //        vector.children.push()
         
