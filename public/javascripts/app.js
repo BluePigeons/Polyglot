@@ -421,30 +421,45 @@ new L.Control.Draw(controlOptions).addTo(map);
 if (existingVectors != false) {
   existingVectors.forEach(function(vector) {
 
-/*    allTheCoordinates = [];
-    vector.feature.geometry.coordinates[0].forEach(function(coordinatesPair){
-      var coordsNumbers = [];
-      coordinatesPair.forEach(function(number){
-          converted = Number(number);
-          coordsNumbers.push(converted);
-      });
-      allTheCoordinates.push(coordsNumbers);         
-    });
-*/
     existingVectorFeature = L.geoJson().addTo(map);
     testingFeature = ({
-      "geometry":
-        {"type": vector.notFeature.notGeometry.notType,
-        "coordinates": vector.notFeature.notGeometry.notCoordinates}
+      "type": "Feature",
+      "properties":{},
+      "geometry":{
+        "type": vector.notFeature.notGeometry.notType,
+        "coordinates": [vector.notFeature.notGeometry.notCoordinates]
+      }
     });
 
-    JSON.stringify(testingFeature);
+//    alert(JSON.stringify(testingFeature));
 
+    existingVectorFeature.addData(testingFeature);
     drawnItems.addLayer(existingVectorFeature);
 
   });
 };
+/*
+testingFeature
+{
+"type":"Feature",
+"properties":{},
+"geometry":{
+    "type":"Polygon",
+    "coordinates":[[238,-474],[238,-370],[326,-370],[326,-474],[238,-474]]
+    }
+}
 
+shape
+{
+"type":"Feature",
+"properties":{},
+"geometry":{
+    "type":"Polygon",
+    "coordinates":[[[240,-536],[240,-368],[349,-368],[349,-536],[240,-536]]]
+    }
+}
+
+*/
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
 
@@ -456,7 +471,6 @@ map.on('draw:created', function(evt) {
 //a new geoJSON file is always created
   var shape = layer.toGeoJSON();
   currentCoords = shape.geometry.coordinates;
-  alert(JSON.stringify(shape));
 
 /////INSERT IIIF URL FRAGMENT SCRIPT HERE
 

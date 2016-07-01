@@ -49,7 +49,10 @@ exports.findAllTargetVectors = function(req, res) {
 
     vectorSearch.exec(function(err, vectors){
 
-        if (err) {res.json({list: false})}
+        if (err) {
+            console.log(err);
+            res.json({list: false});
+        }
         else {
             vectors.forEach(function(vectorJSON){
                 var vectorID = vectorJSON.body.id;
@@ -84,10 +87,8 @@ exports.addNew = function(req, res) {
             converted = Number(number);
             coordsNumbers.push(converted);
         });
-        console.dir(coordsNumbers);
         allTheCoordinates[ATCarray].push(coordsNumbers);
         vector.notFeature.notGeometry.notCoordinates[ATCarray] = coordsNumbers;
-        console.dir("the vector is saving" + vector.notFeature.notGeometry.notCoordinates);
         ATCarray += 1;      
     });
     console.dir(allTheCoordinates);
@@ -131,7 +132,7 @@ exports.updateOne = function(req, res) {
 
     var newInfo = req.body;
 
-    console.dir(newInfo);
+//    console.dir(newInfo);
 
     var updateDoc = newVector.findById(req.params.vector_id); 
     updateDoc.exec(function(err, vector) {
