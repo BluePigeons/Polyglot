@@ -431,7 +431,7 @@ if (existingVectors != false) {
 //    alert(JSON.stringify(testingFeature));
 
     existingVectorFeature.addData(testingFeature);
-    drawnItems.addLayer(existingVectorFeature);
+//    drawnItems.addLayer(existingVectorFeature);
 
   });
 };
