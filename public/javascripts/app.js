@@ -418,15 +418,32 @@ new L.Control.Draw(controlOptions).addTo(map);
 
 
 //load the existing vectors
-existingVectors.forEach(function(vector) {
+if (existingVectors != false) {
+  existingVectors.forEach(function(vector) {
 
-  var theFeature = vector.feature;
+/*    allTheCoordinates = [];
+    vector.feature.geometry.coordinates[0].forEach(function(coordinatesPair){
+      var coordsNumbers = [];
+      coordinatesPair.forEach(function(number){
+          converted = Number(number);
+          coordsNumbers.push(converted);
+      });
+      allTheCoordinates.push(coordsNumbers);         
+    });
+*/
+    existingVectorFeature = L.geoJson().addTo(map);
+    testingFeature = ({
+      "geometry":
+        {"type": vector.notFeature.notGeometry.notType,
+        "coordinates": vector.notFeature.notGeometry.notCoordinates}
+    });
 
-  existingVectorFeature = L.geoJson(theFeature).addTo(map);
+    JSON.stringify(testingFeature);
 
-  drawnItems.addLayer(existingVectorFeature);
+    drawnItems.addLayer(existingVectorFeature);
 
-});
+  });
+};
 
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
@@ -439,6 +456,9 @@ map.on('draw:created', function(evt) {
 //a new geoJSON file is always created
   var shape = layer.toGeoJSON();
   currentCoords = shape.geometry.coordinates;
+  alert(JSON.stringify(shape));
+
+/////INSERT IIIF URL FRAGMENT SCRIPT HERE
 
   $.ajax({
     type: "POST",
@@ -594,12 +614,6 @@ $('.openTranslationMenu').on("click", function(event) {
 map.on('popupopen', function() {
 
   var vectorInUse = this;
-
-  $('.deleteVector').on("click", function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    map.removeLayer(vectorInUse);
-  });
 
   $('.openTranscriptionMenu').on("click", function(event) {
     openTranscriptionMenu(vectorSelected, "vector");

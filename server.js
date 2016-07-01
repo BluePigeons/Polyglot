@@ -44,7 +44,8 @@ app.use(bodyParser.json());
 
 var port = process.env.PORT || 8080; 
 
-mongoose.connect(databaseURL);
+mongoose.connect(databaseURL, { config: { autoIndex: false } });
+
 
 //MIDDLEWARE
 

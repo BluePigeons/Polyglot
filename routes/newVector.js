@@ -1,4 +1,6 @@
 var mongoose     = require('mongoose');
+//var GeoJSON = require('mongoose-geojson-schema');
+
 var Schema       = mongoose.Schema;
 
 var vectorSchema   = new Schema({
@@ -13,21 +15,34 @@ var vectorSchema   = new Schema({
 		type: String,
 		default: "http://127.0.0.1:8080/vectors/" 
 	},
-    "feature": {
-	    "geometry": {
-
-	    	"type": {
+    "notFeature": {
+    	"notType": {
+    		type: String,
+    		default: "Feature"
+    	},
+    	"notProperties": {
+    		"notName": String
+    	},
+	    "notGeometry": {
+	    	"notType":{
 	    		type: String,
 	    		default: "Polygon"
 	    	},
-	    	"coordinates": {
-	    		type: []
+	    	"notCoordinates": {
+	    		type:[]
 	    	},
-	    	"crs": {
-	    		"type": String,
-	    		"properties": String
-	    	}
-	    }
+	    },
+
+	    "notCrs": {
+    		"notType": {
+    			type: String,
+    			default: "name"
+    		},
+    		"notProperties": {
+    			type: String,
+    			default: "L.CRS.Simple"
+    		}
+    	}
 	},
     "parent": {
     	type: String
@@ -83,9 +98,20 @@ var vectorSchema   = new Schema({
 	"Annotation": {
 		type: String,
 
+	},
+	"type": {
+		type: "string",
+		default: "GeoJSON, Annotation"
 	}
 
+},
 
-});
+{ autoIndex: false }
+
+);
+
+vectorSchema.index({"coordinates": "2d"}, {min: -1000000, max: 1000000});
+vectorSchema.index({"feature": "2d"}, {min: -1000000, max: 1000000});
+vectorSchema.index({"geometry": "2d"}, {min: -1000000, max: 1000000});
 
 module.exports = mongoose.model('newVector', vectorSchema);

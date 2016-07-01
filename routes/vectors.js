@@ -46,17 +46,18 @@ exports.findAllTargetVectors = function(req, res) {
     var targetID = req.params.target;
 
     var vectorSearch = newVector.find({'target.id': targetID});
-    vectorSearch.limit(10);
+
     vectorSearch.exec(function(err, vectors){
 
-        if (err) {res.send(err)};
+        if (err) {res.json({list: false})}
+        else {
+            vectors.forEach(function(vectorJSON){
+                var vectorID = vectorJSON.body.id;
+                vectorAnnos.push(vectorJSON);
+            });
 
-        vectors.forEach(function(vectorJSON){
-            var vectorID = vectorJSON.body.id;
-            vectorAnnos.push(vectorJSON);
-        });
-
-        res.json({list: vectorAnnos});
+            res.json({list: vectorAnnos});
+        };
     });
 
 };
@@ -65,9 +66,34 @@ exports.addNew = function(req, res) {
     
     var vector = new newVector(); 
 
+//    console.dir(req.body.geometry.coordinates);
+
+//    vector.feature.geometry.coordinates = req.body.geometry.coordinates;
+/*    req.body.geometry.coordinates[0].forEach(function(pair){
+        vector.feature.geometry.coordinates.push(pair);
+        //geo values must be 'legacy coordinate pairs' for 2d indexes
+    });
+*/
+    allTheCoordinates = [];
+    ATCarray = 0;
     req.body.geometry.coordinates[0].forEach(function(coordinatesPair){
-        vector.feature.geometry.coordinates.push(coordinatesPair);
-    })
+        vector.notFeature.notGeometry.notCoordinates.push([]);
+        allTheCoordinates.push([]);
+        var coordsNumbers = [];
+        coordinatesPair.forEach(function(number){
+            converted = Number(number);
+            coordsNumbers.push(converted);
+        });
+        console.dir(coordsNumbers);
+        allTheCoordinates[ATCarray].push(coordsNumbers);
+        vector.notFeature.notGeometry.notCoordinates[ATCarray] = coordsNumbers;
+        console.dir("the vector is saving" + vector.notFeature.notGeometry.notCoordinates);
+        ATCarray += 1;      
+    });
+    console.dir(allTheCoordinates);
+//    vector.feature.geometry.coordinates.push(allTheCoordinates[0]); 
+
+    console.dir(vector.notFeature.notGeometry);
 
     var newVectorID = vector.id;
     var newVectorURL = vectorURL.concat(newVectorID);
@@ -76,19 +102,19 @@ exports.addNew = function(req, res) {
 //    vector.'@id' = newVectorURL;
 
     vector.save(function(err, vector) {
-        if (err) {res.send(err)};
+        if (err) {
+            console.log(err);
+            res.send(err)
+        }
+        else {
+            res.json({ "url": newVectorURL})
+        };
     });
-
-/*    $set: { "'@id'": newVectorURL };
-
-    vector.save(function(err, vector) {
-        if (err) {res.send(err)};
-    });
-*/
-
-    res.json({ "url": newVectorURL});
 
 };
+
+/*
+*/
 
 exports.getByID = function(req, res) {
     newVector.findById(req.params.vector_id).lean().exec( function(err, vector) {
@@ -105,6 +131,8 @@ exports.updateOne = function(req, res) {
 
     var newInfo = req.body;
 
+    console.dir(newInfo);
+
     var updateDoc = newVector.findById(req.params.vector_id); 
     updateDoc.exec(function(err, vector) {
         if (err) {res.send(err)};
@@ -118,6 +146,7 @@ exports.updateOne = function(req, res) {
                 "language": req.body.target.language,
                 "format": req.body.target.format
             });
+
         };
         if (typeof newInfo.transcription != 'undefined' || newInfo.transcription != null) {
             vector.transcription = req.body.transcription;
@@ -125,6 +154,10 @@ exports.updateOne = function(req, res) {
 
         if (typeof newInfo.transcription != 'undefined' || newInfo.transcription != null) {
             vector.translation = req.body.translation;
+        };
+
+        if (typeof newInfo.coordinates != 'undefined' || newInfo.coordinates != null) {
+
         };
 
 //        vector.children.push()
