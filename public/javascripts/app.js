@@ -96,15 +96,9 @@ var getTargetJSON = function(target) {
 };
 
 var getBodyText = function(target) {
-
   var bodyText = getTargetJSON(target);
-
-  alert(JSON.stringify(bodyText));
-
   var theText = bodyText.body.text;
-
-  alert(theText);
-
+  return theText;
 };
 
 var checkForTranscription = function(target) {
@@ -243,17 +237,16 @@ var openTranscriptionMenu = function (target, targetType) {
 
   if (targetsTranscription == false) {
 
-    alert("nothing there");
+
 
   }
   else {
 
-    var theText = getBodyText(target);
+    var theText = getBodyText(targetsTranscription);
+    alert(theText);
 
-//    alert("this function will display "+theText);
-
-    $("h2.firstTitle").html("TRANSCRIPTION");
-    $("textarea.testLoading").html(theText);
+    $("#firstTitle").val("TRANSCRIPTION");
+    $("#testLoading").val(theText);
 
   };
 
@@ -332,6 +325,9 @@ var addTranscription = function(target){
       }
   });
 
+  $("#transcription").val('');
+  $('#testLoading').val(newText);
+
   //update relevant files with new transcription info
 
   if (targetType == "vector") {
@@ -353,6 +349,7 @@ var addTranscription = function(target){
 
   targetSelected = "";
   targetType = "";
+  newText = "";
 
 };
 
@@ -438,28 +435,7 @@ if (existingVectors != false) {
 
   });
 };
-/*
-testingFeature
-{
-"type":"Feature",
-"properties":{},
-"geometry":{
-    "type":"Polygon",
-    "coordinates":[[238,-474],[238,-370],[326,-370],[326,-474],[238,-474]]
-    }
-}
 
-shape
-{
-"type":"Feature",
-"properties":{},
-"geometry":{
-    "type":"Polygon",
-    "coordinates":[[[240,-536],[240,-368],[349,-368],[349,-536],[240,-536]]]
-    }
-}
-
-*/
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
 
@@ -499,7 +475,7 @@ map.on('draw:created', function(evt) {
   });
 
   var popupVectorMenu = L.popup()
-    .setContent('<div class="deleteVector button"><p>DELETE</p></div><br><div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
+    .setContent('<div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
 
   layer._leaflet_id = vectorSelected;
   layer.bindPopup(popupVectorMenu).openPopup();
