@@ -3,44 +3,36 @@
 
 var express    = require('express');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser')
 var http = require('http');
 var https = require('https');
 
 var IIIFmongoose = require('./IIIFmongoose');
 
-//var websiteinfo = require('./leafletiiifanno.json');
+//var websiteinfo = require('../leafletiiifanno.json');
 //var websiteAddress = websiteinfo.websiteAddress;
 
-var vectorURL = "http://localhost:8080/api/vectors/";
-var transcriptionURL = "http://localhost:8080/api/transcriptions/";
-var translationURL = "http://localhost:8080/api/translations/";
-var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/";
+var websiteAddress = "http://localhost:8080";
+
+var vectorURL = websiteAddress.concat("/api/vectors/");
+var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
+var translationURL = websiteAddress.concat("/api/translations/");
 
 //because LUNA API is questionable currently using from database but will change later
 var imageDevURL = "http://localhost:8080/theImage/images_api/"
 
-var currentImage = "";
+exports.openImage = function(req, res, next) {
 
-exports.loadOne = function(req, res) {
+	thisImage = req.body.image_id;
+	console.log("the image to check is " + thisImage);
 
-	currentImage = req.params.image_id;
-
-	https.get(currentImage, (res) => {
-
-	  res.on('data', (d) => {
-
-
-
-
-	  });
-
-	}).on('error', (e) => {
-	  res.send(e);
-	});
-
+	http.get(thisImage, (res) => {res.on('data', (d) => {
+		res.cookie("currentImage", thisImage);
+	})}).on('error', (e) => {res.send(e);});
+	
 };
 
 exports.tellMe = function(req,res) {
-	res.send(currentImage);
+	
 };
 

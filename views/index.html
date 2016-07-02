@@ -41,20 +41,20 @@
 
 		<div class="col-md-4">
 			<div></div>
-			<a href="/theimage.html">Open to annotate an image</a>
+			<a href="/theimage" class="openImage" id="http://ids.lib.harvard.edu/ids/iiif/25286610/info.json" >Open to annotate an image</a>
 
 		</div>
 
 
 		<div  class="col-md-4">
 			<div></div>
-			<input type="button" class="openImage" value="blob">
+			<a class="openImage" id="http://ids.lib.harvard.edu/ids/iiif/25286610/info.json" >Or another one</a>
 		</div>
 
 
 		<div class="col-md-4">
 			<div></div>
-			<input type="button" class="openImage" value="blob">
+			<a href="/theimage.html">Or this one</a>
 		</div>
 
 
@@ -68,24 +68,19 @@
 
 	var currentImage;
 	var currentSite = window.location.href;
-	var imagePageURL = currentSite.concat("editing");
+	var imagePageURL = currentSite.concat("theimagesearch/open");
 
 	var openImage = function(image) {
-
-		var imageID = encodeURIComponent(image);
-		var pageURL = imagePageURL.concat(imageID);
-/*
 		$.ajax({
 		   type: "POST",
-		   url: imagePageURL
+		   url: imagePageURL,
+		   data: {image_id: image}
 		});
-*/
 	};
 
 	$('.openImage').on("click", function(event) {
-	  	event.preventDefault();
 	  	event.stopPropagation();
-	  	currentImage;
+	  	currentImage = event.target.id;
 	  	openImage(currentImage);
 	});
 

@@ -8,10 +8,11 @@ var newTranslate    = require('./newTranslation');
 var newTranscription    = require('./newTranscription');
 var IIIFmongoose = require('./IIIFmongoose');
 
-var vectorURL = "http://localhost:8080/api/vectors/";
-var transcriptionURL = "http://localhost:8080/api/transcriptions/";
-var translationURL = "http://localhost:8080/api/translations/";
-var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/";
+var websiteAddress = "http://localhost:8080";
+
+var vectorURL = websiteAddress.concat("/api/vectors/");
+var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
+var translationURL = websiteAddress.concat("/api/translations/");
 
 //because LUNA API is questionable currently using from database but will change later
 var imageDevURL = "http://localhost:8080/api/images_api/"
@@ -57,13 +58,11 @@ var generateIIIFregion = function(coordinates) {
 
 var getIIIFsectionURL = function (imageJSON, coordinates, formats) {
 
-    var imagewithoutinfo = imageJSON.split("info.json",1);
+    var imagewithoutinfo = imageJSON.split("/info.json",1);
     var imagewithoutinfoURL = imagewithoutinfo[0];
     var splitIndex = imagewithoutinfoURL.lastIndexOf("/");
     var image_id = imagewithoutinfoURL.substring(splitIndex +1);
     var baseImageURL = imagewithoutinfoURL.slice(0, splitIndex +1);
-
-    console.log(baseImageURL);
 
     var regionParams = generateIIIFregion(coordinates);
     var pickAFormat = formats;
@@ -163,7 +162,7 @@ exports.addNew = function(req, res) {
 
 //need to find official format name for IIIF region
 
-        "format": "image fragment"
+        "format": "jpg"
     });
 
     var newVectorID = vector.id;
@@ -171,6 +170,10 @@ exports.addNew = function(req, res) {
 
     vector.body.id = newVectorURL;
 //    vector.'@id' = newVectorURL;
+
+    if (typeof req.body.metadata != 'undefined' || req.body.metadata != null) {
+        vector.metadata.push(req.body.metadata);
+    };
 
     vector.save(function(err, vector) {
         if (err) {
@@ -183,9 +186,6 @@ exports.addNew = function(req, res) {
     });
 
 };
-
-/*
-*/
 
 exports.getByID = function(req, res) {
     newVector.findById(req.params.vector_id).lean().exec( function(err, vector) {
@@ -202,13 +202,9 @@ exports.updateOne = function(req, res) {
 
     var newInfo = req.body;
 
-//    console.dir(newInfo);
-
     var updateDoc = newVector.findById(req.params.vector_id); 
     updateDoc.exec(function(err, vector) {
         if (err) {res.send(err)};
-
-//        vector.feature.geometry.coordinates = req.params.coordinates;
 
         if (typeof newInfo.target != 'undefined' || newInfo.target != null) {
 
@@ -227,11 +223,39 @@ exports.updateOne = function(req, res) {
             vector.translation = req.body.translation;
         };
 
-        if (typeof newInfo.coordinates != 'undefined' || newInfo.coordinates != null) {
+        if (typeof newInfo.geometry.coordinates != 'undefined' || newInfo.coordinates != null) {
 
+            ATCarray = 0;
+            newInfo.geometry.coordinates[0].forEach(function(coordinatesPair){
+                var coordsNumbers = [];
+                coordinatesPair.forEach(function(number){
+                    converted = Number(number);
+                    coordsNumbers.push(converted);
+                });
+                vector.notFeature.notGeometry.notCoordinates[ATCarray] = coordsNumbers;
+                ATCarray += 1;      
+            });
+            var theCoordinates = vector.notFeature.notGeometry.notCoordinates;
+
+            //the image fragment is always pushed in after the json target
+            var imageID = vector.target[0].id;
+            var imageFormats = vector.target[1].format;
+            var newIIIFsection = getIIIFsectionURL(imageID, theCoordinates, imageFormats);
+
+            vector.target[1].id = newIIIFsection;
         };
 
-//        vector.children.push()
+        if (typeof req.body.metadata != 'undefined' || req.body.metadata != null) {
+            vector.metadata.push(req.body.metadata);
+        };
+
+        if (typeof req.body.children != 'undefined' || req.body.children != null) {
+            vector.children.push(req.body.children);
+        };
+
+        if (typeof req.body.creator != 'undefined' || req.body.creator != null) {
+            vector.creator = req.body.creator;
+        };
         
         vector.save(function(err, vector) {
             if (err) {res.send(err)};

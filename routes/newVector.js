@@ -1,5 +1,4 @@
 var mongoose     = require('mongoose');
-//var GeoJSON = require('mongoose-geojson-schema');
 
 var Schema       = mongoose.Schema;
 
@@ -102,7 +101,7 @@ var vectorSchema   = new Schema({
 	},
 	"type": {
 		type: "string",
-		default: "GeoJSON, Annotation"
+		default: "Annotation"
 	}
 
 },
@@ -110,9 +109,5 @@ var vectorSchema   = new Schema({
 { autoIndex: false }
 
 );
-
-vectorSchema.index({"coordinates": "2d"}, {min: -1000000, max: 1000000});
-vectorSchema.index({"feature": "2d"}, {min: -1000000, max: 1000000});
-vectorSchema.index({"geometry": "2d"}, {min: -1000000, max: 1000000});
 
 module.exports = mongoose.model('newVector', vectorSchema);

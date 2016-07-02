@@ -14,6 +14,7 @@ var databaseURL = 'mongodb://localhost:27017/testMongoDB';
 var express    = require('express');
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
+var cookieParser = require('cookie-parser')
 var cors = require('cors');
 
 var annotations = require('./routes/annotations');
@@ -43,8 +44,10 @@ app.get('/', function(req, res) {
 
 app.use(cors());
 //Currently using cors for all origins just for development but will need to be specific for actual deployment
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser())
 
 var port = process.env.PORT || 8080; 
 
@@ -89,15 +92,15 @@ gameRouter.use(function(req, res, next) {
 /*
 
 app.get('/FAQs', function(req, res) {
-    res.sendFile(__dirname + "/FAQs.html");
+    res.redirect("/FAQs.html");
 });
 app.get('/contactus', function(req, res) {
-    res.sendFile(__dirname + "/contactus.html");
+    res.redirect"/contactus.html");
 });
 
 //temporary until game routing implemented if wanted
 app.get('/devgame', function(req,res) {
-    res.sendFile(__dirname + "/devGame.html");
+    res.redirect("/devGame.html");
 });
 //contains images to select from
 
@@ -105,37 +108,20 @@ app.get('/devgame', function(req,res) {
 
 /////////////////IMAGE ROUTES
 
-imageRouter.use(express.static(__dirname + '/public'));
-imageRouter.use(express.static(__dirname + '/views'));
-
 app.get('/theimage', function(req, res) {
     res.redirect("/theimage.html"); 
 });
 
-imageRouter.post('image/:image_id', images_api.loadOne);
-
 imageRouter.get('/whichone', images_api.tellMe);
 
-/*
-//IMAGE DEV API
-//temporary holding until using LUNA
+imageRouter.post('/open', images_api.openImage);
 
-//imageRouter.get('/images_api', images_api.findAll);
-//imageRouter.post('/images_api', images_api.addNew);
-//imageRouter.get('/images_api/:vector_id', images_api.getByID);
-//imageRouter.put('/images_api', images_api.updateOne);
-
-*/
 /////////////////API ROUTES
 
 //PARAMETERS
 
 //app.param('parent', annotations.parentParams);
 //make a generic trigger for updating rankings?
-
-//app.param('imageTarget', annotations.findImageTarget);
-
-
 
 //VECTOR API
 
@@ -192,7 +178,7 @@ gameRouter.get('/', function(req, res) {
 
 /////////GET STARTED
 
-app.use('/theimage', imageRouter);
+app.use('/theimagesearch', imageRouter);
 app.use('/api', annoRouter);
 
 //independent routes for now but ultimately should be layered

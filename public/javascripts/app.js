@@ -5,16 +5,15 @@ var currentWebsite = window.location.href;
 
 var websiteAddress = "http://localhost:8080";
 
-var vectorURL = "http://localhost:8080/api/vectors/";
-var transcriptionURL = "http://localhost:8080/api/transcriptions/";
-var translationURL = "http://localhost:8080/api/translations/";
+var vectorURL = websiteAddress.concat("/api/vectors/");
+var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
+var translationURL = websiteAddress.concat("/api/translations/");
 
 //because LUNA API is questionable currently using from database but will change later
 var imageDevURL = "http://localhost:8080/api/images_api/"
 
 //will be info.json format
 var imageSelected;
-
 var imageSelectedFormats;
 var imageSelectedMetadata = [];
 
@@ -36,53 +35,6 @@ var childrenText = false;
 
 //used to indicate if the user is currently searching for a vector to link or not
 var selectingVector = "";
-
-////IMAGE HANDLING
-
-$.ajax({
-  type: "GET",
-  url: websiteAddress.concat("/theimage/whichone"),
-  success: 
-    function (data) {
-      imageSelected = data;
-    }
-});
-
-//currently hardcoded for testing
-imageSelected = 'http://ids.lib.harvard.edu/ids/iiif/25286610/info.json';
-imageSelectedFormats = "jpg";
-
-var loadImage = function(image_id) {
-
-  var theImage = getTargetJSON(imageSelected);
-  imageSelectedFormats = theImage.formats;
-  imageSelectedMetadata = theImage.metadata;
-
-};
-
-var getImageVectors = function(target) {
-
-  var imageVectors;
-  var targetParam = encodeURIComponent(target);
-  var imageSearch = vectorURL.concat("targets/"+targetParam);
-
-  $.ajax({
-    type: "GET",
-    dataType: "json",
-    url: imageSearch,
-    async: false,
-    success: 
-      function (data) {
-        imageVectors = data.list;
-      }
-  });
-
-  return imageVectors;
-
-};
-
-var existingVectors = getImageVectors(imageSelected);
-
 
 ///// API FUNCTIONS
 
@@ -170,23 +122,19 @@ var updateVectorSelection = function(vectorURL) {
 
   if (selectingVector == "transcription") {
 
-//    var textSelectedURL = transcriptionURL.concat(textSelected);
-
-//    $.put(textSelectedURL, {target: {id: vectorURL}}, null);
-//    $.put(vectorURL, {transcription: textSelectedURL}, null);
-
-//    selectingVector = "";
+    var textSelectedURL = transcriptionURL.concat(textSelected);
+    $.put(textSelectedURL, {target: {id: vectorURL}});
+    $.put(vectorURL, {transcription: textSelectedURL});
+    selectingVector = "";
 
   }
 
   else if (selectingVector == "translation") {
 
-//    var textSelectedURL = translationURL.concat(textSelected);
-
-//    $.put(textSelectedURL, {target: vectorURL}, null);
-//    $.put(vectorURL, {translation: textSelectedURL});
-
-//    selectingVector = "";
+    var textSelectedURL = translationURL.concat(textSelected);
+    $.put(textSelectedURL, {target: vectorURL});
+    $.put(vectorURL, {translation: textSelectedURL});
+    selectingVector = "";
 
   }
 
@@ -194,6 +142,37 @@ var updateVectorSelection = function(vectorURL) {
     return handleError(err);
   }
 
+};
+
+////IMAGE HANDLING
+
+//currently hardcoded for testing
+imageSelected = 'http://ids.lib.harvard.edu/ids/iiif/25286610/info.json';
+imageSelectedFormats = "jpg";
+
+var loadImage = function(image_id) {
+
+  var theImage = getTargetJSON(imageSelected);
+  imageSelectedFormats = theImage.formats;
+  imageSelectedMetadata = theImage.metadata;
+
+};
+
+var getImageVectors = function(target) {
+  var imageVectors;
+  var targetParam = encodeURIComponent(target);
+  var imageSearch = vectorURL.concat("targets/"+targetParam);
+  $.ajax({
+    type: "GET",
+    dataType: "json",
+    url: imageSearch,
+    async: false,
+    success: 
+      function (data) {
+        imageVectors = data.list;
+      }
+  });
+  return imageVectors;
 };
 
 //////POPUP OPTIONS
@@ -433,6 +412,8 @@ var popupVectorMenu = L.popup()
 var currentlyEditing = false;
 var currentlyDeleting = false;
 
+var existingVectors = getImageVectors(imageSelected);
+
 //load the existing vectors
 if (existingVectors != false) {
   existingVectors.forEach(function(vector) {
@@ -461,15 +442,12 @@ oldDrawnItems.on('load', function(){
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
 
-	var type = evt.layerType;
 	var layer = evt.layer;
+  var shape = layer.toGeoJSON();
 
 	drawnItems.addLayer(layer);
 
-//a new geoJSON file is always created
-  var shape = layer.toGeoJSON();
-
-  var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}};
+  var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata};
 
   $.ajax({
     type: "POST",
@@ -483,16 +461,7 @@ map.on('draw:created', function(evt) {
         targetType = "vector";
       }
   });
-/*
-  $.ajax({
-    type: "PUT",
-    url: vectorSelected,
-    async: false,
-    data: targetData,
-    success:
-      function (data) {}
-  });
-*/
+
   layer._leaflet_id = vectorSelected;
   layer.bindPopup(popupVectorMenu).openPopup();
 
@@ -505,7 +474,6 @@ map.on('draw:created', function(evt) {
 /////whenever a vector is clicked
 allDrawnItems.on('click', function(vec) {
 
-//find id url of vector selected
   vectorSelected = vec.layer._leaflet_id;
   targetSelected = vec.layer._leaflet_id;
   targetType = "vector";
@@ -540,7 +508,7 @@ map.on('draw:editstop', function(){
 //////update DB whenever vector coordinates are changed
 allDrawnItems.on('edit', function(vec){
 
-  var shape = vec.layer.toGeoJSON().geometry;
+  var shape = vec.layer.toGeoJSON();
 
   $.ajax({
     type: "PUT",
@@ -561,6 +529,22 @@ allDrawnItems.on('remove', function(vec){
     url: vectorSelected,
     success:
       function (data) {}
+  });
+
+});
+
+map.on('popupopen', function() {
+
+  var vectorInUse = this;
+
+  $('.openTranscriptionMenu').on("click", function(event) {
+    openTranscriptionMenu(vectorSelected, "vector");
+    map.closePopup();
+  });
+
+  $('.openTranslationMenu').on("click", function(event) {
+    openTranslationMenu(vectorSelected, "vector");
+    map.closePopup();
   });
 
 });
@@ -605,7 +589,7 @@ var gettext = (function () {
 
 //trigger popup
 
-//JQUERY 
+///////JQUERY 
 
 $('.addTranscriptionSubmit').on("click", function(event) {
   event.preventDefault();
@@ -641,19 +625,4 @@ $('.openTranslationMenu').on("click", function(event) {
 //whenever the transcription or translation viewer is clicked on, or any child DOMs then the target selected has to change to their target
 //$('')
 
-map.on('popupopen', function() {
-
-  var vectorInUse = this;
-
-  $('.openTranscriptionMenu').on("click", function(event) {
-    openTranscriptionMenu(vectorSelected, "vector");
-    map.closePopup();
-  });
-
-  $('.openTranslationMenu').on("click", function(event) {
-    openTranslationMenu(vectorSelected, "vector");
-    map.closePopup();
-  });
-
-});
 
