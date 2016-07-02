@@ -1,25 +1,24 @@
 
-//The main Annotator script
-/*
-if (typeof annotator === 'undefined') {
-  alert("Oops! it looks like you haven't built Annotator. " +
-        "Either download a tagged release from GitHub, or build the " +
-        "package by running `make`");
-} else {
-  var app = new annotator.App();
-  app.include(annotator.ui.main);
-  app.start();
-}
-*/
+
+var currentWebsite = window.location.href;
+//alert(currentWebsite);
+
+var websiteAddress = "http://localhost:8080";
+
 var vectorURL = "http://localhost:8080/api/vectors/";
 var transcriptionURL = "http://localhost:8080/api/transcriptions/";
 var translationURL = "http://localhost:8080/api/translations/";
-var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"
 
-var imageViewing = "UoEsha~3~3~54530~102219";
+//because LUNA API is questionable currently using from database but will change later
+var imageDevURL = "http://localhost:8080/api/images_api/"
+
+//will be info.json format
+var imageSelected;
+
+var imageSelectedFormats;
+var imageSelectedMetadata = [];
 
 var vectorSelected = "";
-//the coordinates of the current vector selected
 var currentCoords;
 
 var textSelected = "";
@@ -38,28 +37,39 @@ var childrenText = false;
 //used to indicate if the user is currently searching for a vector to link or not
 var selectingVector = "";
 
-var imageSelected = imageURL.concat(imageViewing);
+////IMAGE HANDLING
 
-///Image Handling
-var getIIIFjsonURL = function (image_id) {
-  imageURL.concat(image_id).concat("/info.json")
+$.ajax({
+  type: "GET",
+  url: websiteAddress.concat("/theimage/whichone"),
+  success: 
+    function (data) {
+      imageSelected = data;
+    }
+});
+
+//currently hardcoded for testing
+imageSelected = 'http://ids.lib.harvard.edu/ids/iiif/25286610/info.json';
+imageSelectedFormats = "jpg";
+
+var loadImage = function(image_id) {
+
+  var theImage = getTargetJSON(imageSelected);
+  imageSelectedFormats = theImage.formats;
+  imageSelectedMetadata = theImage.metadata;
+
 };
-
-var imageSelectedIIIF = getIIIFjsonURL(imageSelected);
 
 var getImageVectors = function(target) {
 
   var imageVectors;
-
   var targetParam = encodeURIComponent(target);
-
   var imageSearch = vectorURL.concat("targets/"+targetParam);
 
   $.ajax({
     type: "GET",
     dataType: "json",
     url: imageSearch,
-//    data: targetParam,
     async: false,
     success: 
       function (data) {
@@ -73,7 +83,6 @@ var getImageVectors = function(target) {
 
 var existingVectors = getImageVectors(imageSelected);
 
-//alert(JSON.stringify(existingVectors[0]));
 
 ///// API FUNCTIONS
 
@@ -378,7 +387,6 @@ var votedDown = function (target) {
 };
 
 ///////LEAFLET 
-
 var map;
 
 //IIIF Viewer initial settings
@@ -389,37 +397,48 @@ map = L.map('map', {
   zoom: 0
 });
 
-var baseLayer = L.tileLayer.iiif(
-  'http://ids.lib.harvard.edu/ids/iiif/25286610/info.json'
-).addTo(map);
+var baseLayer = L.tileLayer.iiif(imageSelected).addTo(map);
 
-//initialises layer group called drawItems and adds it to the map - standard Leaflet Draw setup
+//need to adjust settings to account for viewport size
+
 var drawnItems = new L.FeatureGroup();
-map.addLayer(drawnItems);
+var oldDrawnItems = new L.FeatureGroup();
+var allDrawnItems = new L.FeatureGroup();
+allDrawnItems.addLayer(drawnItems);
+allDrawnItems.addLayer(oldDrawnItems);
+map.addLayer(allDrawnItems);
 
 var controlOptions = {
-
     draw: {
-// disables the polyline feature as this is unnecessary for annotation of text as it cannot enclose it
+// disables the polyline and marker feature as this is unnecessary for annotation of text as it cannot enclose it
         polyline: false,
-        marker: false
+        marker: false,
+//disabling polygons and circles as IIIF image region API does not specify how to encode anything but rectangular regions
+        polygon: false,
+        circle: false
     },
 //passes draw controlOptions to the FeatureGroup of editable layers
     edit: {
-        featureGroup: drawnItems        
+        featureGroup: drawnItems,
     }
 };
 
 //adds new draw control features to the map
 new L.Control.Draw(controlOptions).addTo(map);
 
+var popupVectorMenu = L.popup()
+    .setContent('<div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
+
+//to track when editing
+var currentlyEditing = false;
+var currentlyDeleting = false;
 
 //load the existing vectors
 if (existingVectors != false) {
   existingVectors.forEach(function(vector) {
 
-    existingVectorFeature = L.geoJson().addTo(map);
-    testingFeature = ({
+    var existingVectorFeature = L.geoJson();
+    oldFeature = ({
       "type": "Feature",
       "properties":{},
       "geometry":{
@@ -427,14 +446,17 @@ if (existingVectors != false) {
         "coordinates": [vector.notFeature.notGeometry.notCoordinates]
       }
     });
-
-//    alert(JSON.stringify(testingFeature));
-
-    existingVectorFeature.addData(testingFeature);
-//    drawnItems.addLayer(existingVectorFeature);
-
+    existingVectorFeature.addData(oldFeature);
+    oldDrawnItems.addLayer(existingVectorFeature);
+    existingVectorFeature.bindPopup(popupVectorMenu);
   });
 };
+
+oldDrawnItems.on('load', function(){
+  oldDrawnItems.eachFeature(function(layer){
+    drawItems.addLayer(layer);
+  })
+});
 
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
@@ -446,15 +468,14 @@ map.on('draw:created', function(evt) {
 
 //a new geoJSON file is always created
   var shape = layer.toGeoJSON();
-  currentCoords = shape.geometry.coordinates;
 
-/////INSERT IIIF URL FRAGMENT SCRIPT HERE
+  var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}};
 
   $.ajax({
     type: "POST",
     url: vectorURL,
     async: false,
-    data: shape,
+    data: targetData,
     success: 
       function (data) {
         vectorSelected = data.url;
@@ -462,9 +483,7 @@ map.on('draw:created', function(evt) {
         targetType = "vector";
       }
   });
-
-  var targetData = {target: {id: imageSelected, format: "application/json"}};
-
+/*
   $.ajax({
     type: "PUT",
     url: vectorSelected,
@@ -473,10 +492,7 @@ map.on('draw:created', function(evt) {
     success:
       function (data) {}
   });
-
-  var popupVectorMenu = L.popup()
-    .setContent('<div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
-
+*/
   layer._leaflet_id = vectorSelected;
   layer.bindPopup(popupVectorMenu).openPopup();
 
@@ -487,33 +503,58 @@ map.on('draw:created', function(evt) {
 });
 
 /////whenever a vector is clicked
-drawnItems.on('click', function(vec) {
-
-  var shape = vec.layer.toGeoJSON();
-  var currentCoords = shape.geometry.coordinates;
+allDrawnItems.on('click', function(vec) {
 
 //find id url of vector selected
   vectorSelected = vec.layer._leaflet_id;
   targetSelected = vec.layer._leaflet_id;
   targetType = "vector";
-//  alert(vectorSelected);
+  alert(targetSelected);
 
-  if (selectingVector == "") {
-    vec.layer.openPopup();
-
-  }
-
+  if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
   else {
-    updateVectorSelection(vectorSelected);
-  }
+
+    if (selectingVector == "") {
+      vec.layer.openPopup();
+    }
+    else {
+      updateVectorSelection(vectorSelected);
+    }
+  };
 
 });
 
+map.on('draw:deletestart', function(){
+  currentlyDeleting = true;
+});
+map.on('draw:deletestop', function(){
+  currentlyDeleting = false;
+});
+map.on('draw:editstart', function(){
+  currentlyEditing = true;
+});
+map.on('draw:editstop', function(){
+  currentlyEditing = false;
+});
+
 //////update DB whenever vector coordinates are changed
-//drawItems.on();
+allDrawnItems.on('edit', function(vec){
+
+  var shape = vec.layer.toGeoJSON().geometry;
+
+  $.ajax({
+    type: "PUT",
+    url: vectorSelected,
+    async: false,
+    data: shape,
+    success:
+      function (data) {}
+  });
+
+});
 
 //////update DB whenever vector is deleted
-drawnItems.on('remove', function(vec){
+allDrawnItems.on('remove', function(vec){
 
   $.ajax({
     type: "DELETE",
@@ -523,7 +564,6 @@ drawnItems.on('remove', function(vec){
   });
 
 });
-
 
 ///// TEXT SELECTION
 
@@ -616,5 +656,4 @@ map.on('popupopen', function() {
   });
 
 });
-
 

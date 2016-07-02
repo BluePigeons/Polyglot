@@ -13,6 +13,9 @@ var transcriptionURL = "http://localhost:8080/api/transcriptions/";
 var translationURL = "http://localhost:8080/api/translations/";
 var imageURL = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"
 
+//because LUNA API is questionable currently using from database but will change later
+var imageDevURL = "http://localhost:8080/api/images_api/"
+
 //ROUTE FUNCTIONS
 
 exports.findAll = function(req, res) {

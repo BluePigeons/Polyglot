@@ -19,8 +19,13 @@ var cors = require('cors');
 var annotations = require('./routes/annotations');
 var vectors = require('./routes/vectors');
 var transcriptions = require('./routes/transcriptions');
-//var translations = require('./routes/translations');
-//var images = require('./routes/images');
+var translations = require('./routes/translations');
+
+var images_api = require('./routes/images_api');
+
+//var websiteinfo = require('./leafletiiifanno.json');
+
+//var websiteAddress = websiteinfo.website;
 
 // GET APPLICATION RUNNING
 
@@ -30,50 +35,97 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 app.use(express.static(__dirname + '/examples'));
 
-//Currently using cors for all origins just for development but will need to be specific for actual deployment
-app.use(cors());
-
 app.get('/', function(req, res) {
 
     res.sendFile(__dirname + "/index.html"); 
 
 });
 
+app.use(cors());
+//Currently using cors for all origins just for development but will need to be specific for actual deployment
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 var port = process.env.PORT || 8080; 
 
+//eventually adjust for any database connection??
 mongoose.connect(databaseURL, { config: { autoIndex: false } });
-
 
 //MIDDLEWARE
 
-var router = express.Router();
+//really ought to make a nice 404 page
 
-// middleware to use for all requests
-router.use(function(req, res, next) {
+var annoRouter = express.Router();
+var imageRouter = express.Router();
+var gameRouter = express.Router();
+
+annoRouter.use(function(req, res, next) {
 
     //should have proper logging here but for now just to console
 
-    console.log('Something is happening.');
+    console.log('something is using the APIs');
+
+    next(); 
+});
+
+imageRouter.use(function(req, res, next) {
+
+    //should have proper logging here but for now just to console
+
+    console.log('something is using the image routes');
+
+    next(); 
+});
+
+gameRouter.use(function(req, res, next) {
+
+    //should have proper logging here but for now just to console
+
+    console.log('something is using the game routes');
 
     next(); 
 });
 
 /*
+
 app.get('/FAQs', function(req, res) {
     res.sendFile(__dirname + "/FAQs.html");
 });
 app.get('/contactus', function(req, res) {
     res.sendFile(__dirname + "/contactus.html");
 });
-app.get('/thegame', function(req, res) {
-    res.sendFile(__dirname + "/thegame.html");
+
+//temporary until game routing implemented if wanted
+app.get('/devgame', function(req,res) {
+    res.sendFile(__dirname + "/devGame.html");
 });
+//contains images to select from
 
 */
 
+/////////////////IMAGE ROUTES
+
+imageRouter.use(express.static(__dirname + '/public'));
+imageRouter.use(express.static(__dirname + '/views'));
+
+app.get('/theimage', function(req, res) {
+    res.redirect("/theimage.html"); 
+});
+
+imageRouter.post('image/:image_id', images_api.loadOne);
+
+imageRouter.get('/whichone', images_api.tellMe);
+
+/*
+//IMAGE DEV API
+//temporary holding until using LUNA
+
+//imageRouter.get('/images_api', images_api.findAll);
+//imageRouter.post('/images_api', images_api.addNew);
+//imageRouter.get('/images_api/:vector_id', images_api.getByID);
+//imageRouter.put('/images_api', images_api.updateOne);
+
+*/
 /////////////////API ROUTES
 
 //PARAMETERS
@@ -83,63 +135,75 @@ app.get('/thegame', function(req, res) {
 
 //app.param('imageTarget', annotations.findImageTarget);
 
+
+
 //VECTOR API
 
-//app.param('coordinates', vectors.getByCoords);
-
 //route /api/vectors GET -> get all vector JSONs
-router.get('/vectors', vectors.findAll);
+annoRouter.get('/vectors', vectors.findAll);
 
 //route /api/vectors POST -> add a single new vector JSON
-router.post('/vectors', vectors.addNew);
+annoRouter.post('/vectors', vectors.addNew);
 
 //route /api/vectors/:vector_id GET -> get specific vector JSON
-router.get('/vectors/:vector_id', vectors.getByID);
+annoRouter.get('/vectors/:vector_id', vectors.getByID);
 
-router.get('/vectors/targets/:target', vectors.findAllTargetVectors);
+annoRouter.get('/vectors/targets/:target', vectors.findAllTargetVectors);
 
 //route /api/vectors/:vector_id PUT -> update vector JSON with new info
-router.put('/vectors/:vector_id', vectors.updateOne);
+annoRouter.put('/vectors/:vector_id', vectors.updateOne);
 
 //route /api/vectors/:vector_id DELETE -> delete vector JSON
-router.delete('/vectors/:vector_id', vectors.deleteOne);
+annoRouter.delete('/vectors/:vector_id', vectors.deleteOne);
 
 //exists mainly for testing purposes
-router.delete('/vectors', vectors.deleteAll);
+annoRouter.delete('/vectors', vectors.deleteAll);
 
 //TRANSCRIPTION API
 
 //route /api/transcriptions GET -> get all transcriptions JSONs
-router.get('/transcriptions', transcriptions.findAll);
+annoRouter.get('/transcriptions', transcriptions.findAll);
 
 //route /api/transcriptions POST -> add a single new transcription JSON
-router.post('/transcriptions', transcriptions.addNew);
+annoRouter.post('/transcriptions', transcriptions.addNew);
 
 //route /api/transcriptions/:transcriptions_id GET -> get specific transcription JSON
-router.get('/transcriptions/:transcription_id', transcriptions.getByID);
+annoRouter.get('/transcriptions/:transcription_id', transcriptions.getByID);
 
-router.get('/transcriptions/:vector_target', transcriptions.getByVectorTarget);
-router.get('/transcriptions/:text_target', transcriptions.getByTextTarget);
+annoRouter.get('/transcriptions/:vector_target', transcriptions.getByVectorTarget);
+annoRouter.get('/transcriptions/:text_target', transcriptions.getByTextTarget);
 
 //route /api/transcriptions/:transcriptions_id PUT -> update transcription JSON with new info
-router.put('/transcriptions/:transcription_id', transcriptions.updateOne);
+annoRouter.put('/transcriptions/:transcription_id', transcriptions.updateOne);
 
 //route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
-router.delete('/transcriptions/:transcription_id', transcriptions.deleteOne);
+annoRouter.delete('/transcriptions/:transcription_id', transcriptions.deleteOne);
 
-router.delete('/transcriptions', transcriptions.deleteAll);
+annoRouter.delete('/transcriptions', transcriptions.deleteAll);
 
-//IMAGE API
+/////////////////GAME ROUTES
+/*
 
-//router.get('/images_api', images.findAll);
-//router.post('/images_api', images.addNew);
-//router.get('/images_api/:vector_id', images.getByID);
-//router.put('/images_api', images.updateOne);
+gameRouter.get('/', function(req, res) {
+    res.sendFile(__dirname + "/thegame.html");
+});
 
-app.use('/api', router);
+*/
+
+/////////GET STARTED
+
+app.use('/theimage', imageRouter);
+app.use('/api', annoRouter);
+
+//independent routes for now but ultimately should be layered
+/*
+imageRouter.use('/anno', annoRouter);
+gameRouter.use('/theimage', imageRouter);
+app.use('/thegame', gameRouter);
+*/
 
 //tells the server where it should be listening for req and res
 app.listen(8080);
 
-
+//will need to configure stuff for actual deployment
 

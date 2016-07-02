@@ -44,6 +44,7 @@ var vectorSchema   = new Schema({
     		}
     	}
 	},
+	"metadata": [],
     "parent": {
     	type: String
     },
