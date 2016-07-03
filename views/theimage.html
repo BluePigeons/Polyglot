@@ -92,9 +92,10 @@
 
   <div data-role="main" class="ui-content">
 
+  	<h2 class="editorTitle">Transcription</h2>
+
 	<div class="transcription-text">
-		<h2 id="firstTitle">Transcription</h2>
-		<p id="testingLoad">there should be some text here</p>
+		<p class="annoTextDisplay">there should be some text here</p>
 	</div>
 
 	<div>
@@ -113,14 +114,15 @@
 
   <div data-role="main" class="ui-content">
 
+  	<h2 class="editorTitle">Translation</h2>
+
 	<div class="translation-text">
-		<h2 id="firstTitle">Translation</h2>
-		<p id="testingLoad">something in English or other language now</p>
+		<p class="annoTextDisplay">something in English or other language now</p>
 	</div>
 
 	<div>
 	    <p>Add New</p>
-	    <input type="TEXT" id="transcription" size="40"><br>
+	    <input type="TEXT" id="newTranslation" size="40"><br>
 	    <input type="button" class="addTranslationSubmit" value="Submit">
 	</div>
 
@@ -129,7 +131,34 @@
 
 </div>
 
+<!-- New Transcription Text Select Popup Menu -->
+<div data-role="popup"  id="popupTranscriptionChildrenMenu">
 
+  <div data-role="main" class="ui-content">
+
+  	<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox2" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
+
+    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
+  </div>
+
+</div>
+
+<!-- Children Transcription Text Select Popup Menu-->
+<div data-role="popup" id="popupTranscriptionNewMenu">
+
+  <div data-role="main" class="ui-content">
+
+  	<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox2" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">VIEW OTHER TRANSCRIPTIONS</a>
+
+    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
+  </div>
+
+</div>
+
+
+<!-- New Translation Text Select Popup Menu -->
+
+<!-- Children Translation Text Select Popup Menu -->
 
 </div>
 

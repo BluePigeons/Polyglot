@@ -25,7 +25,6 @@ var translations = require('./routes/translations');
 var images_api = require('./routes/images_api');
 
 //var websiteinfo = require('./leafletiiifanno.json');
-
 //var websiteAddress = websiteinfo.website;
 
 // GET APPLICATION RUNNING

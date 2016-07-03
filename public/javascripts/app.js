@@ -1,16 +1,13 @@
 
 
 var currentWebsite = window.location.href;
-//alert(currentWebsite);
+alert(currentWebsite);
 
 var websiteAddress = "http://localhost:8080";
 
 var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
-
-//because LUNA API is questionable currently using from database but will change later
-var imageDevURL = "http://localhost:8080/api/images_api/"
 
 //will be info.json format
 var imageSelected;
@@ -26,9 +23,6 @@ var textTypeSelected = "";
 
 var targetSelected = "";
 var targetType = ""; 
-
-var bodySelected = ""; 
-var bodyType = "";
 
 //Boolean to indicate if the currently selected text already has children or not
 var childrenText = false;
@@ -177,6 +171,8 @@ var getImageVectors = function(target) {
 
 //////POPUP OPTIONS
 
+/*
+
 var popupTranscriptionChildrenMenu = function () {
 
   var textSelectedURL = transcriptionURL.concat(textSelected);
@@ -186,7 +182,7 @@ var popupTranscriptionChildrenMenu = function () {
 
 };
 
-var popupTranscriptionMenu = function () {
+var popupTranscriptionNewMenu = function () {
 
   var textSelectedURL = transcriptionURL.concat(textSelected);
 
@@ -204,7 +200,7 @@ var popupTranslationChildrenMenu = function () {
 
 };
 
-var popupTranslationMenu = function () {
+var popupTranslationNewMenu = function () {
 
   var textSelectedURL = translationURL.concat(textSelected);
 
@@ -212,26 +208,23 @@ var popupTranslationMenu = function () {
   //openTranslationMenu(textSelectedURL);
 
 };
+*/
 
 ///// VIEWER WINDOWS
 
-var openTranscriptionMenu = function (target, targetType) {
+var openTranscriptionMenu = function() {
 
-  var targetsTranscription = checkForTranscription(target);
-
+  var targetsTranscription = checkForTranscription(targetSelected);
   if (targetsTranscription == false) {
 
+    $(".annoTextDisplay").html(" ");
 
-
+    //default open ADD NEW TRANSCRIPTION
   }
   else {
 
     var theText = getBodyText(targetsTranscription);
-
-    $(function(){
-      $("h2:has(#firstTitle)").text("TRANSCRIPTION");
-      $("p:has(#testLoading)").text(theText);
-    });
+    $(".annoTextDisplay").html(theText);
 
   };
 
@@ -256,12 +249,10 @@ var openTranscriptionMenu = function (target, targetType) {
 
 };
 
-
-var openTranslationMenu = function (target) {
-
-
+var openTranslationMenu = function() {
 
 };
+
 
 ///// TRANSLATION AND TRANSCRIPTION FUNCTIONS
 
@@ -333,7 +324,7 @@ var addTranscription = function(target){
 
   newText = "";
 
-  openTranscriptionMenu(target, targetType);
+  openTranscriptionMenu();
 
 };
 
@@ -476,6 +467,7 @@ allDrawnItems.on('click', function(vec) {
 //  alert(targetSelected);
 
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
+
   else {
 
     if (selectingVector == "") {
@@ -531,79 +523,91 @@ allDrawnItems.on('remove', function(vec){
 
 map.on('popupopen', function() {
 
-  var vectorInUse = this;
-
   $('.openTranscriptionMenu').on("click", function(event) {
-    openTranscriptionMenu(vectorSelected, "vector");
+    openTranscriptionMenu();
     map.closePopup();
   });
 
   $('.openTranslationMenu').on("click", function(event) {
-    openTranslationMenu(vectorSelected, "vector");
+    openTranslationMenu();
     map.closePopup();
   });
 
 });
 
-///// TEXT SELECTION
 
-//whenever text is selected in 
+//////TRANSCRIPTIONS
 
+var generatingNewTranscription = false;
 
-/*if (window.getSelection) {
-    textSelected = window.getSelection().toString();
-} 
-else if (document.selection && document.selection.type != "Control") {
-    textSelected = document.selection.createRange().textSelected;
-};
+$( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
 
-function selectingText() {
-  alert(textSelected);
-};
+  var editorTarget = targetSelected;
+  var editorTargetType = targetType;
 
-var elem = document.getElementById('thing');
-elem.addEventListener('select', function() {
-  alert('Selection changed!');
-}, false);
+  generatingNewTranscription = false;
 
+  $( "#popupTranscriptionChildrenMenu" ).on( "popupafteropen", function( event, ui ) {
+    event.stopPropagation();
 
+    //set targetSelected
 
-var gettext = (function () {
-    if (typeof global.Gettext === 'function') {
-        var _gettext = new global.Gettext({domain: "annotator"});
-        return function (msgid) { return _gettext.gettext(msgid); };
-    }
+      $('.openTranscriptionMenu').on("click", function(event) {
+        openTranscripionMenu();
+        generatingNewTranscription = true;
+        //close popup
+      });
 
-    return function (msgid) { return msgid; };
-}());
-*/
+  });
 
+  $( "#popupTranscriptionChildrenMenu" ).on( "popupafterclose", function( event, ui ) {
+    event.stopPropagation();
+      if (generatingNewTranscription = false) {
+          targetSelected = editorTarget;
+          targetType = editorTargetType;
+      };
+  });
 
-//look up parent text JSON for target
+  $( "#popupTranscriptionNewMenu" ).on( "popupafteropen", function( event, ui ) {
+    event.stopPropagation();
 
-//store fragment selector info as textSelected
+    //set targetSelected
 
-//trigger popup
+      $('.openTranscriptionMenu').on("click", function(event) {
+        openTranscripionMenu();
+        generatingNewTranscription = true;
+        //close popup
+      });
 
-///////JQUERY 
+  });
+
+  $( "#popupTranscriptionNewMenu" ).on( "popupafterclose", function( event, ui ) {
+    event.stopPropagation();
+      if (generatingNewTranscription = false) {
+          targetSelected = editorTarget;
+          targetType = editorTargetType;
+      };
+  });
+
+});
+
+$('.addTranscriptionSubmit').on("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  addTranscription(targetSelected)
+});
+
 /*
 $( "#transcriptionEditor" ).position({
   my: "center",
   at: "center",
   of: "#ViewerBox1"
 });
- 
-$( "#translationEditor" ).position({
-  my: "center",
-  at: "center",
-  of: "#ViewerBox1"
-});
 */
-$('.addTranscriptionSubmit').on("click", function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  addTranscription(targetSelected)
-});
+
+/////TRANSLATIONS
+
+$( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {});
 
 $('.addTranslationSubmit').on("click", function(event) {
   event.preventDefault();
@@ -611,8 +615,12 @@ $('.addTranslationSubmit').on("click", function(event) {
   addTranslation(targetSelected)
 });
 
-
-//whenever the transcription or translation viewer is clicked on, or any child DOMs then the target selected has to change to their target
-//$('')
+/*
+$( "#translationEditor" ).position({
+  my: "center",
+  at: "center",
+  of: "#ViewerBox1"
+});
+*/
 
 

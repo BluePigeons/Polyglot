@@ -27,7 +27,10 @@ exports.openImage = function(req, res, next) {
 	console.log("the image to check is " + thisImage);
 
 	http.get(thisImage, (res) => {res.on('data', (d) => {
-//		res.cookie("currentImage", thisImage);
+
+
+
+
 	})}).on('error', (e) => {res.send(e);});
 	
 };
