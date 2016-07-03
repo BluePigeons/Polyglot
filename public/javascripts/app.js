@@ -217,10 +217,6 @@ var popupTranslationMenu = function () {
 
 var openTranscriptionMenu = function (target, targetType) {
 
-  //jquery to generate new window
-  //open in centre third or right third?
-  //trigger closing of other windows?
-
   var targetsTranscription = checkForTranscription(target);
 
   if (targetsTranscription == false) {
@@ -231,10 +227,11 @@ var openTranscriptionMenu = function (target, targetType) {
   else {
 
     var theText = getBodyText(targetsTranscription);
-    alert(theText);
 
-    $("#firstTitle").val("TRANSCRIPTION");
-    $("#testLoading").val(theText);
+    $(function(){
+      $("h2:has(#firstTitle)").text("TRANSCRIPTION");
+      $("p:has(#testLoading)").text(theText);
+    });
 
   };
 
@@ -285,7 +282,7 @@ var addTranscription = function(target){
 
   //generate the relevant data to be posted
 
-  var newText = $("#transcription").val();
+  var newText = $("#newTranscription").val();
   var createdTranscription;
   var transcriptionData;
   var targetDataJSON;
@@ -313,8 +310,7 @@ var addTranscription = function(target){
       }
   });
 
-  $("#transcription").val('');
-  $('#testLoading').val(newText);
+  $("#newTranscription").val("");
 
   //update relevant files with new transcription info
 
@@ -335,9 +331,9 @@ var addTranscription = function(target){
       function (data) {}
   });
 
-  targetSelected = "";
-  targetType = "";
   newText = "";
+
+  openTranscriptionMenu(target, targetType);
 
 };
 
@@ -406,7 +402,7 @@ var controlOptions = {
 new L.Control.Draw(controlOptions).addTo(map);
 
 var popupVectorMenu = L.popup()
-    .setContent('<a href="#myPopupDialog" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><div class="openTranslationMenu button"><p>TRANSLATION</p></div>')
+    .setContent('<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><a href="#translationEditor" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSLATION</a>')
 
 //to track when editing
 var currentlyEditing = false;
@@ -477,7 +473,7 @@ allDrawnItems.on('click', function(vec) {
   vectorSelected = vec.layer._leaflet_id;
   targetSelected = vec.layer._leaflet_id;
   targetType = "vector";
-  alert(targetSelected);
+//  alert(targetSelected);
 
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
   else {
@@ -590,7 +586,19 @@ var gettext = (function () {
 //trigger popup
 
 ///////JQUERY 
-
+/*
+$( "#transcriptionEditor" ).position({
+  my: "center",
+  at: "center",
+  of: "#ViewerBox1"
+});
+ 
+$( "#translationEditor" ).position({
+  my: "center",
+  at: "center",
+  of: "#ViewerBox1"
+});
+*/
 $('.addTranscriptionSubmit').on("click", function(event) {
   event.preventDefault();
   event.stopPropagation();
@@ -603,24 +611,6 @@ $('.addTranslationSubmit').on("click", function(event) {
   addTranslation(targetSelected)
 });
 
-$('textarea').on("click", function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-//  targetSelected = textarea;
-})
-/*
-$('.openTranscriptionMenu').on("click", function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  openTranscriptionMenu(textSelected,"text");
-});
-
-$('.openTranslationMenu').on("click", function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  openTranslationMenu(textSelected, "text");
-});
-*/
 
 //whenever the transcription or translation viewer is clicked on, or any child DOMs then the target selected has to change to their target
 //$('')

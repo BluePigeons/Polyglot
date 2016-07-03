@@ -72,65 +72,63 @@
 
 	<div id="ViewerBox1" class="col-md-4">
 
-<!-- 
-
-		<div class="meta-form">
-			
-		</div>
-
-		<div class="transcription-text">
-			<h2 id="firstTitle">Transcription</h2>
-			<textarea id="testingLoad">bdhfjbjhdfgskjjda</textarea>
-		</div>
-
-		<div>
-		    <p>Add New</p>
-		    <input type="TEXT" id="transcription" size="40"><br>
-		    <input type="button" class="addTranscriptionSubmit" value="Submit">
-		</div>
--->
-
 	</div>
 
 <!-- Second Viewer Box -->
 
-	<div class="col-md-4">
-		<div class="meta-form"></div>
+	<div id="ViewerBox2" class="col-md-4">
 
-		<div class="translation-text">
-			<h2>Translation</h2>
-			<textarea >bkjdafhsdfjhjsd</textarea>
-			<a href="#myPopupDialog" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Open Dialog Popup</a>
-		</div>
 	</div>
 
 
-
 </div>
 
 </div>
 
-<!--the popup box-->
+<!--the popup boxes-->
 
-    <div data-role="popup" id="myPopupDialog">
+<!-- TRANSCRIPTION-->
+<div data-role="popup" id="transcriptionEditor" >
 
-      <div data-role="main" class="ui-content">
+  <div data-role="main" class="ui-content">
 
-    	<div class="transcription-text">
-			<h2 id="firstTitle">Transcription</h2>
-			<textarea id="testingLoad">bdhfjbjhdfgskjjda</textarea>
-		</div>
+	<div class="transcription-text">
+		<h2 id="firstTitle">Transcription</h2>
+		<p id="testingLoad">there should be some text here</p>
+	</div>
 
-		<div>
-		    <p>Add New</p>
-		    <input type="TEXT" id="transcription" size="40"><br>
-		    <input type="button" class="addTranscriptionSubmit" value="Submit">
-		</div>
+	<div>
+	    <p>Add New</p>
+	    <input type="TEXT" id="newTranscription" size="40"><br>
+	    <input type="button" class="addTranscriptionSubmit" value="Submit">
+	</div>
 
-        <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
-      </div>
+    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
+  </div>
 
-    </div>
+</div>
+
+<!-- TRANSCRIPTION-->
+<div data-role="popup" id="translationEditor" >
+
+  <div data-role="main" class="ui-content">
+
+	<div class="translation-text">
+		<h2 id="firstTitle">Translation</h2>
+		<p id="testingLoad">something in English or other language now</p>
+	</div>
+
+	<div>
+	    <p>Add New</p>
+	    <input type="TEXT" id="transcription" size="40"><br>
+	    <input type="button" class="addTranslationSubmit" value="Submit">
+	</div>
+
+    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
+  </div>
+
+</div>
+
 
 
 </div>
