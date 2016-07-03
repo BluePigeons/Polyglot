@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 <!-- Stylesheets -->
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 
     <link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
 
@@ -23,6 +24,7 @@
 <!-- Javascript libraries -->
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
@@ -47,6 +49,7 @@
 <body>
 
 <!--The Page Content-->
+<div data-role="main" class="ui-content">
 <div class="container">
 
 <div class="row">
@@ -69,39 +72,66 @@
 
 	<div id="ViewerBox1" class="col-md-4">
 
-<!-- Transcription Viewer Popup Windows -->
+<!-- 
 
-			<div class="meta-form">
-				
-			</div>
+		<div class="meta-form">
+			
+		</div>
 
-			<div class="transcription-text">
-				<h2 id="firstTitle">Transcription</h2>
-				<textarea id="testingLoad">bdhfjbjhdfgskjjda</textarea>
-			</div>
+		<div class="transcription-text">
+			<h2 id="firstTitle">Transcription</h2>
+			<textarea id="testingLoad">bdhfjbjhdfgskjjda</textarea>
+		</div>
 
-			<div>
-			    <p>Add New</p>
-			    <input type="TEXT" id="transcription" size="40"><br>
-			    <input type="button" class="addTranscriptionSubmit" value="Submit">
-			</div>
+		<div>
+		    <p>Add New</p>
+		    <input type="TEXT" id="transcription" size="40"><br>
+		    <input type="button" class="addTranscriptionSubmit" value="Submit">
+		</div>
+-->
 
 	</div>
 
 <!-- Second Viewer Box -->
 
-	<div class="translationViewer" class="col-md-4">
+	<div class="col-md-4">
 		<div class="meta-form"></div>
 
 		<div class="translation-text">
 			<h2>Translation</h2>
 			<textarea >bkjdafhsdfjhjsd</textarea>
+			<a href="#myPopupDialog" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Open Dialog Popup</a>
 		</div>
 	</div>
 
 
 
 </div>
+
+</div>
+
+<!--the popup box-->
+
+    <div data-role="popup" id="myPopupDialog">
+
+      <div data-role="main" class="ui-content">
+
+    	<div class="transcription-text">
+			<h2 id="firstTitle">Transcription</h2>
+			<textarea id="testingLoad">bdhfjbjhdfgskjjda</textarea>
+		</div>
+
+		<div>
+		    <p>Add New</p>
+		    <input type="TEXT" id="transcription" size="40"><br>
+		    <input type="button" class="addTranscriptionSubmit" value="Submit">
+		</div>
+
+        <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
+      </div>
+
+    </div>
+
 
 </div>
 

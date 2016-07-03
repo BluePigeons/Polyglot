@@ -12,12 +12,14 @@
 
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 
 	<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
 
 <!-- Javascript libraries -->
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
 </head>
@@ -26,6 +28,7 @@
 
 <body>
 
+<div data-role="page">
 <!--The Page Content-->
 <div class="container">
 
@@ -49,19 +52,38 @@
 		<div  class="col-md-4">
 			<div></div>
 			<a class="openImage" id="http://ids.lib.harvard.edu/ids/iiif/25286610/info.json" >Or another one</a>
+
+
+			  <div data-role="main" class="ui-content">
+
+			    <a href="#myPopupDialog" data-rel="popup" data-position-to="window" data-transition="fade" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Open Dialog Popup</a>
+
+			    <div data-role="popup" id="myPopupDialog">
+
+			      <div data-role="main" class="ui-content">
+			        <h2>Welcome to my Popup Dialog!</h2>
+			        <p>jQuery Mobile is FUN!</p>
+			        <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
+			      </div>
+
+			    </div>
+
+			  </div>
+
+
 		</div>
 
 
 		<div class="col-md-4">
-			<div></div>
-			<a href="/theimage.html">Or this one</a>
+
+
 		</div>
 
 
 	</div>
 
 </div>
-
+</div>
 <!-- The Javascript apps-->
 
 <script>

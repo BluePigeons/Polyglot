@@ -223,28 +223,30 @@ exports.updateOne = function(req, res) {
             vector.translation = req.body.translation;
         };
 
-        if (typeof newInfo.geometry.coordinates != 'undefined' || newInfo.coordinates != null) {
+        if (typeof newInfo.geometry != 'undefined' || newInfo.geometry != null) {
+            if (typeof newInfo.geometry.coordinates != 'undefined' || newInfo.geometry.coordinates != null) {
 
-            ATCarray = 0;
-            newInfo.geometry.coordinates[0].forEach(function(coordinatesPair){
-                var coordsNumbers = [];
-                coordinatesPair.forEach(function(number){
-                    converted = Number(number);
-                    coordsNumbers.push(converted);
+                ATCarray = 0;
+                newInfo.geometry.coordinates[0].forEach(function(coordinatesPair){
+                    var coordsNumbers = [];
+                    coordinatesPair.forEach(function(number){
+                        converted = Number(number);
+                        coordsNumbers.push(converted);
+                    });
+                    vector.notFeature.notGeometry.notCoordinates[ATCarray] = coordsNumbers;
+                    ATCarray += 1;      
                 });
-                vector.notFeature.notGeometry.notCoordinates[ATCarray] = coordsNumbers;
-                ATCarray += 1;      
-            });
-            var theCoordinates = vector.notFeature.notGeometry.notCoordinates;
+                var theCoordinates = vector.notFeature.notGeometry.notCoordinates;
 
-            //the image fragment is always pushed in after the json target
-            var imageID = vector.target[0].id;
-            var imageFormats = vector.target[1].format;
-            var newIIIFsection = getIIIFsectionURL(imageID, theCoordinates, imageFormats);
+                //the image fragment is always pushed in after the json target
+                var imageID = vector.target[0].id;
+                var imageFormats = vector.target[1].format;
+                var newIIIFsection = getIIIFsectionURL(imageID, theCoordinates, imageFormats);
 
-            vector.target[1].id = newIIIFsection;
+                vector.target[1].id = newIIIFsection;
+            };
         };
-
+        
         if (typeof req.body.metadata != 'undefined' || req.body.metadata != null) {
             vector.metadata.push(req.body.metadata);
         };

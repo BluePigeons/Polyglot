@@ -406,7 +406,7 @@ var controlOptions = {
 new L.Control.Draw(controlOptions).addTo(map);
 
 var popupVectorMenu = L.popup()
-    .setContent('<div class="openTranscriptionMenu button"><p>TRANSCRIPTION</p></div><br><div data-rel="popup" class="openTranslationMenu button"><p>TRANSLATION</p></div>')
+    .setContent('<a href="#myPopupDialog" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><div class="openTranslationMenu button"><p>TRANSLATION</p></div>')
 
 //to track when editing
 var currentlyEditing = false;

@@ -14,7 +14,7 @@ var databaseURL = 'mongodb://localhost:27017/testMongoDB';
 var express    = require('express');
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
-var cookieParser = require('cookie-parser')
+//var cookieParser = require('cookie-parser')
 var cors = require('cors');
 
 var annotations = require('./routes/annotations');
@@ -47,7 +47,7 @@ app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cookieParser())
+//app.use(cookieParser())
 
 var port = process.env.PORT || 8080; 
 
