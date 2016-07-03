@@ -367,11 +367,8 @@ var baseLayer = L.tileLayer.iiif(imageSelected).addTo(map);
 
 //need to adjust settings to account for viewport size
 
-var newDrawnItems = new L.FeatureGroup();
-var oldDrawnItems = new L.FeatureGroup();
+
 var allDrawnItems = new L.FeatureGroup();
-allDrawnItems.addLayer(newDrawnItems);
-allDrawnItems.addLayer(oldDrawnItems);
 map.addLayer(allDrawnItems);
 
 var controlOptions = {
@@ -417,7 +414,7 @@ if (existingVectors != false) {
     var existingVectorFeature = L.geoJson(oldData, {
       onEachFeature: function (feature, layer) {
         layer._leaflet_id = vector.body.id,
-        oldDrawnItems.addLayer(layer),
+        allDrawnItems.addLayer(layer),
         layer.bindPopup(popupVectorMenu)
       }
 
@@ -433,7 +430,7 @@ map.on('draw:created', function(evt) {
 	var layer = evt.layer;
   var shape = layer.toGeoJSON();
 
-	newDrawnItems.addLayer(layer);
+	allDrawnItems.addLayer(layer);
 
   var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata};
 
@@ -465,7 +462,7 @@ allDrawnItems.on('click', function(vec) {
   vectorSelected = vec.layer._leaflet_id;
   targetSelected = vec.layer._leaflet_id;
   targetType = "vector";
-  alert(targetSelected);
+//  alert(targetSelected);
 
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
 
