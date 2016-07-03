@@ -14,15 +14,13 @@ var databaseURL = 'mongodb://localhost:27017/testMongoDB';
 var express    = require('express');
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
-//var cookieParser = require('cookie-parser')
+var cookieParser = require('cookie-parser');
 var cors = require('cors');
 
 var annotations = require('./routes/annotations');
 var vectors = require('./routes/vectors');
 var transcriptions = require('./routes/transcriptions');
 var translations = require('./routes/translations');
-
-var images_api = require('./routes/images_api');
 
 //var websiteinfo = require('./leafletiiifanno.json');
 //var websiteAddress = websiteinfo.website;
@@ -46,7 +44,7 @@ app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-//app.use(cookieParser())
+app.use(cookieParser());
 
 var port = process.env.PORT || 8080; 
 
@@ -58,7 +56,6 @@ mongoose.connect(databaseURL, { config: { autoIndex: false } });
 //really ought to make a nice 404 page
 
 var annoRouter = express.Router();
-var imageRouter = express.Router();
 var gameRouter = express.Router();
 
 annoRouter.use(function(req, res, next) {
@@ -66,15 +63,6 @@ annoRouter.use(function(req, res, next) {
     //should have proper logging here but for now just to console
 
     console.log('something is using the APIs');
-
-    next(); 
-});
-
-imageRouter.use(function(req, res, next) {
-
-    //should have proper logging here but for now just to console
-
-    console.log('something is using the image routes');
 
     next(); 
 });
@@ -97,12 +85,6 @@ app.get('/contactus', function(req, res) {
     res.redirect"/contactus.html");
 });
 
-//temporary until game routing implemented if wanted
-app.get('/devgame', function(req,res) {
-    res.redirect("/devGame.html");
-});
-//contains images to select from
-
 */
 
 /////////////////IMAGE ROUTES
@@ -110,10 +92,6 @@ app.get('/devgame', function(req,res) {
 app.get('/theimage', function(req, res) {
     res.redirect("/theimage.html"); 
 });
-
-imageRouter.get('/whichone', images_api.tellMe);
-
-imageRouter.post('/open', images_api.openImage);
 
 /////////////////API ROUTES
 
@@ -177,15 +155,7 @@ gameRouter.get('/', function(req, res) {
 
 /////////GET STARTED
 
-app.use('/theimagesearch', imageRouter);
 app.use('/api', annoRouter);
-
-//independent routes for now but ultimately should be layered
-/*
-imageRouter.use('/anno', annoRouter);
-gameRouter.use('/theimage', imageRouter);
-app.use('/thegame', gameRouter);
-*/
 
 //tells the server where it should be listening for req and res
 app.listen(8080);

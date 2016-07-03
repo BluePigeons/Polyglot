@@ -40,6 +40,7 @@
     "url": "https://github.com/BluePigeons/Polyglot.git"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.3",
     "http": "0.0.0"
   }
 }

@@ -30,6 +30,8 @@ var childrenText = false;
 //used to indicate if the user is currently searching for a vector to link or not
 var selectingVector = "";
 
+var findingcookies = document.cookie;
+
 ///// API FUNCTIONS
 
 var getTargetJSON = function(target) {
@@ -48,6 +50,15 @@ var getTargetJSON = function(target) {
   });
 
   return targetJSON;
+};
+
+var searchCookie = function(cookiestring, field) {
+  var searchTerm = field;
+  var fieldIndex = cookiestring.lastIndexOf(searchTerm);
+  var postField = cookiestring.substring(fieldIndex+searchTerm.length);
+  var theValueEncoded = postField.split(";", 1);
+  var theValue = theValueEncoded[0];
+  return theValue;
 };
 
 var getBodyText = function(target) {
@@ -140,12 +151,9 @@ var updateVectorSelection = function(vectorURL) {
 
 ////IMAGE HANDLING
 
-//currently hardcoded for testing
-imageSelected = 'http://ids.lib.harvard.edu/ids/iiif/25286610/info.json';
-imageSelectedFormats = "jpg";
+var loadImage = function(cookiestring) {
 
-var loadImage = function(image_id) {
-
+  imageSelected = searchCookie(cookiestring, "imageviewing=");
   var theImage = getTargetJSON(imageSelected);
   imageSelectedFormats = theImage.formats;
   imageSelectedMetadata = theImage.metadata;
@@ -353,27 +361,36 @@ var votedDown = function (target) {
 };
 
 ///////LEAFLET 
+
+loadImage(findingcookies);
+
 var map;
+var baseLayer;
 
-//IIIF Viewer initial settings
+//if (typeof map == 'undefined' || map == null) {
 
-map = L.map('map', {
-  center: [0, 0],
-  crs: L.CRS.Simple,
-  zoom: 0
-});
+  map = new L.map('map', {
 
-var baseLayer = L.tileLayer.iiif(imageSelected).addTo(map);
+    center: [0, 0],
+    crs: L.CRS.Simple,
+    //zoom needs to vary according to size of object in viewer but whatever
+    zoom: 0
 
-//need to adjust settings to account for viewport size
+  });
 
+//};
+
+baseLayer = L.tileLayer.iiif(imageSelected);
+map.addLayer(baseLayer);
+
+//map only needs to be initialised once but image changed each time
 
 var allDrawnItems = new L.FeatureGroup();
 map.addLayer(allDrawnItems);
 
 var controlOptions = {
     draw: {
-// disables the polyline and marker feature as this is unnecessary for annotation of text as it cannot enclose it
+//disables the polyline and marker feature as this is unnecessary for annotation of text as it cannot enclose it
         polyline: false,
         marker: false,
 //disabling polygons and circles as IIIF image region API does not specify how to encode anything but rectangular regions

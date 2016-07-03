@@ -34,8 +34,8 @@
 
 	<div class="row">
 		<div id="websiteInfo" class="col-md-12">
-			<h1>THE POLYGLOT PROJECT</h1>
-			<p>Testing IIIF and Leaflet Illustrate combo </p>
+			<a href="/"><h1>THE POLYGLOT PROJECT</h1></a>
+			<p>Building some awesomeness in the form of crowd sourcing transcription and translation</p>
 		</div>
 
 	</div>
@@ -51,15 +51,14 @@
 
 		<div  class="col-md-4">
 			<div></div>
-			<a class="openImage" id="http://ids.lib.harvard.edu/ids/iiif/25286610/info.json" >Or another one</a>
+			<a href="/theimage" class="openImage" id='https://stacks.stanford.edu/image/iiif/zf275jj8939%2FMartellus_300ppi_natural_color_panorama_WIP2/info.json' >Or another one</a>
 
 
 		</div>
 
 
 		<div class="col-md-4">
-
-
+			<a href="/theimage" class="openImage" id='https://stacks.stanford.edu/image/iiif/cv770rd9515%2F0767_23A_SM/info.json' >Or this one</a>
 		</div>
 
 
@@ -73,14 +72,9 @@
 
 	var currentImage;
 	var currentSite = window.location.href;
-	var imagePageURL = currentSite.concat("theimagesearch/open");
 
 	var openImage = function(image) {
-		$.ajax({
-		   type: "POST",
-		   url: imagePageURL,
-		   data: {image_id: image}
-		});
+		document.cookie = "imageviewing="+image+"; path=/theimage";
 	};
 
 	$('.openImage').on("click", function(event) {
