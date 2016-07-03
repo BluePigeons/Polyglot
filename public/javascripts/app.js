@@ -1,7 +1,7 @@
 
 
 var currentWebsite = window.location.href;
-alert(currentWebsite);
+//alert(currentWebsite);
 
 var websiteAddress = "http://localhost:8080";
 
@@ -367,10 +367,10 @@ var baseLayer = L.tileLayer.iiif(imageSelected).addTo(map);
 
 //need to adjust settings to account for viewport size
 
-var drawnItems = new L.FeatureGroup();
+var newDrawnItems = new L.FeatureGroup();
 var oldDrawnItems = new L.FeatureGroup();
 var allDrawnItems = new L.FeatureGroup();
-allDrawnItems.addLayer(drawnItems);
+allDrawnItems.addLayer(newDrawnItems);
 allDrawnItems.addLayer(oldDrawnItems);
 map.addLayer(allDrawnItems);
 
@@ -385,7 +385,7 @@ var controlOptions = {
     },
 //passes draw controlOptions to the FeatureGroup of editable layers
     edit: {
-        featureGroup: drawnItems,
+        featureGroup: allDrawnItems,
     }
 };
 
@@ -405,26 +405,27 @@ var existingVectors = getImageVectors(imageSelected);
 if (existingVectors != false) {
   existingVectors.forEach(function(vector) {
 
-    var existingVectorFeature = L.geoJson();
-    oldFeature = ({
-      "type": "Feature",
-      "properties":{},
-      "geometry":{
-        "type": vector.notFeature.notGeometry.notType,
-        "coordinates": [vector.notFeature.notGeometry.notCoordinates]
+    var oldData = {
+        "type": "Feature",
+        "properties":{},
+        "geometry":{
+          "type": vector.notFeature.notGeometry.notType,
+          "coordinates": [vector.notFeature.notGeometry.notCoordinates]
+        }
+      };
+
+    var existingVectorFeature = L.geoJson(oldData, {
+      onEachFeature: function (feature, layer) {
+        layer._leaflet_id = vector.body.id,
+        oldDrawnItems.addLayer(layer),
+        layer.bindPopup(popupVectorMenu)
       }
-    });
-    existingVectorFeature.addData(oldFeature);
-    oldDrawnItems.addLayer(existingVectorFeature);
-    existingVectorFeature.bindPopup(popupVectorMenu);
+
+    }).addTo(map);
+
   });
 };
 
-oldDrawnItems.on('load', function(){
-  oldDrawnItems.eachFeature(function(layer){
-    drawItems.addLayer(layer);
-  })
-});
 
 ////whenever a new vector is created within the app
 map.on('draw:created', function(evt) {
@@ -432,7 +433,7 @@ map.on('draw:created', function(evt) {
 	var layer = evt.layer;
   var shape = layer.toGeoJSON();
 
-	drawnItems.addLayer(layer);
+	newDrawnItems.addLayer(layer);
 
   var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata};
 
@@ -464,7 +465,7 @@ allDrawnItems.on('click', function(vec) {
   vectorSelected = vec.layer._leaflet_id;
   targetSelected = vec.layer._leaflet_id;
   targetType = "vector";
-//  alert(targetSelected);
+  alert(targetSelected);
 
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
 
