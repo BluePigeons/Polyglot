@@ -1,14 +1,6 @@
 
 // SETUP REQUIREMENTS
 
-//ask user to create javascript file that can export their database variables
-//var databaseThings = require('../../databaseThings');
-//file route assuming node_modules folder location
-//var databaseURL = databaseThings.dbURL();
-
-//learn how the require() path works so that the api routes can be added by starting app
-//in addition the user will also have to add a minified script tag with the app.js functionality OR require() and Browserify etc
-
 var databaseURL = 'mongodb://localhost:27017/testMongoDB';
 
 var express    = require('express');
@@ -24,6 +16,9 @@ var translations = require('./routes/translations');
 
 //var websiteinfo = require('./leafletiiifanno.json');
 //var websiteAddress = websiteinfo.website;
+
+//just for dev purposes so I don't need to keep opening and closing browsers
+var delCookies = function(req, res) { res.clearCookie('mapset', { path: '/theimage.html' }); res.redirect('/'); };
 
 // GET APPLICATION RUNNING
 
@@ -92,6 +87,8 @@ app.get('/contactus', function(req, res) {
 app.get('/theimage', function(req, res) {
     res.redirect("/theimage.html"); 
 });
+
+app.get('/newSession', delCookies);
 
 /////////////////API ROUTES
 

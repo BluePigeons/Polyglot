@@ -34,7 +34,6 @@
 
 	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
 
-
 <!-- 
 	Will eventually use Browserify and bundle all final packages.
 	For now though I keep changing so I'm using node_module paths for most instead until packages are more finalised and tidied up more. WIll use it for node standard packages http, fs, stream etc though.
@@ -55,7 +54,7 @@
 
 <div class="row">
 	<div id="websiteInfo" class="col-md-12">
-		<a href="/"><h1>THE POLYGLOT PROJECT</h1></a>
+		<a href="/" data-ajax="false" ><h1>THE POLYGLOT PROJECT</h1></a>
 		<p>Building some awesomeness in the form of crowd sourcing transcription and translation</p>
 	</div>
 
@@ -66,7 +65,7 @@
 <!-- Image Viewer Panel -->
 
 	<div id="imageViewer" class="col-md-4">
-		<div id="map"></div>
+		<div id='map'></div>
 	</div>
 
 <!-- First Viewer Box -->
@@ -163,8 +162,7 @@
 
 </div>
 
-<!-- The Javascript apps-->
-
+<!-- The Javascript apps for every page-->
 <script src="javascripts/app.js"></script>
 
 </body>

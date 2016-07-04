@@ -55,10 +55,15 @@ var getTargetJSON = function(target) {
 var searchCookie = function(cookiestring, field) {
   var searchTerm = field;
   var fieldIndex = cookiestring.lastIndexOf(searchTerm);
-  var postField = cookiestring.substring(fieldIndex+searchTerm.length);
-  var theValueEncoded = postField.split(";", 1);
-  var theValue = theValueEncoded[0];
-  return theValue;
+  if (fieldIndex == -1) {
+    return false;
+  }
+  else {
+    var postField = cookiestring.substring(fieldIndex+searchTerm.length);
+    var theValueEncoded = postField.split(";", 1);
+    var theValue = theValueEncoded[0];
+    return theValue;
+  };
 };
 
 var getBodyText = function(target) {
@@ -363,31 +368,10 @@ var votedDown = function (target) {
 ///////LEAFLET 
 
 loadImage(findingcookies);
-
+var mapset;
 var map;
 var baseLayer;
-
-//if (typeof map == 'undefined' || map == null) {
-
-  map = new L.map('map', {
-
-    center: [0, 0],
-    crs: L.CRS.Simple,
-    //zoom needs to vary according to size of object in viewer but whatever
-    zoom: 0
-
-  });
-
-//};
-
-baseLayer = L.tileLayer.iiif(imageSelected);
-map.addLayer(baseLayer);
-
-//map only needs to be initialised once but image changed each time
-
 var allDrawnItems = new L.FeatureGroup();
-map.addLayer(allDrawnItems);
-
 var controlOptions = {
     draw: {
 //disables the polyline and marker feature as this is unnecessary for annotation of text as it cannot enclose it
@@ -402,18 +386,28 @@ var controlOptions = {
         featureGroup: allDrawnItems,
     }
 };
-
-//adds new draw control features to the map
-new L.Control.Draw(controlOptions).addTo(map);
-
 var popupVectorMenu = L.popup()
-    .setContent('<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><a href="#translationEditor" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSLATION</a>')
-
+    .setContent('<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><a href="#translationEditor" data-rel="popup" data-position-to="#ViewerBox1" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSLATION</a>');
 //to track when editing
 var currentlyEditing = false;
 var currentlyDeleting = false;
-
 var existingVectors = getImageVectors(imageSelected);
+
+map = L.map('map');
+map.options.crs = L.CRS.Simple;
+map.setView(
+  [0, 0], //centre coordinates
+  0 //zoom needs to vary according to size of object in viewer but whatever
+);
+map.options.crs = L.CRS.Simple;
+baseLayer = L.tileLayer.iiif(imageSelected);
+map.addLayer(baseLayer);
+map.addLayer(allDrawnItems);
+new L.Control.Draw(controlOptions).addTo(map);
+
+map.whenReady(function(){
+  mapset = true;
+});
 
 //load the existing vectors
 if (existingVectors != false) {
