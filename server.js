@@ -88,7 +88,9 @@ app.get('/theimage', function(req, res) {
     res.redirect("/theimage.html"); 
 });
 
-app.get('/newSession', delCookies);
+app.get('/testText', function(req, res){
+    
+});
 
 /////////////////API ROUTES
 

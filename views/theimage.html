@@ -55,7 +55,7 @@
 <div class="row">
 	<div id="websiteInfo" class="col-md-12">
 		<a href="/" data-ajax="false" ><h1>THE POLYGLOT PROJECT</h1></a>
-		<p>Building some awesomeness in the form of crowd sourcing transcription and translation</p>
+		<p>Building some awesomeness in the form of crowd sourcing transcription and translation</p><br>
 	</div>
 
 </div>
@@ -78,6 +78,15 @@
 
 	<div id="ViewerBox2" class="col-md-4">
 
+		<div class="content-area">
+			<p id="themosthipster">Chicharrones photo booth etsy, disrupt viral mumblecore you probably haven't heard of them. Salvia tousled vegan, bicycle rights paleo portland cronut banjo deep v stumptown. Distillery 90's sustainable, green juice ennui pickled four loko. Bitters helvetica gluten-free, fashion axe scenester tofu tote bag next level chia salvia kinfolk lumbersexual quinoa. Humblebrag try-hard cliche, banh mi dreamcatcher cray hoodie. Aesthetic narwhal four dollar toast, selfies try-hard raw denim tattooed blue bottle chicharrones farm-to-table whatever master cleanse offal everyday carry. Biodiesel vegan portland gluten-free you probably haven't heard of them deep v viral.</p>
+
+			<p id="theoriginalipsum">VHS narwhal viral, microdosing craft beer meggings affogato poutine schlitz kitsch plaid cred offal wayfarers. Drinking vinegar church-key vice tattooed chartreuse, williamsburg freegan everyday carry pour-over retro. Thundercats aesthetic wolf, stumptown brooklyn sartorial venmo. Lomo messenger bag flannel, kombucha four loko whatever pinterest pug pop-up. Swag banjo next level hashtag, shoreditch gentrify hoodie. Typewriter next level lumbersexual, heirloom hella etsy vinyl. Occupy taxidermy try-hard, banh mi photo booth distillery cardigan cornhole swag organic forage paleo church-key mumblecore small batch.</p>
+
+			<p></p><br>
+			<p></p><br>
+		</div>
+
 	</div>
 
 
@@ -96,20 +105,13 @@
 
 	<div id="transcriptionCarousel" class="carousel slide" data-interval="false">
 
-	  <!-- Indicators -->
-	  <ol class="carousel-indicators">
-	    <li data-target="#transcriptionCarousel" data-slide-to="0" class="active"></li>
-	    <li data-target="#transcriptionCarousel" data-slide-to="1"></li>
-	    <li data-target="#transcriptionCarousel" data-slide-to="2"></li>
-	  </ol>
-
 	  <!-- Wrapper for slides -->
 	  <div class="carousel-inner" role="listbox">
 
 	    <div class="item active">
 	    	<div class="pTextDisplay">
       			<div class="transcription-text">
-					<p class="annoTextDisplay">there should be some text here</p>
+					<blockquote class="annoTextDisplay content-area">there should be some text here</blockquote>
 				</div>
 	      	</div>
 	    </div>
@@ -124,7 +126,7 @@
 
 	    <div class="item">
 	    	<div class="pTextDisplay">
-	      		<img src="http://placekitten.com/200/300" >
+	      		<blockquote class="content-area">Listicle slow-carb etsy, dreamcatcher pitchfork direct trade next level everyday carry four dollar toast selvage keytar bespoke kickstarter. Drinking vinegar XOXO messenger bag iPhone, affogato fanny pack photo booth vice brooklyn quinoa normcore. Kickstarter gochujang flexitarian narwhal, drinking vinegar humblebrag biodiesel. Kale chips portland art party polaroid</blockquote>
 	      	</div>
 	    </div>
 
@@ -157,7 +159,7 @@
   <div data-role="main" class="ui-content">
 
 	<div class="translation-text">
-		<p class="annoTextDisplay">there should be some text here</p>
+		<p class="annoTextDisplay content-area">there should be some text here</p>
 	</div>
 
     <h3>Add New</h3>
@@ -170,25 +172,23 @@
 </div>
 
 <!-- New Transcription Text Select Popup Menu -->
-<div data-role="popup"  id="popupTranscriptionChildrenMenu">
+<div data-role="popup"  id="popupTranscriptionNewMenu" data-arrow="t,b">
 
   <div data-role="main" class="ui-content">
 
-  	<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox2" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
+  	<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox2" data-transition="fade" class="openTranscriptionMenu transcriptionTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
 
-    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
   </div>
 
 </div>
 
 <!-- Children Transcription Text Select Popup Menu-->
-<div data-role="popup" id="popupTranscriptionNewMenu">
+<div data-role="popup" id="popupTranscriptionChildrenMenu" data-arrow="t,b">
 
   <div data-role="main" class="ui-content">
 
   	<a href="#transcriptionEditor" data-rel="popup" data-position-to="#ViewerBox2" data-transition="fade" class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">VIEW OTHER TRANSCRIPTIONS</a>
 
-    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
   </div>
 
 </div>

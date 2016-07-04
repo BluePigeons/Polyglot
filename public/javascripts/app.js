@@ -33,6 +33,44 @@ var selectingVector = "";
 
 var findingcookies = document.cookie;
 
+///// TEXT SELECTION
+
+//based on the code from https://davidwalsh.name/text-selection-ajax
+
+/* attempt to find a text selection */
+function getSelected() {
+  if(window.getSelection) { return window.getSelection(); }
+  else if(document.getSelection) { return document.getSelection(); }
+  else {
+    var selection = document.selection && document.selection.createRange();
+    if(selection.text) { return selection.text; }
+    return false;
+  }
+  return false;
+}
+/* create sniffer */
+$(document).ready(function() {
+  $('.content-area').mouseup(function(event) {
+
+    var selection = getSelected();
+
+    textSelected = event.target.id;
+    textTypeSelected = "transcription";
+
+    targetType = "transcription";
+
+    if(selection && (selection = new String(selection).replace(/^\s+|\s+$/g,''))) {
+
+      textSelectedFragment = selection;
+
+      alert(selection);
+      
+      $( "#popupTranscriptionNewMenu" ).popup( "open");
+
+    }
+  });
+});
+
 ///// API FUNCTIONS
 
 var getTargetJSON = function(target) {
@@ -583,7 +621,7 @@ map.on('popupopen', function() {
 
 var generatingNewTranscription = false;
 
-$( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
+//$( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
 
   var editorTarget = targetSelected;
   var editorTargetType = targetType;
@@ -593,10 +631,10 @@ $( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
   $( "#popupTranscriptionChildrenMenu" ).on( "popupafteropen", function( event, ui ) {
     event.stopPropagation();
 
-    //set targetSelected
+    targetType = "transcription";
 
       $('.openTranscriptionMenu').on("click", function(event) {
-        openTranscripionMenu();
+        openTranscriptionMenu();
         generatingNewTranscription = true;
         //close popup
       });
@@ -614,10 +652,10 @@ $( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
   $( "#popupTranscriptionNewMenu" ).on( "popupafteropen", function( event, ui ) {
     event.stopPropagation();
 
-    //set targetSelected
+    targetType = "transcription";
 
       $('.openTranscriptionMenu').on("click", function(event) {
-        openTranscripionMenu();
+        openTranscriptionMenu();
         generatingNewTranscription = true;
         //close popup
       });
@@ -632,7 +670,7 @@ $( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
       };
   });
 
-});
+//});
 
 $('.addTranscriptionSubmit').on("click", function(event) {
   event.preventDefault();
