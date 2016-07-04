@@ -94,37 +94,75 @@
 
   	<h2 class="editorTitle">Transcription</h2>
 
-	<div class="transcription-text">
-		<p class="annoTextDisplay">there should be some text here</p>
-	</div>
+	<div id="transcriptionCarousel" class="carousel slide" data-interval="false">
 
-	<div>
-	    <p>Add New</p>
-	    <input type="TEXT" id="newTranscription" size="40"><br>
-	    <input type="button" class="addTranscriptionSubmit" value="Submit">
-	</div>
+	  <!-- Indicators -->
+	  <ol class="carousel-indicators">
+	    <li data-target="#transcriptionCarousel" data-slide-to="0" class="active"></li>
+	    <li data-target="#transcriptionCarousel" data-slide-to="1"></li>
+	    <li data-target="#transcriptionCarousel" data-slide-to="2"></li>
+	  </ol>
 
-    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
+	  <!-- Wrapper for slides -->
+	  <div class="carousel-inner" role="listbox">
+
+	    <div class="item active">
+	    	<div class="pTextDisplay">
+      			<div class="transcription-text">
+					<p class="annoTextDisplay">there should be some text here</p>
+				</div>
+	      	</div>
+	    </div>
+
+	    <div class="item">
+	      	<div id="addNewContainer" class="pTextDisplay">
+			    <h3>Add New</h3>
+			    <input type="TEXT" id="newTranscription" rows="20"><br>
+		
+			</div>
+	    </div>
+
+	    <div class="item">
+	    	<div class="pTextDisplay">
+	      		<img src="http://placekitten.com/200/300" >
+	      	</div>
+	    </div>
+
+	  </div>
+
+	  <!-- Left and right controls -->
+	  <a class="left carousel-control" href="#transcriptionCarousel" role="button" data-slide="prev">
+	    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+	    <span class="sr-only">Previous</span>
+	  </a>
+	  <a class="right carousel-control" href="#transcriptionCarousel" role="button" data-slide="next">
+	    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+	    <span class="sr-only">Next</span>
+	  </a>
+
+	</div>
+	<input type="button" class="addTranscriptionSubmit" value="Submit"><br>
+
   </div>
 
 </div>
 
-<!-- TRANSCRIPTION-->
+<!-- TRANSLATION-->
 <div data-role="popup" id="translationEditor" >
+
+	<div data-role="header">
+		<h2 class="editorTitle">Translation</h2>
+	</div>
 
   <div data-role="main" class="ui-content">
 
-  	<h2 class="editorTitle">Translation</h2>
-
 	<div class="translation-text">
-		<p class="annoTextDisplay">something in English or other language now</p>
+		<p class="annoTextDisplay">there should be some text here</p>
 	</div>
 
-	<div>
-	    <p>Add New</p>
-	    <input type="TEXT" id="newTranslation" size="40"><br>
-	    <input type="button" class="addTranslationSubmit" value="Submit">
-	</div>
+    <h3>Add New</h3>
+    <textarea id="newTranslation" rows="20"></textarea><br>
+    <input type="button" class="addTranslationSubmit" value="Submit">
 
     <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left" data-rel="back">Go Back</a>
   </div>

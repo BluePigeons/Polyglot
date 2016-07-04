@@ -25,3 +25,20 @@
 #ViewerBox2{
 	height: 500px;
 }
+
+#transcriptionCarousel{
+	
+}
+
+.pTextDisplay{
+	height: 300px;
+	width: 300px;
+}
+
+.carousel-control.left, .carousel-control.right {
+   background-image:none !important;
+   filter:none !important;
+}
+.transcription-text {
+	margin: 50px;
+}

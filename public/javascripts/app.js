@@ -23,6 +23,7 @@ var textTypeSelected = "";
 
 var targetSelected = "";
 var targetType = ""; 
+var targetParent;
 
 //Boolean to indicate if the currently selected text already has children or not
 var childrenText = false;
@@ -227,30 +228,61 @@ var popupTranslationNewMenu = function () {
 
 var openTranscriptionMenu = function() {
 
-  var targetsTranscription = checkForTranscription(targetSelected);
-  if (targetsTranscription == false) {
+  var targetsTranscription;
+  var theText;
+//currently hardcoded for dev
+  var canUserAdd = true;
 
-    $(".annoTextDisplay").html(" ");
+  if (targetType == "vector"){
 
-    //default open ADD NEW TRANSCRIPTION
+    targetsTranscription = checkForTranscription(targetSelected);
+
+    if (targetsTranscription == false) {
+      theText = " ";
+      canUserAdd = true;
+    }
+
+    else {
+
+      theText = getBodyText(targetsTranscription);
+
+//display just plaintext for now but wil be html markup
+
+      $(".annoTextDisplay").html(theText);
+/*
+      if (checkForParent(targetTranscription) == false) {
+        canUserAdd = false;
+      }
+      else {
+        canUserAdd = true;
+      };
+*/
+    };
+
+  }
+  else if (targetType == "transcription"){
+
+/*
+
+  for this location look up other children and generate carousel with each child on a page
+  if come via add new then make add new the first page of carousel
+  otherwise make it last
+
+  vote for each one
+
+*/
+
   }
   else {
-
-    var theText = getBodyText(targetsTranscription);
-    $(".annoTextDisplay").html(theText);
-
-  };
+    alert("what are you opening transcription of?");
+  }
+  
 
   //META DATA OPTIONS
 
   //LINK VECTOR 
 
 //    $(".linkVectorTranscription").click(linkVectorTranscription(target));
-
-  //ADD NEW TRANSCRIPTION
-  //open input form
-
-//      $(".addTranscriptionSubmit").click(addTranscription(target));
 
   //var voteEnabled = checkForParent(target);
   //if (voteEnabled != false) {
@@ -443,6 +475,8 @@ map.on('draw:created', function(evt) {
 
 	allDrawnItems.addLayer(layer);
 
+//check for parents of created vector and if so then add to targetData
+
   var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata};
 
   $.ajax({
@@ -605,6 +639,21 @@ $('.addTranscriptionSubmit').on("click", function(event) {
   event.stopPropagation();
   addTranscription(targetSelected)
 });
+
+$('#transcriptionCarousel').on('slide.bs.carousel', function (event) {
+  var slideID = event.relatedTarget.id;
+
+  if (slideID == 1) {
+    //display button to jump to slide 1
+    alert("you can make a new one");
+  }
+  else {
+    //display addTranscriptionSubmit button
+  };
+
+})
+
+
 
 /*
 $( "#transcriptionEditor" ).position({
