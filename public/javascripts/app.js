@@ -37,37 +37,80 @@ var findingcookies = document.cookie;
 
 //based on the code from https://davidwalsh.name/text-selection-ajax
 
-/* attempt to find a text selection */
+// attempt to find a text selection 
 function getSelected() {
-  if(window.getSelection) { return window.getSelection(); }
-  else if(document.getSelection) { return document.getSelection(); }
+  if(window.getSelection) { 
+    return window.getSelection(); 
+  }
+  else if(document.getSelection) { 
+    return document.getSelection(); 
+  }
   else {
     var selection = document.selection && document.selection.createRange();
-    if(selection.text) { return selection.text; }
+    if(selection.text) { 
+      return selection.text; 
+    }
     return false;
   }
   return false;
 }
-/* create sniffer */
+// create sniffer 
 $(document).ready(function() {
   $('.content-area').mouseup(function(event) {
 
-    var selection = getSelected();
-
-    textSelected = event.target.id;
+    //hardcoded here for dev
     textTypeSelected = "transcription";
-
     targetType = "transcription";
 
+    var selection = getSelected();
+
+    var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
+    var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
+    var startNodeTextEndIndex = startNodeText.toString().length;
+    var startParentNode = startNode.parentNode; //the element type Node that the start text is contained in - p or span
+    var startParentID = startNode.parentElement.id;
+
+    var nodeLocationStart = selection.anchorOffset; //index from within startNode text where selection starts
+    var nodeLocationEnd;
+
+    var endNode = selection.focusNode; //the text type Node that end of the selection was in 
+    var endParentID = endNode.parentElement.id; //the ID of the element type Node that the text ends in
+
+    textSelected = startParentID;
+    textSelectedFragment = selection; //includes any HTML elements contained within that
+
     if(selection && (selection = new String(selection).replace(/^\s+|\s+$/g,''))) {
+      textSelectedFragmentString = selection.toString(); //removes all html tags contained or displays them as string???
+    };
 
-      textSelectedFragment = selection;
 
-      alert(selection);
-      
-      $( "#popupTranscriptionNewMenu" ).popup( "open");
-
+    if (startParentID != endParentID) {
+      alert("you can't select across existing fragments' borders sorry");
+      nodeLocationEnd = startNodeTextEndIndex; //nope
     }
+    else {
+      nodeLocationEnd = nodeLocationStart + textSelectedFragmentString.length; //nope
+    };
+
+    alert(nodeLocationEnd);
+
+    var outerTextIDstring = "#" + startParentID;
+    var nodeBodyHTML = $(outerTextIDstring).html(); //includes any spans that are contained within this selection
+
+    var newIDnumber = Math.random().toString().substring(2);
+    var newNodeInsertID = textSelected.concat("_location_"+newIDnumber); //not a standardised selection label but will do for now
+
+    //need to select start and end differently
+    var previousContent = nodeBodyHTML.slice(0, nodeLocationStart);
+    var nextContent = nodeBodyHTML.slice(nodeLocationEnd, startNodeTextEndIndex); 
+
+    //change shade of yellow if layered??
+    var newBodyContent = previousContent + "<span style='background-color:yellow" + "'id='" + newNodeInsertID + "' >" + textSelectedFragment + "</span>" + nextContent;
+
+    $(outerTextIDstring).html(newBodyContent);
+
+    //$( "#popupTranscriptionNewMenu" ).popup( "open");
+
   });
 });
 
@@ -283,10 +326,6 @@ var openTranscriptionMenu = function() {
     else {
 
       theText = getBodyText(targetsTranscription);
-
-//display just plaintext for now but wil be html markup
-
-      $(".annoTextDisplay").html(theText);
 /*
       if (checkForParent(targetTranscription) == false) {
         canUserAdd = false;
@@ -300,22 +339,23 @@ var openTranscriptionMenu = function() {
   }
   else if (targetType == "transcription"){
 
+    theText = textSelectedFragment;
+
+
 /*
 
   for this location look up other children and generate carousel with each child on a page
-  if come via add new then make add new the first page of carousel
-  otherwise make it last
-
-  vote for each one
 
 */
 
   }
   else {
     alert("what are you opening transcription of?");
-  }
-  
+  };
 
+  //first slide is always theText
+  $(".annoTextDisplay").html(theText);
+  
   //META DATA OPTIONS
 
   //LINK VECTOR 
@@ -621,15 +661,24 @@ map.on('popupopen', function() {
 
 var generatingNewTranscription = false;
 
+var insertSpanDivs = function(textFragment, textParentID) {
+
+  var parentTextBody = textParentID.html();
+
+  beginning
+
+};
+
 //$( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
 
-  var editorTarget = targetSelected;
-  var editorTargetType = targetType;
+//  var editorTarget = targetSelected;
+//  var editorTargetType = targetType;
 
-  generatingNewTranscription = false;
+//  generatingNewTranscription = false;
 
+
+/*
   $( "#popupTranscriptionChildrenMenu" ).on( "popupafteropen", function( event, ui ) {
-    event.stopPropagation();
 
     targetType = "transcription";
 
@@ -642,19 +691,19 @@ var generatingNewTranscription = false;
   });
 
   $( "#popupTranscriptionChildrenMenu" ).on( "popupafterclose", function( event, ui ) {
-    event.stopPropagation();
       if (generatingNewTranscription = false) {
           targetSelected = editorTarget;
           targetType = editorTargetType;
       };
   });
+*/
+
 
   $( "#popupTranscriptionNewMenu" ).on( "popupafteropen", function( event, ui ) {
-    event.stopPropagation();
-
-    targetType = "transcription";
 
       $('.openTranscriptionMenu').on("click", function(event) {
+
+        alert(textSelectedFragment);
         openTranscriptionMenu();
         generatingNewTranscription = true;
         //close popup
@@ -663,7 +712,7 @@ var generatingNewTranscription = false;
   });
 
   $( "#popupTranscriptionNewMenu" ).on( "popupafterclose", function( event, ui ) {
-    event.stopPropagation();
+
       if (generatingNewTranscription = false) {
           targetSelected = editorTarget;
           targetType = editorTargetType;
