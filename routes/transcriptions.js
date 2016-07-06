@@ -49,8 +49,12 @@ exports.addNew = function(req, res) {
     var transURL = transcriptionURL.concat(newTransID);
     console.dir(req.body);
 
-    transcription.body.text = req.body.body.text; 
-    transcription.body.id = transURL; 
+    transcription.body.push({
+        "text": req.body.body.text,
+        "id": transURL,
+        "format": req.body.body.format
+    });
+
     transcription.target.push(
         {"id": req.body.target.id,
         "format": req.body.target.format}

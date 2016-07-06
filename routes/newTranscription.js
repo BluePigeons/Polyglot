@@ -36,7 +36,7 @@ var transcriptionSchema   = new Schema({
     "translation": {
     	type: String
     },
-	"body": {
+	"body": [{
 		"id": {
 			type: String,
 			default: "https://127.0.0.1:8080/transcriptions/"
@@ -53,7 +53,7 @@ var transcriptionSchema   = new Schema({
 			type: String,
 			default: "en"
 		}
-	},
+	}],
 	"target": [{
 		"id": {
 			type: String,

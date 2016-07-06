@@ -9,25 +9,34 @@ var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
-//will be info.json format
+//info.json format URL
 var imageSelected;
 var imageSelectedFormats;
 var imageSelectedMetadata = [];
 
+//API URL
 var vectorSelected = "";
 var currentCoords;
 
+//API URL
 var textSelected = "";
+//API URL
+var textSelectedParent = "";
+//DOM id
+var textSelectedID;
+//parent API URL + ID
+var textSelectedHash;
+//HTML Selection Object
 var textSelectedFragment = "";
+var textSelectedFragmentString = "";
 var textTypeSelected = "";
 
+//URL
 var targetSelected = "";
 var targetType = ""; 
-var targetParent;
 
 //Boolean to indicate if the currently selected text already has children or not
 var childrenText = false;
-
 //used to indicate if the user is currently searching for a vector to link or not
 var selectingVector = "";
 
@@ -35,84 +44,123 @@ var findingcookies = document.cookie;
 
 ///// TEXT SELECTION
 
+var outerElementTextIDstring;
+var newContent;
+var newNodeInsertID;
+var startParentID;
+
 //based on the code from https://davidwalsh.name/text-selection-ajax
 
 // attempt to find a text selection 
 function getSelected() {
-  if(window.getSelection) { 
-    return window.getSelection(); 
-  }
-  else if(document.getSelection) { 
-    return document.getSelection(); 
-  }
+  if(window.getSelection) { return window.getSelection() }
+  else if(document.getSelection) { return document.getSelection(); }
   else {
     var selection = document.selection && document.selection.createRange();
-    if(selection.text) { 
-      return selection.text; 
-    }
+    if(selection.text) { return selection.text; }
     return false;
   }
   return false;
-}
+};
+
 // create sniffer 
 $(document).ready(function() {
   $('.content-area').mouseup(function(event) {
 
-    //hardcoded here for dev
-    textTypeSelected = "transcription";
-    targetType = "transcription";
+    selection = getSelected(); 
+    textSelectedFragment = selection;
 
-    var selection = getSelected();
+    if(textSelectedFragment && (textSelectedFragment = new String(textSelectedFragment).replace(/^\s+|\s+$/g,''))) {
+      textSelectedFragmentString = textSelectedFragment.toString();
+    };
 
     var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
     var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
     var startNodeTextEndIndex = startNodeText.toString().length;
-    var startParentNode = startNode.parentNode; //the element type Node that the start text is contained in - p or span
-    var startParentID = startNode.parentElement.id;
+    startParentID = startNode.parentElement.id;
 
     var nodeLocationStart = selection.anchorOffset; //index from within startNode text where selection starts
-    var nodeLocationEnd;
+    var nodeLocationEnd = selection.focusOffset; //index from within endNode text where selection ends
 
     var endNode = selection.focusNode; //the text type Node that end of the selection was in 
+    var endNodeText = endNode.textContent;
     var endParentID = endNode.parentElement.id; //the ID of the element type Node that the text ends in
 
-    textSelected = startParentID;
-    textSelectedFragment = selection; //includes any HTML elements contained within that
-
-    if(selection && (selection = new String(selection).replace(/^\s+|\s+$/g,''))) {
-      textSelectedFragmentString = selection.toString(); //removes all html tags contained or displays them as string???
-    };
-
+    outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
 
     if (startParentID != endParentID) {
       alert("you can't select across existing fragments' borders sorry");
-      nodeLocationEnd = startNodeTextEndIndex; //nope
     }
     else {
-      nodeLocationEnd = nodeLocationStart + textSelectedFragmentString.length; //nope
+
+      var newIDnumber = Math.random().toString().substring(2);
+      newNodeInsertID = startParentID.concat("-location-"+newIDnumber); //not a standardised selection label but will do for now
+      var newSpan = "<span style='background-color:yellow'id='" + newNodeInsertID + "' >" + textSelectedFragment + "</span>";
+   
+      var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
+
+      ///CONTENT BEFORE HIGHLIGHT IN THE TEXT TYPE NODE
+      var previousSpanContent = startNodeText.slice(0, nodeLocationStart);
+
+      //CONTENT BEFORE HIGHLIGHT IN THE ELEMENT TYPE NODE
+      var previousSpan = startNode.previousElementSibling; //returns null if none i.e. this text node is first node in element node
+      var outerElementStartContent;
+      if (previousSpan == "null" || previousSpan == null) {outerElementStartContent = previousSpanContent}
+      else {
+        var previousSpanAll = previousSpan.outerHTML;
+        var StartIndex = outerElementHTML.indexOf(previousSpanAll) + previousSpanAll.length;
+        outerElementStartContent = outerElementHTML.slice(0, StartIndex).concat(previousSpanContent);
+      };
+
+      ///CONTENT AFTER HIGHLIGHT IN THE TEXT TYPE NODE
+      var nextSpanContent;
+      if (endNode == startNode) { nextSpanContent = startNodeText.slice(nodeLocationEnd, startNodeTextEndIndex)}
+      else {nextSpanContent = endNodeText.slice(0, nodeLocationEnd)};
+
+      ///CONTENT AFTER HIGHLIGHT IN ELEMENT TYPE NODE
+      var nextSpan = endNode.nextElementSibling; //returns null if none i.e. this text node is the last in the element node
+      var outerElementEndContent;
+      if (nextSpan == "null" || nextSpan == null) {outerElementEndContent = nextSpanContent}
+      else {
+        var nextSpanAll = nextSpan.outerHTML;
+        var EndIndex = outerElementHTML.indexOf(nextSpanAll);
+        outerElementEndContent = nextSpanContent.concat(outerElementHTML.substring(EndIndex));
+      };
+
+      newContent = outerElementStartContent + newSpan + outerElementEndContent;
+
+      $( "#popupTranscriptionNewMenu" ).popup( "open");
+
     };
-
-    alert(nodeLocationEnd);
-
-    var outerTextIDstring = "#" + startParentID;
-    var nodeBodyHTML = $(outerTextIDstring).html(); //includes any spans that are contained within this selection
-
-    var newIDnumber = Math.random().toString().substring(2);
-    var newNodeInsertID = textSelected.concat("_location_"+newIDnumber); //not a standardised selection label but will do for now
-
-    //need to select start and end differently
-    var previousContent = nodeBodyHTML.slice(0, nodeLocationStart);
-    var nextContent = nodeBodyHTML.slice(nodeLocationEnd, startNodeTextEndIndex); 
-
-    //change shade of yellow if layered??
-    var newBodyContent = previousContent + "<span style='background-color:yellow" + "'id='" + newNodeInsertID + "' >" + textSelectedFragment + "</span>" + nextContent;
-
-    $(outerTextIDstring).html(newBodyContent);
-
-    //$( "#popupTranscriptionNewMenu" ).popup( "open");
 
   });
 });
+
+var insertSpanDivs = function() {
+
+  $(outerElementTextIDstring).html(newContent); //replaces the whole element with just the new content between spans...
+  textSelectedID = newNodeInsertID;
+  textSelectedParent = startParentID;
+};
+
+var newTranscriptionFragment = function() {
+
+  textSelectedHash = startParentID.concat(".body.text"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
+  var targetData = {body: {text: textSelectedFragmentString, format: "text/html"}, target: {id: textSelectedHash, format: "text/html"}, parent: textSelectedParent};
+  
+  $.ajax({
+    type: "POST",
+    url: transcriptionURL,
+    async: false,
+    data: targetData,
+    success: 
+      function (data) {
+        textSelected = data.url;
+        targetSelected = data.url;
+        targetType = "transcription";
+      }
+  });
+};
 
 ///// API FUNCTIONS
 
@@ -264,47 +312,6 @@ var getImageVectors = function(target) {
   return imageVectors;
 };
 
-//////POPUP OPTIONS
-
-/*
-
-var popupTranscriptionChildrenMenu = function () {
-
-  var textSelectedURL = transcriptionURL.concat(textSelected);
-
-  //VIEW OTHER TRANSCRIPTIONS
-  //openTranscriptionMenu(textSelectedURL);
-
-};
-
-var popupTranscriptionNewMenu = function () {
-
-  var textSelectedURL = transcriptionURL.concat(textSelected);
-
-  //ADD NEW TRANSCRIPTION
-  //openTranscriptionMenu(textSelectedURL);
-
-};
-
-var popupTranslationChildrenMenu = function () {
-
-  var textSelectedURL = translationURL.concat(textSelected);
-
-  //VIEW OTHER TRANSLATIONS
-  //openTranslationMenu(textSelectedURL);
-
-};
-
-var popupTranslationNewMenu = function () {
-
-  var textSelectedURL = translationURL.concat(textSelected);
-
-  //ADD NEW TRANSLATION
-  //openTranslationMenu(textSelectedURL);
-
-};
-*/
-
 ///// VIEWER WINDOWS
 
 var openTranscriptionMenu = function() {
@@ -339,9 +346,8 @@ var openTranscriptionMenu = function() {
   }
   else if (targetType == "transcription"){
 
-    theText = textSelectedFragment;
-
-
+    theText = textSelectedFragmentString;
+    canUserAdd = true;
 /*
 
   for this location look up other children and generate carousel with each child on a page
@@ -402,11 +408,11 @@ var addTranscription = function(target){
   var targetDataJSON;
 
   if (targetType == "vector") {
-    transcriptionData = {body: {text: newText}, target: {id: target, format: "SVG"}};
+    transcriptionData = {body: {text: newText, format: "text"}, target: {id: target, format: "image/SVG"}};
   }
 
   else if (targetType == "transcription") {
-    transcriptionData = {body: {text: transcriptionText},target: {id: textSelected, format: "text Fragment"},parent: textSelected};
+    transcriptionData = {body: {text: newText, format: "text"},target: {id: textSelectedHash, format: "text/html"},parent: textSelected};
   }
 
   else {
@@ -478,7 +484,6 @@ var votedDown = function (target) {
 ///////LEAFLET 
 
 loadImage(findingcookies);
-var mapset;
 var map;
 var baseLayer;
 var allDrawnItems = new L.FeatureGroup();
@@ -661,14 +666,6 @@ map.on('popupopen', function() {
 
 var generatingNewTranscription = false;
 
-var insertSpanDivs = function(textFragment, textParentID) {
-
-  var parentTextBody = textParentID.html();
-
-  beginning
-
-};
-
 //$( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
 
 //  var editorTarget = targetSelected;
@@ -676,47 +673,18 @@ var insertSpanDivs = function(textFragment, textParentID) {
 
 //  generatingNewTranscription = false;
 
-
-/*
-  $( "#popupTranscriptionChildrenMenu" ).on( "popupafteropen", function( event, ui ) {
-
-    targetType = "transcription";
-
-      $('.openTranscriptionMenu').on("click", function(event) {
-        openTranscriptionMenu();
-        generatingNewTranscription = true;
-        //close popup
-      });
-
-  });
-
-  $( "#popupTranscriptionChildrenMenu" ).on( "popupafterclose", function( event, ui ) {
-      if (generatingNewTranscription = false) {
-          targetSelected = editorTarget;
-          targetType = editorTargetType;
-      };
-  });
-*/
-
-
   $( "#popupTranscriptionNewMenu" ).on( "popupafteropen", function( event, ui ) {
 
       $('.openTranscriptionMenu').on("click", function(event) {
-
-        alert(textSelectedFragment);
+        insertSpanDivs();
+        newTranscriptionFragment();
+        textTypeSelected = "transcription";
+        targetType = "transcription";
         openTranscriptionMenu();
         generatingNewTranscription = true;
         //close popup
       });
 
-  });
-
-  $( "#popupTranscriptionNewMenu" ).on( "popupafterclose", function( event, ui ) {
-
-      if (generatingNewTranscription = false) {
-          targetSelected = editorTarget;
-          targetType = editorTargetType;
-      };
   });
 
 //});
