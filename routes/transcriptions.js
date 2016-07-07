@@ -231,6 +231,8 @@ exports.updateOne = function(req, res) {
 
         if (err) {res.send(err)};
 
+        console.dir(transcription);
+
         //none of this is working!!!
 
         if (typeof req.body.body.text != 'undefined' || req.body.body.text != null) {
