@@ -88,10 +88,6 @@ app.get('/theimage', function(req, res) {
     res.redirect("/theimage.html"); 
 });
 
-app.get('/testText', function(req, res){
-    
-});
-
 /////////////////API ROUTES
 
 //PARAMETERS
@@ -132,11 +128,12 @@ annoRouter.post('/transcriptions', transcriptions.addNew);
 //route /api/transcriptions/:transcriptions_id GET -> get specific transcription JSON
 annoRouter.get('/transcriptions/:transcription_id', transcriptions.getByID);
 
-annoRouter.get('/transcriptions/:vector_target', transcriptions.getByVectorTarget);
-annoRouter.get('/transcriptions/:text_target', transcriptions.getByTextTarget);
+annoRouter.get('/transcriptions/targets/:target', transcriptions.getByTarget);
 
 //route /api/transcriptions/:transcriptions_id PUT -> update transcription JSON with new info
 annoRouter.put('/transcriptions/:transcription_id', transcriptions.updateOne);
+
+annoRouter.put('/transcriptions/voting/:voteType', transcriptions.voting);
 
 //route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
 annoRouter.delete('/transcriptions/:transcription_id', transcriptions.deleteOne);

@@ -27,7 +27,15 @@
 }
 
 #addNewContainer {
-	
+
+}
+.openTranscriptionChildrenPopup {
+	background-color:yellow;
+	font-weight: normal;
+	color: black;
+}
+.content-area {
+	cursor: text;
 }
 
 .pTextDisplay{

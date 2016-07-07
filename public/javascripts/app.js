@@ -78,6 +78,7 @@ $(document).ready(function() {
     var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
     var startNodeTextEndIndex = startNodeText.toString().length;
     startParentID = startNode.parentElement.id;
+    var startParentClass = startNode.parentElement.className;
 
     var nodeLocationStart = selection.anchorOffset; //index from within startNode text where selection starts
     var nodeLocationEnd = selection.focusOffset; //index from within endNode text where selection ends
@@ -88,14 +89,18 @@ $(document).ready(function() {
 
     outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
 
-    if (startParentID != endParentID) {
+    //only checking here so that other info can still be accessed from reopening
+    if (startParentClass == 'openTranscriptionChildrenPopup') { 
+      $("#popupTranscriptionChildrenMenu").popup("open");
+    }
+    else if (startParentID != endParentID) {
       alert("you can't select across existing fragments' borders sorry");
     }
     else {
 
       var newIDnumber = Math.random().toString().substring(2);
       newNodeInsertID = startParentID.concat("-location-"+newIDnumber); //not a standardised selection label but will do for now
-      var newSpan = "<span style='background-color:yellow'id='" + newNodeInsertID + "' >" + textSelectedFragment + "</span>";
+      var newSpan = "<a class='openTranscriptionChildrenPopup' id='" + newNodeInsertID + "' >" + textSelectedFragment + "</a>";
    
       var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
 
@@ -137,15 +142,13 @@ $(document).ready(function() {
 });
 
 var insertSpanDivs = function() {
-
-  $(outerElementTextIDstring).html(newContent); //replaces the whole element with just the new content between spans...
+  $(outerElementTextIDstring).html(newContent); 
   textSelectedID = newNodeInsertID;
-  textSelectedParent = startParentID;
 };
 
 var newTranscriptionFragment = function() {
 
-  textSelectedHash = startParentID.concat(".body.text"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
+  textSelectedHash = textSelectedParent.concat(".body.text#"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
   var targetData = {body: {text: textSelectedFragmentString, format: "text/html"}, target: {id: textSelectedHash, format: "text/html"}, parent: textSelectedParent};
   
   $.ajax({
@@ -157,9 +160,22 @@ var newTranscriptionFragment = function() {
       function (data) {
         textSelected = data.url;
         targetSelected = data.url;
-        targetType = "transcription";
       }
   });
+
+  var newHTML = $(outerElementTextIDstring).html();
+  var parentData = {body: {text: newHTML}};
+
+  $.ajax({
+    type: "PUT",
+    url: textSelectedParent,
+    async: false,
+    dataType: "json",
+    data: parentData,
+    success:
+      function (data) {}
+  });
+
 };
 
 ///// API FUNCTIONS
@@ -258,6 +274,25 @@ var checkForParent = function(target) {
 
 };
 
+var lookupTranscriptionChildren = function(target) {
+
+  var childTexts
+  var targetParam = encodeURIComponent(target);
+  var aSearch = transcriptionURL.concat("targets/"+targetParam);
+  $.ajax({
+    type: "GET",
+    dataType: "json",
+    url: aSearch,
+    async: false,
+    success: 
+      function (data) {
+        childTexts = data.list;
+      }
+  });
+  return childTexts;
+
+};
+
 var updateVectorSelection = function(vectorURL) {
 
   if (selectingVector == "transcription") {
@@ -281,6 +316,40 @@ var updateVectorSelection = function(vectorURL) {
   else {
     return handleError(err);
   }
+
+};
+
+var votingFunction = function(vote, idString, targetID, targetText, parentID, currentText) {
+
+  var targetData = {
+    parent: parentID, ///it is this that is updated
+    children: {
+      id: idString, //ID of span location
+      fragments: {
+        id: targetID, ///API URL of the annotation voted on
+      }
+    },
+    wholeText: targetText, ///includes outerHTML
+    wholeCurrentText: currentText ///includes outerHTML
+  };
+
+  var theVote;
+  if (targetType == "transcription"){
+    theVote = transcriptionURL + "voting/" + vote;
+  } 
+  else if (targetType == "translation"){
+    theVote = translationURL + "voting/" + vote;
+  }
+
+  $.ajax({
+    type: "PUT",
+    url: theVote,
+    async: false,
+    dataType: "json",
+    data: targetData,
+    success:
+      function (data) {}
+  });
 
 };
 
@@ -346,13 +415,25 @@ var openTranscriptionMenu = function() {
   }
   else if (targetType == "transcription"){
 
-    theText = textSelectedFragmentString;
     canUserAdd = true;
-/*
+    theText = textSelectedFragmentString;
 
-  for this location look up other children and generate carousel with each child on a page
+    var existingChildren = lookupTranscriptionChildren(textSelectedHash); //returns an array of all the children JSONs
+    if (typeof existingChildren != false || existingChildren != 'undefined' || existingChildren != null) {
+      var openingHTML = "<div class='item'><div class='pTextDisplay'><div class='transcription-text'><blockquote id='"
+      var middleHTML = "' class='content-area'>";
+      var closingHTML = "</blockquote></div></div></div>"
+      existingChildren.forEach(function(text) {
 
-*/
+        var itemText = text.body.text;
+        var theURL = text.body.id;
+        var itemID = theURL.slice(transcriptionURL.length, theURL.length);
+        //will need to add voting info at some point
+        var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
+        $("#transcriptionCarouselWrapper").append(itemHTML);
+
+      });
+    };
 
   }
   else {
@@ -361,6 +442,7 @@ var openTranscriptionMenu = function() {
 
   //first slide is always theText
   $(".annoTextDisplay").html(theText);
+//  $(".annoTextDisplay").attr("id") = encodeURIComponent(targetSelected);
   
   //META DATA OPTIONS
 
@@ -376,6 +458,10 @@ var openTranscriptionMenu = function() {
       //    $(".voteDown").click(voteDown(target));
 //  };
 
+};
+
+var closeTranscriptionMenu = function() {
+//remove additional slides and reset $(".annoTextDisplay");
 };
 
 var openTranslationMenu = function() {
@@ -439,7 +525,7 @@ var addTranscription = function(target){
   }
 
   else if (targetType == "transcription") {
-    targetData = {children: {id: textSelected,fragment: {id: createdTranscription,rank: 1.0}}};
+    targetData = {children: {id: textSelected, fragment: {id: createdTranscription,rank: 1.0}}};
   }; 
 
   $.ajax({
@@ -649,12 +735,12 @@ allDrawnItems.on('remove', function(vec){
 
 map.on('popupopen', function() {
 
-  $('.openTranscriptionMenu').on("click", function(event) {
+  $('.openTranscriptionMenu').one("click", function(event) {
     openTranscriptionMenu();
     map.closePopup();
   });
 
-  $('.openTranslationMenu').on("click", function(event) {
+  $('.openTranslationMenu').one("click", function(event) {
     openTranslationMenu();
     map.closePopup();
   });
@@ -663,37 +749,88 @@ map.on('popupopen', function() {
 
 
 //////TRANSCRIPTIONS
+/*
+$(document.activeElement).addEventListener("focus", function( event ) {
+  event.target.style.background = "pink";  
+  alert("the element going into focus is "+event.target.id);
+}, true);
 
-var generatingNewTranscription = false;
+$("#transcriptionEditor").addEventListener("blur", function( event ) {
+  alert("the element going to blur is "+event.target.id)
+}, true);
+*/
+var openTranscriptionEditor = false;
 
 //$( "#transcriptionEditor" ).on( "popupafteropen", function( event, ui ) {
 
-//  var editorTarget = targetSelected;
-//  var editorTargetType = targetType;
+/////NEW LOCATIONS
+$( "#popupTranscriptionNewMenu" ).on( "popupafteropen", function(event, ui) {
+  openTranscriptionEditor = false;
+    $('.openTranscriptionMenuNew').one("click", function(event) {
+      insertSpanDivs();
+      textSelectedParent = transcriptionURL.concat(startParentID);
+      newTranscriptionFragment();
+      textTypeSelected = "transcription";
+      targetType = "transcription";
+      openTranscriptionMenu();
+      openTranscriptionEditor = true;
+      $('#popupTranscriptionNewMenu').popup("close");    
+    });
+});
+//because chaining popup links isn't explicitly supported in JQuery Mobile and while transcription editor is another JQM popup
+$( "#popupTranscriptionNewMenu" ).on("popupafterclose", function(event, ui) {
+  if (openTranscriptionEditor == true) {
+    setTimeout( function(){ $( "#transcriptionEditor" ).popup( "open" ) }, 50 );
+    openTranscriptionEditor = false;
+  };
+});
 
-//  generatingNewTranscription = false;
+//////EXISTING LOCATIONS
+$( "#popupTranscriptionChildrenMenu" ).on( "popupafteropen", function( event, ui ) {
+  openTranscriptionEditor = false;
+    $('.openTranscriptionMenuOld').one("click", function(event) {
+      textSelected = startParentID;
+      textSelectedID = startParentID;
+      textSelectedFragment = $(outerElementTextIDstring).html();
+      textSelectedFragmentString = $(outerElementTextIDstring).html().toString(); //remove html tags
+      textSelectedParent = $(outerElementTextIDstring).parent().attr('id'); 
+      textSelectedHash = textSelectedParent.concat(".body.text"+textSelectedID);
+      textTypeSelected = "transcription";
 
-  $( "#popupTranscriptionNewMenu" ).on( "popupafteropen", function( event, ui ) {
+      targetSelected = startParentID;
+      targetType = "transcription";
 
-      $('.openTranscriptionMenu').on("click", function(event) {
-        insertSpanDivs();
-        newTranscriptionFragment();
-        textTypeSelected = "transcription";
-        targetType = "transcription";
-        openTranscriptionMenu();
-        generatingNewTranscription = true;
-        //close popup
-      });
+      openTranscriptionMenu();
+      openTranscriptionEditor = true;
+      $('#popupTranscriptionChildrenMenu').popup("close");
+    });
+});
+$( "#popupTranscriptionChildrenMenu" ).on("popupafterclose", function(event, ui) {
+  if (openTranscriptionEditor == true) {
+    setTimeout( function(){ $( "#transcriptionEditor" ).popup( "open" ) }, 50 );
+    openTranscriptionEditor = false;
+  };
+});
 
-  });
-
-//});
-
-$('.addTranscriptionSubmit').on("click", function(event) {
+$('.addTranscriptionSubmit').one("click", function(event) {
   event.preventDefault();
   event.stopPropagation();
   addTranscription(targetSelected)
 });
+
+$('.votingUpButton').one("click", function(event) {
+
+  event.preventDefault();
+  event.stopPropagation();
+  
+});
+
+$('.votingDownButton').one("click", function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  
+});
+
 
 $('#transcriptionCarousel').on('slide.bs.carousel', function (event) {
   var slideID = event.relatedTarget.id;
@@ -705,6 +842,8 @@ $('#transcriptionCarousel').on('slide.bs.carousel', function (event) {
   else {
     //display addTranscriptionSubmit button
   };
+
+  ///change targetSelected according to slide viewed
 
 })
 

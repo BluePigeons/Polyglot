@@ -113,7 +113,6 @@ exports.findAllTargetVectors = function(req, res) {
         }
         else {
             vectors.forEach(function(vectorJSON){
-                var vectorID = vectorJSON.body.id;
                 vectorAnnos.push(vectorJSON);
             });
 

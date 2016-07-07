@@ -23,9 +23,15 @@ var transcriptionSchema   = new Schema({
     	"id": {
     		type: String
     	},
-    	"fragment": [{
+    	"fragments": [{
     		"id": {
     			type: String
+    		},
+    		"votesUp": {
+    			type: Number
+    		},
+    		"votesDown": {
+    			type: Number
     		},
     		"rank": {
     			type: Number
@@ -36,7 +42,7 @@ var transcriptionSchema   = new Schema({
     "translation": {
     	type: String
     },
-	"body": [{
+	"body": {
 		"id": {
 			type: String,
 			default: "https://127.0.0.1:8080/transcriptions/"
@@ -53,7 +59,7 @@ var transcriptionSchema   = new Schema({
 			type: String,
 			default: "en"
 		}
-	}],
+	},
 	"target": [{
 		"id": {
 			type: String,
@@ -84,7 +90,8 @@ var transcriptionSchema   = new Schema({
 	"Annotation": {
 		type: String,
 		default: "transcription"
-	}
+	},
+	"metadata":[]
 
 });
 
