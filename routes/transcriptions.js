@@ -214,12 +214,9 @@ exports.addNew = function(req, res) {
 
 exports.getByID = function(req, res) {
     newTranscription.findById(req.params.transcription_id, function(err, transcription) {
-        if (err)
-            res.send(err);
-        res.json(transcription);
-        
+        if (err) {res.send(err) }
+        else { res.json(transcription) };  
     });
-
 };
 
 ////IMPORTANT NOTE: use updateOne to add new children but NOT to change vote or rank!

@@ -50,7 +50,6 @@ var newNodeInsertID;
 var startParentID;
 
 //based on the code from https://davidwalsh.name/text-selection-ajax
-
 // attempt to find a text selection 
 function getSelected() {
   if(window.getSelection) { return window.getSelection() }
@@ -181,7 +180,7 @@ var newTranscriptionFragment = function() {
   });
 
   var newHTML = $(outerElementTextIDstring).html();
-  var parentData = {body: {text: newHTML}};
+  var parentData = {body: {text: newHTML}, children: {id: textSelectedID, fragments: {id: textSelected}}};
 
   $.ajax({
     type: "PUT",
@@ -244,8 +243,9 @@ var getBodyText = function(target) {
 
 var checkForVectorTarget = function(theText) {
   var isThere = "false";
+  alert(theText);
   var theChecking = getTargetJSON(theText);
-  var theTargets = theChecking.targets;
+  var theTargets = theChecking.target;
   theTargets.forEach(function(target){
     if(target.format == "SVG"){
       isThere = target.id;
@@ -262,7 +262,7 @@ var checkForTranscription = function(target) {
   if (targetTranscription == '""') {  return false  }
   else if (targetTranscription == "") {  return false  }
 
-  else {  return targetsTranscription  };
+  else {  return targetTranscription  };
 
 };
 
@@ -324,7 +324,7 @@ var updateVectorSelection = function(vectorURL) {
     async: false,
     data: textData,
     success: 
-      function (data) {};
+      function (data) {}
   });
 
   $.ajax({
@@ -332,7 +332,7 @@ var updateVectorSelection = function(vectorURL) {
     dataType: "json",
     url: vectorURL,
     async: false,
-    data: vectorData
+    data: vectorData,
     success: 
       function (data) {
         selectingVector = "";
@@ -417,6 +417,21 @@ var buildCarousel = function(childrenArray, baseURL, carouselWrapperID, canItLin
 
 };
 
+var findHghestRankingChild = function(parent, locationID) {
+  var parentJSON = getTargetJSON(parent);
+  var theChild = "";
+  var locationArray = parentJSON.target.forEach(function(location){
+    if (location.id == locationID) {
+      location.fragments.forEach(function(alternative){
+        if (alternative.rank == 0) {
+          theChild = alternative.id;
+        };
+      });
+    };
+  });
+  return theChild;
+};
+
 ////IMAGE HANDLING
 
 var loadImage = function(cookiestring) {
@@ -447,6 +462,13 @@ var getImageVectors = function(target) {
 
 ///// VIEWER WINDOWS
 
+//just for testing dev
+/*
+var testingURL = transcriptionURL + "577e7dbb4b89700311000007";
+var testingJSON = getTargetJSON(testingURL);
+var testingText = testingJSON.body.text;
+$("#577e7dbb4b89700311000007").html(testingText);
+*/
 var openTranscriptionMenu = function() {
 
   var targetsTranscription;
@@ -472,9 +494,9 @@ var openTranscriptionMenu = function() {
     var carouselClassID = vectorSelected.slice(vectorURL.length, vectorSelected.length);
     $(newCarouselWrapperID).addClass('vector-target vectorID'+carouselClassID);
 
-    targetsTranscription = checkForTranscription(vectorSelected);
+    targetTranscription = checkForTranscription(vectorSelected);
     canUserLink = false;
-    if (targetsTranscription == false) {
+    if (typeof targetTranscription == false || targetTranscription == 'undefined' || targetTranscription == null) {
       var displayText = " [[[[NO TRANSCRIPTION EXISTS HERE YET]]]] "; //think of something more formal here....
       theText = "noTranscriptionToDisplay";
       var displayID = transcriptionURL.concat(theText);
@@ -502,6 +524,7 @@ var openTranscriptionMenu = function() {
     $(newCarouselWrapperID).addClass('transcription-target transcriptionID'+textSelectedID);
     canUserAdd = true;
     canUserVote = true;
+
     theText = textSelected.slice(transcriptionURL.length, textSelected.length);
     checkVectors = checkForVectorTarget(textSelected); 
     //if there is a vector target already they cannot link
@@ -518,7 +541,7 @@ var openTranscriptionMenu = function() {
   else { alert("what are you opening transcription of?") };
 
   buildCarousel(childrenArray, transcriptionURL, newCarouselWrapperID, canUserLink);
-  $(newCarouselWrapperID).find(*).addClass("transcription-text "+parentID+" "+spanID);
+  $(newCarouselWrapperID).find('*').addClass("transcription-text "+parentID+" "+spanID);
 
   //emphasise theText as the current highest voted -- choose better styling later
   $(theText).css("background-color", "blue");
@@ -540,9 +563,7 @@ var closeTranscriptionMenu = function(carouselWrapperID) {
   //check if add new slide is disabled and reenable
 
 //detach() or remove() ????
-  $(".pTextDisplayItem").filter(function(){
-    return this.parent().attr("id") == carouselWrapperID;
-  }).remove();
+  $(carouselWrapperID).find(".pTextDisplayItem").remove();
 
 };
 
@@ -852,15 +873,16 @@ $( "#popupTranscriptionNewMenu" ).on("popupafterclose", function(event, ui) {
 $( "#popupTranscriptionChildrenMenu" ).on( "popupafteropen", function( event, ui ) {
   openTranscriptionEditor = false;
     $('.openTranscriptionMenuOld').one("click", function(event) {
-      textSelected = startParentID;
       textSelectedID = startParentID;
       textSelectedFragment = $(outerElementTextIDstring).html();
       textSelectedFragmentString = $(outerElementTextIDstring).html().toString(); //remove html tags
-      textSelectedParent = $(outerElementTextIDstring).parent().attr('id'); 
+      textSelectedParent = transcriptionURL + $(outerElementTextIDstring).parent().attr('id'); 
       textSelectedHash = textSelectedParent.concat(".body.text"+textSelectedID);
       textTypeSelected = "transcription";
 
-      targetSelected = startParentID;
+      textSelected = findHghestRankingChild(textSelectedParent, textSelectedID);
+
+      targetSelected = textSelected;
       targetType = "transcription";
 
       openTranscriptionMenu();
