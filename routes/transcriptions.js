@@ -84,11 +84,11 @@ exports.voting = function(req, res) {
                     if(alternative.id == req.body.children.fragments.id) {
                         var oldRank = alternative.rank;
                         var rankChange;
-                        if (req.params.voteType == "votesUp") {
+                        if (req.params.voteType == "up") {
                             rankChange = compareChild(1, alternative, index, currentArray);
                             alternative.votesUp += 1;
                         };
-                        if (req.params.voteType == "votesDown") {
+                        if (req.params.voteType == "down") {
                             rankChange = compareChild(1, alternative, index, currentArray);
                             alternative.votesUp -= 1;
                         };
@@ -98,8 +98,8 @@ exports.voting = function(req, res) {
                         //check to see if now highest ranking child and update
                         if (oldRank != 0 && currentRank == 0){ 
                             var oldHTML = transcription.body.text;
-                            var newInsert = req.body.wholeText;
-                            var oldInsert = req.body.wholeCurrentText;
+                            var newInsert = req.body.votedText;
+                            var oldInsert = req.body.topText;
                             transcription.body.text = replaceChildText(oldHTML, newInsert, oldInsert);
                             reload = "yes";
                         }
@@ -226,14 +226,12 @@ exports.getByID = function(req, res) {
 
 exports.updateOne = function(req, res) {
 
+    console.dir(req.body);
+
     var updateDoc = newTranscription.findById(req.params.transcription_id);
     updateDoc.exec(function(err, transcription) {
 
         if (err) {res.send(err)};
-
-        console.dir(transcription);
-
-        //none of this is working!!!
 
         if (typeof req.body.body.text != 'undefined' || req.body.body.text != null) {
             transcription.body.text = req.body.body.text;

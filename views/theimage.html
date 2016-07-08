@@ -80,7 +80,7 @@
 
 		<div class="content-area" id="hipstercontainer">
 
-			<p id="577e7dbb4b89700311000007">VHS narwhal viral, microdosing craft beer meggings affogato poutine schlitz kitsch plaid cred offal wayfarers. Drinking vinegar church-key vice tattooed chartreuse, williamsburg freegan everyday carry pour-over retro. Thundercats aesthetic wolf, stumptown brooklyn sartorial venmo. Lomo messenger bag flannel, kombucha four loko whatever pinterest pug pop-up. Swag banjo next level hashtag, shoreditch gentrify hoodie. Typewriter next level lumbersexual, heirloom hella etsy vinyl. Occupy taxidermy try-hard, banh mi photo booth distillery cardigan cornhole swag organic forage paleo church-key mumblecore small batch.</p>
+			<p class= "transcription-text" id="577e7dbb4b89700311000007">VHS narwhal viral, microdosing craft beer meggings affogato poutine schlitz kitsch plaid cred offal wayfarers. Drinking vinegar church-key vice tattooed chartreuse, williamsburg freegan everyday carry pour-over retro. Thundercats aesthetic wolf, stumptown brooklyn sartorial venmo. Lomo messenger bag flannel, kombucha four loko whatever pinterest pug pop-up. Swag banjo next level hashtag, shoreditch gentrify hoodie. Typewriter next level lumbersexual, heirloom hella etsy vinyl. Occupy taxidermy try-hard, banh mi photo booth distillery cardigan cornhole swag organic forage paleo church-key mumblecore small batch.</p>
 
 			<p></p><br>
 			<p></p><br>
@@ -107,26 +107,14 @@
 	  <!-- Wrapper for slides -->
 	  <div id="transcriptionCarouselWrapper" class="carousel-inner" role="listbox">
 
-	    <div class="item active">
-	    	<div class="pTextDisplay">
-      			<div class="transcription-text">
-					<blockquote class="annoTextDisplay content-area">there should be some text here</blockquote>
-				</div>
-	      	</div>
-	    </div>
-
 	    <div class="item">
-	      	<div id="addNewContainer" class="pTextDisplay">
+	      	<div class="addNewContainer">
 			    <h3>Add New</h3>
 			    <textarea id="newTranscription" rows="5"></textarea><br>		
 			</div>
 	    </div>
 
-	    <div class="item">
-	    	<div class="pTextDisplay">
-	      		<blockquote class="content-area">When more alternatives are made then they will be here</blockquote>
-	      	</div>
-	    </div>
+	    <!--appended transcription slides go here-->
 
 	  </div>
 
@@ -142,7 +130,11 @@
 
 	</div>
 
-	<input type="button" class="addTranscriptionSubmit" value="Submit"><input type="button" class="votingUpButton" value="VoteUp"><input type="button" class="votingDownButton" value="VoteDown">
+	<button type="button" class="btn addTranscriptionSubmit">SUBMIT</button><br>
+
+	<button type="button" class="btn voteBtn votingUpButton">+1</button><button type="button" class="btn voteBtn votingDownButton">-1</button><br>
+
+	<button type="button" id="addNewBtn" class="btn btn-success" id="addNewBtn">ADD NEW</button>
 
   </div>
 
