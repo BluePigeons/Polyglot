@@ -169,6 +169,13 @@ exports.addNew = function(req, res) {
             {"id": newTarget.id,
             "format": newTarget.format}
         );
+        if (newTarget.format == "SVG") {
+            var targetVectorID = newTarget.id.substring(vectorURL.length);
+            newVector.findById(targetVectorID, function(err, vector){
+                vector.transcription = transURL;
+                vector.save(function(err, vector) {    if (err) {res.send(err)};    });
+            });
+        };
     });
 
     if (typeof req.body.metadata != 'undefined' || req.body.metadata != null) {

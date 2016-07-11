@@ -24,6 +24,7 @@
 	height: 500px;
 	width: 300px;
 	background-color: white;
+	z-index: 10000;
 }
 .popupBoxHandlebar {
 	height: 20px;

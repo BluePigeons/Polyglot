@@ -88,8 +88,8 @@
 
 <div id="popupBoxes">
 
-	<!-- TRANSCRIPTION - need to change this to a non-JQM popup dialog box -->
-	<div id="transcriptionEditor" >
+	<!-- EDITOR BOX -->
+	<div id="theEditor" class="textEditorBox">
 
 		<button type="BUTTON" class="closePopupBtn btn">X</button>
 		<div class="popupBoxHandlebar"></div>
@@ -98,16 +98,16 @@
 
 		  	<h2 class="editorTitle">Transcription</h2>
 
-			<div class="transcriptionCarousel carousel slide" data-interval="false">
+			<div class="editorCarousel carousel slide" data-interval="false">
 
 				<!-- Wrapper for slides -->
-				<div class="transcriptionCarouselWrapper carousel-inner" role="listbox">
+				<div class="editorCarouselWrapper carousel-inner" role="listbox">
 
 				    <div class="item">
 				      	<div class="addNewContainer">
 						    <h3>Add New</h3>
-						    <textarea class="newTranscription" rows="5"></textarea><br>
-						    <button type="button" class="btn addTranscriptionSubmit">SUBMIT</button><br>		
+						    <textarea class="newAnnotation" rows="5"></textarea><br>
+						    <button type="button" class="btn addAnnotationSubmit">SUBMIT</button><br>		
 						</div>
 				    </div>
 
@@ -127,7 +127,7 @@
 
 			</div>
 
-			<button type="button" id="addNewBtn" class="btn btn-success" id="addNewBtn">ADD NEW</button>
+			<button type="button" class="btn btn-success addNewBtn">ADD NEW</button>
 
 		</div>
 
