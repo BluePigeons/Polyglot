@@ -524,7 +524,7 @@ var openEditorMenu = function() {
     };
   };
 
-  buildCarousel(childrenArray, baseURL, popupIDstring, canUserLink);
+  buildCarousel(childrenArray, baseURL, popupIDstring, canUserLink); ///not working????
   $(popupIDstring).find(".editorCarouselWrapper").find('*').addClass(wrapperClassList); 
   var theTextString = "#"+theText;
 
