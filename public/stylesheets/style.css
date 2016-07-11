@@ -34,6 +34,9 @@
 	height: 480px;
 	width: 300px;
 }
+.addNewContainer {
+	margin: 20px;
+}
 .openTranscriptionChildrenPopup {
 	background-color:yellow;
 	font-weight: normal;

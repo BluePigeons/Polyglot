@@ -571,6 +571,7 @@ var addTranscription = function(thisEditor){
   var editorString = "#" + thisEditor;
 
   var newText = $(editorString).find(".newTranscription").val();
+  alert(newText);
   var createdTranscription;
   var transcriptionData = {body: {text: newText, format: "text"}, target: []};
 
