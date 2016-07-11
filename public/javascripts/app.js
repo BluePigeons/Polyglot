@@ -414,7 +414,7 @@ var buildCarousel = function(childrenArray, baseURL, popupIDstring, canItLink) {
       var theURL = text.body.id;
       var itemID = theURL.slice(baseURL.length, theURL.length);
       var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
-      $(popupIDstring).find("#transcriptionCarouselWrapper").append(itemHTML);
+      $(popupIDstring).find(".transcriptionCarouselWrapper").append(itemHTML);
 /////////update metadata options with defaults and placeholders???    
 
     });
@@ -482,12 +482,16 @@ var openTranscriptionMenu = function() {
   var pageBody = document.getElementById("ViewerBox1");
   pageBody.appendChild(popupBoxDiv); 
 
+  var newCarouselID = "Carousel" + Math.random().toString().substring(2);
+  $(popupIDstring).find(".transcriptionCarousel").attr("id", newCarouselID);
+  $(popupIDstring).find(".carousel-control").attr("href", "#" + newCarouselID);
+
   //GLOBAL VARIABLES USED
   var canUserAdd;
   var canUserVote;
   var canUserLink = true;
   var wrapperClassList = "transcription-text ";
-  var newCarouselWrapper = $(popupIDstring).find("#transcriptionCarouselWrapper"); 
+  var newCarouselWrapper = $(popupIDstring).find(".transcriptionCarouselWrapper"); 
   var childrenArray = lookupTranscriptionChildren(targetSelected[0]);
   //the most popular text HTML ID
   var theText = textSelected.slice(transcriptionURL.length, textSelected.length);
