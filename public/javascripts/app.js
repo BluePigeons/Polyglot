@@ -642,45 +642,54 @@ var addAnnotation = function(thisEditor){
 };
 
 var setVectorVariables = function(textType) {
+  var textType = textType;
   targetSelected = [vectorSelected];
   targetType = "vector";
-  editorsOpen.forEach(function(editorOpen){
-    if ((editorOpen.vectorSelected == vectorSelected) && (editorOpen.textTypeSelected == textType)){
-      $(editorOpen.editor).effect("shake");
+  var openNewEditor = function() {
+    var targetText = checkForAnnotation(vectorSelected, textType); //return the api url NOT json file
+    if (targetText == false || targetText == 'undefined' || targetText == null){ 
+      if (textType == "transcription") {  vectorTranscription = false;  } 
+      else if (textType == "translation") {  vectorTranslation = false;  };  
     }
-    else {
-      var targetText = checkForAnnotation(vectorSelected, textType); //return the api url NOT json file
-      if (targetText == false || targetText == 'undefined' || targetText == null){ 
-        if (textType == "transcription") {  vectorTranscription = false;  } 
-        else if (textType == "translation") {  vectorTranslation = false;  };  
-      }
-      else { 
-        if (textType == "transcription") {  vectorTranscription = true;  } 
-        else if (textType == "translation") {  vectorTranslation = true;  }; 
-        textSelected = targetText;
-        textTypeSelected = textType;
-        var lookupTarget = getTargetJSON(textSelected);
-        textSelectedFragment = lookupTarget.body.text;
-        textSelectedFragmentString = textSelectedFragment;
-        textSelectedHash = "";
-        textSelectedID = "";
-        textSelectedParent = lookupTarget.parent; 
-        if (textSelectedParent == "''" || textSelectedParent == "" || textSelectedParent == false || textSelectedParent == null || textSelectedParent == "undefined") {}
-        else {
-          lookupTarget.target.forEach(function(target){
-            if(target.format == "text/html"){
-              textSelectedHash = target.id;
-              var preHash = textSelectedParent.concat(".body.text#");
-              textSelectedID = textSelectedHash.substring(preHash.length);
-            };
-          });
-          targetSelected = [vectorSelected, textSelectedParent];
-          targetType = "vector "+textType;
-        };
+    else { 
+      if (textType == "transcription") {  vectorTranscription = true;  } 
+      else if (textType == "translation") {  vectorTranslation = true;  }; 
+      textSelected = targetText;
+      textTypeSelected = textType;
+      var lookupTarget = getTargetJSON(textSelected);
+      textSelectedFragment = lookupTarget.body.text;
+      textSelectedFragmentString = textSelectedFragment;
+      textSelectedHash = "";
+      textSelectedID = "";
+      textSelectedParent = lookupTarget.parent; 
+      if (textSelectedParent == "''" || textSelectedParent == "" || textSelectedParent == false || textSelectedParent == null || textSelectedParent == "undefined") {}
+      else {
+        lookupTarget.target.forEach(function(target){
+          if(target.format == "text/html"){
+            textSelectedHash = target.id;
+            var preHash = textSelectedParent.concat(".body.text#");
+            textSelectedID = textSelectedHash.substring(preHash.length);
+          };
+        });
+        targetSelected = [vectorSelected, textSelectedParent];
+        targetType = "vector "+textType;
       };
-      openEditorMenu();
-    }
-  });
+    };
+    openEditorMenu();
+  };
+
+  if (editorsOpen == null || editorsOpen == 'undefined') {  openNewEditor();  }
+  else {
+    var canOpen = true;
+    editorsOpen.forEach(function(editorOpen){
+      if ((editorOpen.vectorSelected == vectorSelected) && (editorOpen.textTypeSelected == textType)){
+        $(editorOpen.editor).effect("shake");
+        canOpen = false;
+      }
+    });
+    if (canOpen == true) {  openNewEditor() };
+  };
+
 };
 
 var setTextVariables = function(textType) {
@@ -698,9 +707,7 @@ var setTextVariables = function(textType) {
   textSelectedHash = textSelectedParent.concat(".body.text"+textSelectedID);
   textTypeSelected = textType;
 
-  editorsOpen.forEach(function(targetOpen){
-  if ((targetOpen.textSelectedParent == textSelectedParent) && (targetOpen.textType == textType)) {  $(targetOpen.editor).effect("shake");  }
-  else {
+  var openNewEditor = function() {
     textSelected = findHghestRankingChild(textSelectedParent, textSelectedID);
     checkVectors = checkForVectorTarget(textSelected); 
     if (checkVectors != "false"){
@@ -714,7 +721,21 @@ var setTextVariables = function(textType) {
       targetType = textType;
     };
     openEditorMenu();
-  }});
+  };
+
+  if (editorsOpen == null || editorsOpen == 'undefined') {  openNewEditor();  }
+  else {
+    var canOpen = true;
+    editorsOpen.forEach(function(targetOpen){
+      if ((targetOpen.textSelectedParent == textSelectedParent) && (targetOpen.textType == textType)) {
+        $(targetOpen.editor).effect("shake"); 
+        canOpen = false; 
+      };
+    });
+    if (canOpen == true) {
+      openNewEditor();
+    };
+  };
 };
 
 ///////LEAFLET 
@@ -883,6 +904,7 @@ allDrawnItems.on('remove', function(vec){
 map.on('popupopen', function() {
 
   $('.openTranscriptionMenu').one("click", function(event) {
+    alert("the open function is running");
     setVectorVariables("transcription");
     map.closePopup();
   });
