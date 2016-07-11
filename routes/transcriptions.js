@@ -164,10 +164,12 @@ exports.addNew = function(req, res) {
         transcription.body.language = req.body.body.language;
     };
 
-    transcription.target.push(
-        {"id": req.body.target.id,
-        "format": req.body.target.format}
-    );
+    req.body.target.forEach(function(newTarget){
+        transcription.target.push(
+            {"id": newTarget.id,
+            "format": newTarget.format}
+        );
+    });
 
     if (typeof req.body.metadata != 'undefined' || req.body.metadata != null) {
         transcription.metadata.push(req.body.metadata);
@@ -230,8 +232,11 @@ exports.updateOne = function(req, res) {
 
         if (err) {res.send(err)};
 
+        console.dir(transcription);
+
         if (typeof req.body.body.text != 'undefined' || req.body.body.text != null) {
-            transcription.body.text = req.body.body.text;
+            transcription.body.text = 
+            req.body.body.text;
         };
 
         if (typeof req.body.body.language != 'undefined' || req.body.body.language!= null) {
@@ -276,6 +281,7 @@ exports.updateOne = function(req, res) {
             if (err) {res.send(err)};
             res.json(transcription);
         });
+
     });
 
 };

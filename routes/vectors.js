@@ -197,6 +197,8 @@ exports.updateOne = function(req, res) {
 
     var newInfo = req.body;
 
+    console.dir(newInfo);
+
     var updateDoc = newVector.findById(req.params.vector_id); 
     updateDoc.exec(function(err, vector) {
         if (err) {res.send(err)};

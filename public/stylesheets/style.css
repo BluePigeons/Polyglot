@@ -8,14 +8,8 @@
 	height: 500px;
 }
 
-#transcriptionViewer{
-
-	
-}
-
-#translationViewer{
-
-	
+#popupBoxes {
+	display: none;
 }
 
 #ViewerBox1{
@@ -26,8 +20,19 @@
 	height: 500px;
 }
 
-#addNewContainer {
-
+.textEditorPopup {
+	height: 500px;
+	width: 300px;
+	background-color: white;
+}
+.popupBoxHandlebar {
+	height: 20px;
+	width: 300px;
+	background-color: grey;
+}
+.textEditorMainBox {
+	height: 480px;
+	width: 300px;
 }
 .openTranscriptionChildrenPopup {
 	background-color:yellow;
@@ -45,7 +50,4 @@
 .carousel-control.left, .carousel-control.right {
    background-image:none !important;
    filter:none !important;
-}
-.transcription-text {
-	
 }
