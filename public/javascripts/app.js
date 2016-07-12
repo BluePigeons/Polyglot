@@ -405,7 +405,7 @@ var buildCarousel = function(childrenArray, baseURL, popupIDstring, canItLink) {
       var theURL = text.body.id;
       var itemID = theURL.slice(baseURL.length, theURL.length);
       var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
-      $(popupIDstring).find(".transcriptionCarouselWrapper").append(itemHTML);
+      $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
 /////////update metadata options with defaults and placeholders???    
 
     });
@@ -904,7 +904,6 @@ allDrawnItems.on('remove', function(vec){
 map.on('popupopen', function() {
 
   $('.openTranscriptionMenu').one("click", function(event) {
-    alert("the open function is running");
     setVectorVariables("transcription");
     map.closePopup();
   });
