@@ -152,6 +152,8 @@ $(document).ready(function() {
       };
 
       newContent = outerElementStartContent + newSpan + outerElementEndContent;
+      ///newPopupMenu has correct value but will not open....
+      $( newPopupMenu ).popup();
       $( newPopupMenu ).popup( "open");
 
     };
@@ -261,7 +263,6 @@ var checkForAnnotation = function(target, textType) {
     targetAnno = targetChecking.translation;
   };
 
-  alert("targetAnno is "+targetAnno);
   if (targetAnno == '""') {  return false  }
   else if (targetAnno == "") {  return false  }
   else {  return targetAnno  };
@@ -269,8 +270,6 @@ var checkForAnnotation = function(target, textType) {
 };
 
 var checkForParent = function(target) {
-
-  alert(target);
 
   var targetChecking = getTargetJSON(target);
   var parent = targetChecking.parent;
@@ -422,22 +421,18 @@ var getImageVectors = function(target) {
 
 ///// VIEWER WINDOWS
 
-var buildCarousel = function(baseURL, popupIDstring) {
+var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
 
-  var existingChildren = childrenArray; //an array of all the children JSONs
-  if (typeof existingChildren != false || existingChildren != 'undefined' || existingChildren != null) {
+  if (typeof existingChildren[0] == false || existingChildren[0] == 'undefined' || existingChildren[0] == null) {  }
+  else {  
     var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div> <blockquote id='";
-
     var middleHTML = "' class='content-area'>";
-
     var endTextHTML = "</blockquote><br>";
     var voteButtonsHTML = "<button type='button' class='btn voteBtn votingUpButton'>+1</button><button type='button' class='btn voteBtn votingDownButton'>-1</button><br>";
-
 /////////need to add metadata options!!!
     var metadataHTML = " ";
-
+/////////////////////////////
     var endDivHTML = "</div></div></div>";
-    if (canItLink == false){linkButtonHTML = " "};
     var closingHTML = endTextHTML + voteButtonsHTML + metadataHTML + endDivHTML;
 
     existingChildren.forEach(function(text) {
@@ -447,9 +442,6 @@ var buildCarousel = function(baseURL, popupIDstring) {
       $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
 /////////update metadata options with defaults and placeholders???    
     });
-  }
-  else {
-    $(popupIDstring).find(".addNewContainer").parent().addClass("active");
   };
 
 };
@@ -474,25 +466,27 @@ var openEditorMenu = function() {
   //CREATE POPUP BOX
   var popupBoxDiv = document.createElement("div");
   popupBoxDiv.classList.add("textEditorPopup");
+  popupBoxDiv.classList.add("col-md-6");
   popupBoxDiv.id = "DivTarget-" + Math.random().toString().substring(2);
   var popupIDstring = "#" + popupBoxDiv.id;
 //need to eventually save HTML as string in JS file but for now cloning
   var popupTranscriptionTemplate = document.getElementById("theEditor");
   var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
   popupBoxDiv.appendChild(newPopupClone);
-//need to develop function to decide initial location of new div node
-//hardcoded just for dev
+
   var pageBody = document.getElementById("ViewerBox1");
-  pageBody.appendChild(popupBoxDiv); 
+  pageBody.insertBefore(popupBoxDiv, pageBody.childNodes[0]); 
 
   var newCarouselID = "Carousel" + Math.random().toString().substring(2);
   $(popupIDstring).find(".editorCarousel").attr("id", newCarouselID);
   $(popupIDstring).find(".carousel-control").attr("href", "#" + newCarouselID);
 
+  childrenArray = [];
   childrenArray = lookupAnnotationChildren(targetSelected[0], baseURL);
-  buildCarousel(baseURL, popupIDstring); 
-  $(popupIDstring).find(".editorCarouselWrapper").find('*').addClass(wrapperClassList); 
-  $(popupIDstring).find(".editorTitle").val(titleHTML);
+  buildCarousel(childrenArray, baseURL, popupIDstring); 
+  $(popupIDstring).find("#theEditor").attr("id", "newEditor");
+  $(popupIDstring).find(".textEditorMainBox").find('*').addClass(wrapperClassList); 
+  $(popupIDstring).find(".editorTitle").html(titleHTML);
 
   //UPDATE CAROUSEL 
 
@@ -503,7 +497,9 @@ var openEditorMenu = function() {
   };
 
   //if a highest ranking exists then highlight it
-  if (childrenArray == null || childrenArray == 'undefined' || childrenArray == false) { }
+  if (childrenArray[0] == null || childrenArray[0] == 'undefined' || childrenArray[0] == false || childrenArray[0] == []) {
+    $(popupIDstring).find(".addNewItem").addClass("active");
+  }
   else {
 
     var theTextString = "#" + textSelected.slice(baseURL.length, textSelected.length);
@@ -515,7 +511,7 @@ var openEditorMenu = function() {
     $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
 
     //if it is targeting it's own type then it isn't a top parent OR it is targeting a vector with parents then you can vote and add
-    if (targetType.includes(textTypeSelected) == true) || ((targetType.includes("vector") == true) && (checkForParent(vectorSelected) != null)){
+    if ( (targetType.includes(textTypeSelected) == true) || ( (targetType.includes("vector") == true) && (checkForParent(vectorSelected) != null) ) ) {
       canUserAdd = true; 
       canUserVote = true; 
       $(theTextString).siblings(".voteBtn").remove();
@@ -595,40 +591,71 @@ var addAnnotation = function(thisEditor){
   $(editorString).find(".newAnnotation").val(""); //reset
   newText = "";
 
-  if ((targetType.includes("transcription")==true)&&(textTypeSelected == "transcription")) {
-    targetData = {children: {id: textSelectedID, fragments: {id: createdText}}};
-    $.ajax({
-      type: "PUT",
-      url: textSelectedParent,
-      async: false,
-      data: targetData,
-      success:
-        function (data) {}
-    });
+  if (textTypeSelected == "transcription") {
+
+    if (targetType.includes("transcription")==true) {
+      targetData = {children: {id: textSelectedID, fragments: {id: createdText}}};
+      $.ajax({
+        type: "PUT",
+        url: textSelectedParent,
+        async: false,
+        data: targetData,
+        success:
+          function (data) {}
+      });
+    };
+
+    if ((targetType.includes("vector")==true)&&(childrenArray[0] == null || childrenArray[0] == 'undefined' || childrenArray[0] == false || childrenArray[0] == [])) {
+      targetData = {transcription: createdText};
+      $.ajax({
+        type: "PUT",
+        url: vectorSelected,
+        async: false,
+        data: targetData,
+        success:
+          function (data) {}
+      });
+    };
+
   }; 
-  if ((targetType.includes("translation")==true)&&(textTypeSelected == "translation")) {
-    targetData = {children: {id: textSelectedID, fragments: {id: createdText}}};
-    $.ajax({
-      type: "PUT",
-      url: textSelectedParent,
-      async: false,
-      data: targetData,
-      success:
-        function (data) {}
-    });
+
+  if (textTypeSelected == "translation") {
+
+    if (targetType.includes("translation")==true) {
+      targetData = {children: {id: textSelectedID, fragments: {id: createdText}}};
+      $.ajax({
+        type: "PUT",
+        url: textSelectedParent,
+        async: false,
+        data: targetData,
+        success:
+          function (data) {}
+      });
+    };
+
+    if ((targetType.includes("vector")==true)&&(childrenArray[0] == null || childrenArray[0] == 'undefined' || childrenArray[0] == false || childrenArray[0] == [])) {
+      targetData = {translation: createdText};
+      $.ajax({
+        type: "PUT",
+        url: vectorSelected,
+        async: false,
+        data: targetData,
+        success:
+          function (data) {}
+      });
+    };
+
   }; 
   
   //UPDATE CAROUSEL
   textData.body.id = createdText;
-  $(editorString).find("NothingToDisplay").parent().parent().parent().remove();
-  buildCarousel([textData], baseURL, editorString, false);
+  buildCarousel([textData], baseURL, editorString);
 
 };
 
 var setVectorVariables = function(textType) {
   var textType = textType;
   textTypeSelected = textType;
-  alert("the new textTypeSelected is "+textTypeSelected);
   targetSelected = [vectorSelected];
   targetType = "vector";
   var openNewEditor = function() {
@@ -941,11 +968,11 @@ $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
 });
 
 $('#page_body').on("click", ".closePopupBtn", function(){
-  var thisEditor = $(event.target).parent().parent().attr("id");
+  var thisEditor = $(event.target).parent().parent().parent().attr("id");
   closeEditorMenu(thisEditor);
 });
 
-/////change the textSelected to whatever slide of the carousel is selected...
+
 $('#page_body').on('slid.bs.carousel', '.editorCarousel', function(event) {
   var baseURL;
   if(textTypeSelected == "transcription") {
@@ -954,12 +981,9 @@ $('#page_body').on('slid.bs.carousel', '.editorCarousel', function(event) {
   else if(textTypeSelected == "translation") {
     baseURL = translationURL;
   };
+/////change the textSelected to whatever slide of the carousel is selected...
 
-  var slide = event.relatedTarget;
-  if (slide.classList.includes("addNewItem") == false) {
-    textSelected = baseURL.concat(slide.id);
-  };
-};
+});
 
 $('#page_body').on("click", ".addNewBtn", function(){
   $(event.target).siblings(".editorCarousel").carousel(0);

@@ -16,24 +16,19 @@
 	height: 500px;
 }
 
-#ViewerBox2{
-	height: 500px;
-}
-
 .textEditorPopup {
 	height: 500px;
-	width: 300px;
 	background-color: white;
 	z-index: 10000;
 }
 .popupBoxHandlebar {
 	height: 20px;
-	width: 300px;
+	width: 100%;
 	background-color: grey;
 }
 .textEditorMainBox {
 	height: 480px;
-	width: 300px;
+	width: 100%;
 }
 .addNewContainer {
 	margin: 20px;
@@ -48,7 +43,7 @@
 }
 
 .pTextDisplay{
-	width: 300px;
+	width: 200px;
 }
 
 .carousel-control.left, .carousel-control.right {
