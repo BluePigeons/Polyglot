@@ -17,9 +17,6 @@ var imageSelectedMetadata = [];
 //API URL
 var vectorSelected = "";
 var currentCoords;
-//booleans to declare if it has one or not
-var vectorTranscription;
-var vectorTranslation;
 
 //API URL
 var textSelected = "";
@@ -34,17 +31,16 @@ var textSelectedFragment = "";
 var textSelectedFragmentString = "";
 var textTypeSelected = "";
 
-//URL
-var targetSelected;
+//URLs
+var targetSelected; //array
 var targetType = ""; 
+var childrenArray;
 
 //those targets currently open in editors
 var editorsOpen = [];
 
-//Boolean to indicate if the currently selected text already has children or not
-var childrenText = false;
 //used to indicate if the user is currently searching for a vector to link or not
-var selectingVector = "";
+var selectingVector = false;
 
 var findingcookies = document.cookie;
 
@@ -244,7 +240,6 @@ var searchCookie = function(field) {
 
 var checkForVectorTarget = function(theText) {
   var isThere = "false";
-  alert(theText);
   var theChecking = getTargetJSON(theText);
   var theTargets = theChecking.target;
   theTargets.forEach(function(target){
@@ -266,6 +261,7 @@ var checkForAnnotation = function(target, textType) {
     targetAnno = targetChecking.translation;
   };
 
+  alert("targetAnno is "+targetAnno);
   if (targetAnno == '""') {  return false  }
   else if (targetAnno == "") {  return false  }
   else {  return targetAnno  };
@@ -286,11 +282,10 @@ var checkForParent = function(target) {
 
 };
 
-var lookupTranscriptionChildren = function(target) {
-
+var lookupAnnotationChildren = function(target, baseURL) {
   var childTexts
   var targetParam = encodeURIComponent(target);
-  var aSearch = transcriptionURL.concat("targets/"+targetParam);
+  var aSearch = baseURL.concat("targets/"+targetParam);
   $.ajax({
     type: "GET",
     dataType: "json",
@@ -302,7 +297,6 @@ var lookupTranscriptionChildren = function(target) {
       }
   });
   return childTexts;
-
 };
 
 var updateVectorSelection = function(vectorURL) {
@@ -312,14 +306,16 @@ var updateVectorSelection = function(vectorURL) {
   if (textTypeSelected == "transcription") {  vectorData = {transcription: textSelected};  }
   else if (textTypeSelected == "translation") {  vectorData = {translation: textSelected};  };
 
-  $.ajax({
-    type: "PUT",
-    dataType: "json",
-    url: textSelected,
-    async: false,
-    data: textData,
-    success: 
-      function (data) {}
+  selectingVector.forEach(function(child){
+    $.ajax({
+      type: "PUT",
+      dataType: "json",
+      url: child.body.id,
+      async: false,
+      data: textData,
+      success: 
+        function (data) {}
+    });
   });
 
   $.ajax({
@@ -330,7 +326,7 @@ var updateVectorSelection = function(vectorURL) {
     data: vectorData,
     success: 
       function (data) {
-        selectingVector = "";
+        selectingVector = false;
       }
   }); 
 
@@ -381,38 +377,6 @@ var votingFunction = function(vote, votedID, currentTopText) {
 
 };
 
-var buildCarousel = function(childrenArray, baseURL, popupIDstring, canItLink) {
-
-  var existingChildren = childrenArray; //an array of all the children JSONs
-  if (typeof existingChildren != false || existingChildren != 'undefined' || existingChildren != null) {
-    var openingHTML = "<div class='item pTextDisplayItem'><div class='pTextDisplay'><div><blockquote id='";
-
-    var middleHTML = "' class='content-area'>";
-
-    var endTextHTML = "</blockquote><br>";
-    var voteButtonsHTML = "<button type='button' class='btn voteBtn votingUpButton'>+1</button><button type='button' class='btn voteBtn votingDownButton'>-1</button><br>";
-    var linkButtonHTML = "<button type='button' class='btn linkBtn'>Link Vector</button><br>";
-
-/////////need to add metadata options!!!
-    var metadataHTML = " ";
-
-    var endDivHTML = "</div></div></div>";
-    if (canItLink == false){linkButtonHTML = " "};
-    var closingHTML = endTextHTML + voteButtonsHTML + linkButtonHTML + metadataHTML + endDivHTML;
-
-    existingChildren.forEach(function(text) {
-      var itemText = text.body.text;
-      var theURL = text.body.id;
-      var itemID = theURL.slice(baseURL.length, theURL.length);
-      var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
-      $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
-/////////update metadata options with defaults and placeholders???    
-
-    });
-  };
-
-};
-
 var findHghestRankingChild = function(parent, locationID) {
   var parentJSON = getTargetJSON(parent);
   var theChild = "";
@@ -458,24 +422,53 @@ var getImageVectors = function(target) {
 
 ///// VIEWER WINDOWS
 
+var buildCarousel = function(baseURL, popupIDstring) {
+
+  var existingChildren = childrenArray; //an array of all the children JSONs
+  if (typeof existingChildren != false || existingChildren != 'undefined' || existingChildren != null) {
+    var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div> <blockquote id='";
+
+    var middleHTML = "' class='content-area'>";
+
+    var endTextHTML = "</blockquote><br>";
+    var voteButtonsHTML = "<button type='button' class='btn voteBtn votingUpButton'>+1</button><button type='button' class='btn voteBtn votingDownButton'>-1</button><br>";
+
+/////////need to add metadata options!!!
+    var metadataHTML = " ";
+
+    var endDivHTML = "</div></div></div>";
+    if (canItLink == false){linkButtonHTML = " "};
+    var closingHTML = endTextHTML + voteButtonsHTML + metadataHTML + endDivHTML;
+
+    existingChildren.forEach(function(text) {
+      var itemText = text.body.text;
+      var itemID = text._id;
+      var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
+      $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
+/////////update metadata options with defaults and placeholders???    
+    });
+  }
+  else {
+    $(popupIDstring).find(".addNewContainer").parent().addClass("active");
+  };
+
+};
+
 var openEditorMenu = function() {
 
   //GLOBAL VARIABLES USED
-  var canUserAdd;
-  var canUserVote;
-  var canUserLink = true;
-  var childrenArray;
   var baseURL;
   var wrapperClassList;
+  var titleHTML;
   if (textTypeSelected == "transcription") {
     wrapperClassList = "transcription-text ";
-    childrenArray = lookupTranscriptionChildren(targetSelected[0]);
     baseURL = transcriptionURL;
+    titleHTML = "TRANSCRIPTION";
   }
   else if (textTypeSelected == "translation") {
     wrapperClassList = "translation-text ";
-    childrenArray = lookupTranslationChildren(targetSelected[0]);
     baseURL = translationURL;
+    titleHTML = "TRANSLATION";
   };
 
   //CREATE POPUP BOX
@@ -483,6 +476,7 @@ var openEditorMenu = function() {
   popupBoxDiv.classList.add("textEditorPopup");
   popupBoxDiv.id = "DivTarget-" + Math.random().toString().substring(2);
   var popupIDstring = "#" + popupBoxDiv.id;
+//need to eventually save HTML as string in JS file but for now cloning
   var popupTranscriptionTemplate = document.getElementById("theEditor");
   var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
   popupBoxDiv.appendChild(newPopupClone);
@@ -495,50 +489,37 @@ var openEditorMenu = function() {
   $(popupIDstring).find(".editorCarousel").attr("id", newCarouselID);
   $(popupIDstring).find(".carousel-control").attr("href", "#" + newCarouselID);
 
-  //the most popular text HTML ID
-  var theText = textSelected.slice(baseURL.length, textSelected.length);
-
-  //ADD CAROUSEL 
-  if (targetType.includes("vector") == true){
-    canUserLink = false;
-    if (((textTypeSelected == "transcription")&&(vectorTranscription == false)) || ((textTypeSelected == "translation")&&(vectorTranslation == false))) {
-      var displayText = " [[[[NOTHING EXISTS HERE YET]]]] "; 
-      theText = "NothingToDisplay"; 
-      var placeholderURL = baseURL.concat(theText);
-      childrenArray = [{body: {id: placeholderURL, text: displayText}}];
-      canUserAdd = true;
-      canUserVote = false;
-    };
-  };
-
-  if (targetType.includes(textTypeSelected) == true){
-    //if the text has a parent then you can vote between and add because it will also have a text target
-    if (checkForParent(textSelected) == false) { 
-          canUserAdd = true; 
-          canUserVote = true; 
-    }
-    //if it doesn't have a parent then it shouldn't have any siblings, only children
-    else { 
-          canUserAdd = false; 
-          canUserVote = false; 
-    };
-  };
-
-  buildCarousel(childrenArray, baseURL, popupIDstring, canUserLink); ///not working????
+  childrenArray = lookupAnnotationChildren(targetSelected[0], baseURL);
+  buildCarousel(baseURL, popupIDstring); 
   $(popupIDstring).find(".editorCarouselWrapper").find('*').addClass(wrapperClassList); 
-  var theTextString = "#"+theText;
+  $(popupIDstring).find(".editorTitle").val(titleHTML);
 
-  //emphasise theText as the current highest voted -- choose better styling later
-  $(theTextString).css("color", "grey");
-  $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
-  $(theTextString).parent().parent().parent().addClass("active"); //ensures it is the first slide people see
-  $(theTextString).addClass("currentTop");
+  //UPDATE CAROUSEL 
 
-  if (canUserAdd == false) {
-    //disable the add new slide
+  //if a vector target doesn't already exist then user can link to a vector target either by creating or clicking on an existing one 
+  if (targetType.includes("vector") == false){ 
+    var linkButtonHTML = "<button type='button' class='btn linkBtn'>Link Vector</button><br>";
+    $(popupIDstring).find(".textEditorMainBox").append(linkButtonHTML);
   };
-  if (canUserVote == false) {
-    $(theTextString).siblings(".voteBtn").remove();
+
+  //if a highest ranking exists then highlight it
+  if (childrenArray == null || childrenArray == 'undefined' || childrenArray == false) { }
+  else {
+
+    var theTextString = "#" + textSelected.slice(baseURL.length, textSelected.length);
+    $(theTextString).parent().parent().parent().addClass("active"); //ensures it is the first slide people see
+    $(theTextString).addClass("currentTop");
+
+///////////choose better styling later!!!!!///////
+    $(theTextString).css("color", "grey");
+    $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
+
+    //if it is targeting it's own type then it isn't a top parent OR it is targeting a vector with parents then you can vote and add
+    if (targetType.includes(textTypeSelected) == true) || ((targetType.includes("vector") == true) && (checkForParent(vectorSelected) != null)){
+      canUserAdd = true; 
+      canUserVote = true; 
+      $(theTextString).siblings(".voteBtn").remove();
+    };
   };
 
   $(".textEditorPopup").draggable();
@@ -549,11 +530,12 @@ var openEditorMenu = function() {
   editorsOpen.push({
     "editor": popupIDstring,
     "typesFor": targetType,
-    "vectorSelected": vectorSelected,
-    "textSelectedParent": textSelectedParent,
-    "textSelectedID": textSelectedID,
-    "textSelectedHash": textSelectedHash,
-    "textTypeSelected": textTypeSelected
+    "vSelected": vectorSelected,
+    "tSelectedParent": textSelectedParent,
+    "tSelectedID": textSelectedID,
+    "tSelectedHash": textSelectedHash,
+    "tTypeSelected": textTypeSelected,
+    "children": childrenArray
   });
 
 };
@@ -635,27 +617,27 @@ var addAnnotation = function(thisEditor){
         function (data) {}
     });
   }; 
-
-  closeEditorMenu(thisEditor);
-  openEditorMenu();
+  
+  //UPDATE CAROUSEL
+  textData.body.id = createdText;
+  $(editorString).find("NothingToDisplay").parent().parent().parent().remove();
+  buildCarousel([textData], baseURL, editorString, false);
 
 };
 
 var setVectorVariables = function(textType) {
   var textType = textType;
+  textTypeSelected = textType;
+  alert("the new textTypeSelected is "+textTypeSelected);
   targetSelected = [vectorSelected];
   targetType = "vector";
   var openNewEditor = function() {
     var targetText = checkForAnnotation(vectorSelected, textType); //return the api url NOT json file
-    if (targetText == false || targetText == 'undefined' || targetText == null){ 
-      if (textType == "transcription") {  vectorTranscription = false;  } 
-      else if (textType == "translation") {  vectorTranslation = false;  };  
-    }
+    if (targetText == false || targetText == 'undefined' || targetText == null){   }
     else { 
-      if (textType == "transcription") {  vectorTranscription = true;  } 
-      else if (textType == "translation") {  vectorTranslation = true;  }; 
-      textSelected = targetText;
-      textTypeSelected = textType;
+
+      textSelected = targetText; //initially for editor and target info the textSelected is highest ranking
+
       var lookupTarget = getTargetJSON(textSelected);
       textSelectedFragment = lookupTarget.body.text;
       textSelectedFragmentString = textSelectedFragment;
@@ -671,7 +653,7 @@ var setVectorVariables = function(textType) {
             textSelectedID = textSelectedHash.substring(preHash.length);
           };
         });
-        targetSelected = [vectorSelected, textSelectedParent];
+        targetSelected = [vectorSelected, textSelectedHash];
         targetType = "vector "+textType;
       };
     };
@@ -835,7 +817,7 @@ map.on('draw:created', function(evt) {
   layer._leaflet_id = vectorSelected;
   layer.bindPopup(popupVectorMenu).openPopup();
 
-    if (selectingVector != "") {
+    if (selectingVector != false) {
       updateVectorSelection(vectorSelected);
     }
 
@@ -848,14 +830,12 @@ allDrawnItems.on('click', function(vec) {
 
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
 
-  else {
+  else if (selectingVector != false) {
+    updateVectorSelection(vectorSelected);
+  }
 
-    if (selectingVector == "") {
-      vec.layer.openPopup();
-    }
-    else {
-      updateVectorSelection(vectorSelected);
-    }
+  else {
+    vec.layer.openPopup();
   };
 
 });
@@ -944,12 +924,13 @@ $('#page_body').on("click", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).parent().attr("id");
   editorsOpen.forEach(function(target){
     if(target.editor == thisEditor) {
-      targetType = "typesFor";
-      vectorSelected = "vectorSelected";
-      textSelectedParent = "textSelectedParent";
-      textSelectedID = "textSelectedID";
-      textSelectedHash = "textSelectedHash";
-      textTypeSelected = "textTypeSelected";
+      targetType = target.typesFor;
+      vectorSelected = target.vSelected;
+      textSelectedParent = target.tSelectedParent;
+      textSelectedID = target.tSelectedID;
+      textSelectedHash = target.tSelectedHash;
+      textTypeSelected = target.tTypeSelected;
+      childrenArray = target.children;
     };
   })
 });
@@ -964,14 +945,30 @@ $('#page_body').on("click", ".closePopupBtn", function(){
   closeEditorMenu(thisEditor);
 });
 
-/////change the textSelected to whatever slide of the carousel is selected??
+/////change the textSelected to whatever slide of the carousel is selected...
+$('#page_body').on('slid.bs.carousel', '.editorCarousel', function(event) {
+  var baseURL;
+  if(textTypeSelected == "transcription") {
+    baseURL = transcriptionURL;
+  }
+  else if(textTypeSelected == "translation") {
+    baseURL = translationURL;
+  };
+
+  var slide = event.relatedTarget;
+  if (slide.classList.includes("addNewItem") == false) {
+    textSelected = baseURL.concat(slide.id);
+  };
+};
 
 $('#page_body').on("click", ".addNewBtn", function(){
   $(event.target).siblings(".editorCarousel").carousel(0);
 });
 
 $('#page_body').on("click", ".linkBtn", function(){
-  updateVectorSelection();
+  selectingVector = childrenArray;
+  $("#popupLinkVectorMenu").popup( "open");
+  $("#imageViewer").effect("bounce");
 });
 
 $('#page_body').on("click", '.votingUpButton', function(event) {

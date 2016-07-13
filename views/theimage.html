@@ -96,14 +96,14 @@
 
 		<div data-role="main" class="textEditorMainBox ui-content">
 
-		  	<h2 class="editorTitle">Transcription</h2>
+		  	<h2 class="editorTitle"></h2>
 
 			<div class="editorCarousel carousel slide" data-interval="false">
 
 				<!-- Wrapper for slides -->
 				<div class="editorCarouselWrapper carousel-inner" role="listbox">
 
-				    <div class="item">
+				    <div class="item addNewItem">
 				      	<div class="addNewContainer">
 						    <h3>Add New</h3>
 						    <textarea class="newAnnotation" rows="5"></textarea><br>
@@ -133,29 +133,33 @@
 
 	</div>
 
-	<!-- New Transcription Text Select Popup Menu -->
-	<div data-role="popup"  id="popupTranscriptionNewMenu" data-arrow="t,b">
-
+	<!-- Link Vector Popup Menu -->
+	<div data-role="popup"  id="popupLinkVectorMenu" data-arrow="t,b">
 	  <div data-role="main" class="ui-content">
-
-	  	<a class="openTranscriptionMenuNew transcriptionTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
-
+	  	<p>Select an existing vector or create a new one on the image for this text selection</p>
 	  </div>
-
 	</div>
 
-	<!-- Children Transcription Text Select Popup Menu-->
-	<div data-role="popup" id="popupTranscriptionChildrenMenu" data-arrow="t,b">
-
+	<!-- New Transcription Text Select Popup Menu -->
+	<div data-role="popup"  id="popupTranscriptionNewMenu" data-arrow="t,b">
 	  <div data-role="main" class="ui-content">
-
-	  	<a class="openTranscriptionMenuOld ui-btn ui-corner-all ui-shadow ui-btn-inline">VIEW OTHER TRANSCRIPTIONS</a>
-
+	  	<a class="openTranscriptionMenuNew transcriptionTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
 	  </div>
-
 	</div>
 
 	<!-- New Translation Text Select Popup Menu -->
+	<div data-role="popup"  id="popupTranslationNewMenu" data-arrow="t,b">
+	  <div data-role="main" class="ui-content">
+	  	<a class="openTranslationMenuNew translationTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSLATION</a>
+	  </div>
+	</div>	
+
+	<!-- Children Transcription Text Select Popup Menu-->
+	<div data-role="popup" id="popupTranscriptionChildrenMenu" data-arrow="t,b">
+	  <div data-role="main" class="ui-content">
+	  	<a class="openTranscriptionMenuOld ui-btn ui-corner-all ui-shadow ui-btn-inline">VIEW OTHER TRANSCRIPTIONS</a>
+	  </div>
+	</div>
 
 	<!-- Children Translation Text Select Popup Menu -->
 </div>
