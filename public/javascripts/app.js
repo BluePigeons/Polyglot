@@ -147,12 +147,13 @@ var checkForVectorTarget = function(theText) {
   var isThere = "false";
   var theChecking = getTargetJSON(theText);
   alert(theText);
-  var theTargets = theChecking.target;
-  theTargets.forEach(function(target){
-    if(target.format == "SVG"){
-      isThere = target.id;
-    };
-  });
+  if (typeof theChecking.target != (null || 'undefined')) {
+    theChecking.target.forEach(function(target){
+      if(target.format == "SVG"){
+        isThere = target.id;
+      };
+    });
+  };
   return isThere;
 };
 
@@ -630,11 +631,20 @@ var setTextVariables = function(textType) {
     baseURL = translationURL;
   }
   textSelectedID = startParentID;
+  textSelected = baseURL.concat(textSelectedID);
   textSelectedFragment = $(outerElementTextIDstring).html();
-  textSelectedFragmentString = $(outerElementTextIDstring).html().toString(); //remove html tags
-  textSelectedParent = baseURL + $(outerElementTextIDstring).parent().attr('id'); 
-  textSelectedHash = textSelectedParent.concat(textSelectedID);
+  textSelectedFragmentString = $(outerElementTextIDstring).html().toString(); 
+
+  if ($(outerElementTextIDstring).parent().attr('id') != (null || 'undefined')){
+    textSelectedParent = baseURL + $(outerElementTextIDstring).parent().attr('id'); 
+  };
+///////is this always true??
+//  textSelectedParent = baseURL + $(outerElementTextIDstring).parent().attr('id'); 
+
+  textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
   textTypeSelected = textType;
+
+  alert(textSelectedParent);
 
   var openNewEditor = function() {
     textSelected = findHghestRankingChild(textSelectedParent, textSelectedID);
