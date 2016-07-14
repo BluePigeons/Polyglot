@@ -16,10 +16,15 @@
 	height: 500px;
 }
 
+.popupAnnoMenu {
+	
+
+}
+
 .textEditorPopup {
 	height: 500px;
 	background-color: white;
-	z-index: 10000;
+	z-index: 1000;
 }
 .popupBoxHandlebar {
 	height: 20px;
@@ -31,19 +36,16 @@
 	width: 100%;
 }
 .addNewContainer {
-	margin: 20px;
+	margin: 40px;
 }
 .openTranscriptionChildrenPopup {
 	background-color:yellow;
 	font-weight: normal;
 	color: black;
 }
-.content-area {
-	cursor: text;
-}
 
 .pTextDisplay{
-	width: 200px;
+	margin: 50px;
 }
 
 .carousel-control.left, .carousel-control.right {

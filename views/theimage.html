@@ -12,7 +12,6 @@
 <!-- Stylesheets -->
 
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css"> 
 
     <link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.css" />
@@ -26,7 +25,6 @@
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script> 
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
@@ -34,13 +32,6 @@
     <script src="javascripts/leaflet-iiif.js"></script>
 
 	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
-
-<!-- 
-	Will eventually use Browserify and bundle all final packages.
-	For now though I keep changing so I'm using node_module paths for most instead until packages are more finalised and tidied up more. WIll use it for node standard packages http, fs, stream etc though.
--->
-
-<!--	<script src="javascripts/bundle.js"></script> -->
 
 
 </head>
@@ -66,17 +57,30 @@
 <!-- Image Viewer Panel -->
 
 	<div id="imageViewer" class="col-md-4">
+		<div class="progress">
+
+		<!-- rather than percentage perhaps just indicator of started/ongoing/complete (+11% each) for each phase of 33%? -->
+
+		  <div class="progress-bar progress-bar-success" style="width: 33%">
+		    <span class="Type">Vectors</span><span class="stage"></span>
+		  </div>
+		  <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 11%">
+		    <span class="Type">Transcribing</span><span class="stage"></span>
+		  </div>
+		  <div class="progress-bar progress-bar-danger" style="width: 22%">
+		    <span class="Type">Translating</span><span class="stage"></span>
+		  </div>
+		</div>
 		<div id='map'></div>
 	</div>
 
-<!-- First Viewer Box -->
+<!-- Viewer Box -->
 
 	<div class="viewerBox col-md-8">
 		<div id="ViewerBox1" class="row">
-			<div class="col-md-4"></div>
+			<div class="col-md-4" id="bob"></div>
 		</div>
 	</div>
-
 
 </div>
 
@@ -87,7 +91,7 @@
 	<!-- EDITOR BOX -->
 	<div id="theEditor" class="textEditorBox">
 
-		<div class="popupBoxHandlebar"><button type="BUTTON" class="closePopupBtn btn">X</button></div>
+		<div class="popupBoxHandlebar"><button type="BUTTON" class="closePopupBtn btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></div>
 
 		<div data-role="main" class="textEditorMainBox ui-content">
 
@@ -129,37 +133,39 @@
 	</div>
 
 	<!-- Link Vector Popup Menu -->
-	<div data-role="popup"  id="popupLinkVectorMenu" data-arrow="t,b">
+	<div id="popupLinkVectorMenu" class="popupAnnoMenu">
+		<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
 	  <div data-role="main" class="ui-content">
 	  	<p>Select an existing vector or create a new one on the image for this text selection</p>
 	  </div>
 	</div>
 
 	<!-- New Transcription Text Select Popup Menu -->
-	<div data-role="popup"  id="popupTranscriptionNewMenu" data-arrow="t,b">
-	  <div data-role="main" class="ui-content">
-	  	<a class="openTranscriptionMenuNew transcriptionTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
-	  </div>
+	<div id="popupTranscriptionNewMenu" class="popupAnnoMenu">
+		<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
+		 <div data-role="main" class="ui-content">
+		  	<a class="openTranscriptionMenuNew transcriptionTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
+		 </div>
 	</div>
 
 	<!-- New Translation Text Select Popup Menu -->
-	<div data-role="popup"  id="popupTranslationNewMenu" data-arrow="t,b">
-	  <div data-role="main" class="ui-content">
-	  	<a class="openTranslationMenuNew translationTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSLATION</a>
-	  </div>
+	<div id="popupTranslationNewMenu" class="popupAnnoMenu" >
+	<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
+	  	<div data-role="main" class="ui-content">
+	  		<a class="openTranslationMenuNew translationTarget ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSLATION</a>
+	  	</div>
 	</div>	
 
 	<!-- Children Transcription Text Select Popup Menu-->
-	<div data-role="popup" id="popupTranscriptionChildrenMenu" data-arrow="t,b">
-	  <div data-role="main" class="ui-content">
-	  	<a class="openTranscriptionMenuOld ui-btn ui-corner-all ui-shadow ui-btn-inline">VIEW OTHER TRANSCRIPTIONS</a>
-	  </div>
+	<div id="popupTranscriptionChildrenMenu" class="popupAnnoMenu">
+		<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
+	  	<div data-role="main" class="ui-content">
+	  		<a class="openTranscriptionMenuOld ui-btn ui-corner-all ui-shadow ui-btn-inline">VIEW OTHER TRANSCRIPTIONS</a>
+	  	</div>
 	</div>
 
 	<!-- Children Translation Text Select Popup Menu -->
-
 </div>
-
 </div>
 
 <!-- The Javascript apps for every page-->

@@ -64,103 +64,6 @@ function getSelected() {
   return false;
 };
 
-// create sniffer 
-$(document).ready(function() {
-  $('#page_body').on("mouseup", '.content-area', function(event) {
-
-    selection = getSelected(); 
-    textSelectedFragment = selection;
-
-    if(textSelectedFragment && (textSelectedFragment = new String(textSelectedFragment).replace(/^\s+|\s+$/g,''))) {
-      textSelectedFragmentString = textSelectedFragment.toString();
-    };
-
-    var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
-    var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
-    var startNodeTextEndIndex = startNodeText.toString().length;
-    startParentID = startNode.parentElement.id;
-    var startParentClass = startNode.parentElement.className;
-
-    var nodeLocationStart = selection.anchorOffset; //index from within startNode text where selection starts
-    var nodeLocationEnd = selection.focusOffset; //index from within endNode text where selection ends
-
-    var endNode = selection.focusNode; //the text type Node that end of the selection was in 
-    var endNodeText = endNode.textContent;
-    var endParentID = endNode.parentElement.id; //the ID of the element type Node that the text ends in
-
-    outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
-
-    //only checking here so that other info can still be accessed from reopening
-    if (startParentClass.includes('openTranscriptionChildrenPopup')) { 
-      $("#popupTranscriptionChildrenMenu").popup("open");
-    }
-    else if (startParentClass.includes('openTranslationChildrenPopup')) { 
-      $("#popupTranslationChildrenMenu").popup("open");
-    }
-    else if (startParentID != endParentID) {
-      alert("you can't select across existing fragments' borders sorry");
-    }
-    else {
-
-      var newSpanClass;
-      var newPopupMenu;
-      if (startParentClass.includes('transcription-text')) {
-        newSpanClass = "transcription-text openTranscriptionChildrenPopup";
-        newPopupMenu = "#popupTranscriptionNewMenu";
-      }
-      else if (startParentClass.includes('translation-text')) {
-        newSpanClass = "translation-text openTranslationChildrenPopup";
-        newPopupMenu = "#popupTranslationNewMenu";
-      }
-      else {
-        alert("Please select transcription translation text");
-      };
-
-      var newIDnumber = Math.random().toString().substring(2);
-      newNodeInsertID = startParentID.concat("-location-"+newIDnumber); //not a standardised selection label but will do for now
-
-      var newSpan = "<a class='" + newSpanClass + "' id='" + newNodeInsertID + "' >" + textSelectedFragment + "</a>";
-   
-      var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
-
-      ///CONTENT BEFORE HIGHLIGHT IN THE TEXT TYPE NODE
-      var previousSpanContent = startNodeText.slice(0, nodeLocationStart);
-
-      //CONTENT BEFORE HIGHLIGHT IN THE ELEMENT TYPE NODE
-      var previousSpan = startNode.previousElementSibling; //returns null if none i.e. this text node is first node in element node
-      var outerElementStartContent;
-      if (previousSpan == "null" || previousSpan == null) {outerElementStartContent = previousSpanContent}
-      else {
-        var previousSpanAll = previousSpan.outerHTML;
-        var StartIndex = outerElementHTML.indexOf(previousSpanAll) + previousSpanAll.length;
-        outerElementStartContent = outerElementHTML.slice(0, StartIndex).concat(previousSpanContent);
-      };
-
-      ///CONTENT AFTER HIGHLIGHT IN THE TEXT TYPE NODE
-      var nextSpanContent;
-      if (endNode == startNode) { nextSpanContent = startNodeText.slice(nodeLocationEnd, startNodeTextEndIndex)}
-      else {nextSpanContent = endNodeText.slice(0, nodeLocationEnd)};
-
-      ///CONTENT AFTER HIGHLIGHT IN ELEMENT TYPE NODE
-      var nextSpan = endNode.nextElementSibling; //returns null if none i.e. this text node is the last in the element node
-      var outerElementEndContent;
-      if (nextSpan == "null" || nextSpan == null) {outerElementEndContent = nextSpanContent}
-      else {
-        var nextSpanAll = nextSpan.outerHTML;
-        var EndIndex = outerElementHTML.indexOf(nextSpanAll);
-        outerElementEndContent = nextSpanContent.concat(outerElementHTML.substring(EndIndex));
-      };
-
-      newContent = outerElementStartContent + newSpan + outerElementEndContent;
-      ///newPopupMenu has correct value but will not open....
-      $( newPopupMenu ).popup();
-      $( newPopupMenu ).popup( "open");
-
-    };
-
-  });
-});
-
 var insertSpanDivs = function() {
   $(outerElementTextIDstring).html(newContent); 
   textSelectedID = newNodeInsertID;
@@ -168,9 +71,9 @@ var insertSpanDivs = function() {
 
 var newTranscriptionFragment = function() {
 
-  textSelectedHash = textSelectedParent.concat(".body.text#"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
+  textSelectedHash = textSelectedParent.concat("#"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
   targetSelected = [textSelectedHash];
-  var targetData = {body: {text: textSelectedFragmentString, format: "text/html"}, target: {id: textSelectedHash, format: "text/html"}, parent: textSelectedParent};
+  var targetData = {body: {text: textSelectedFragmentString, format: "text/html"}, target: [{id: textSelectedHash, format: "text/html"}], parent: textSelectedParent};
   
   $.ajax({
     type: "POST",
@@ -184,7 +87,7 @@ var newTranscriptionFragment = function() {
   });
 
   var newHTML = $(outerElementTextIDstring).html();
-  var parentData = {body: {text: newHTML}, children: {id: textSelectedID, fragments: {id: textSelected}}};
+  var parentData = {body: {text: newHTML}, children: [{id: textSelectedID, fragments: [{id: textSelected}]}]};
 
   $.ajax({
     type: "PUT",
@@ -335,7 +238,7 @@ var votingFunction = function(vote, votedID, currentTopText) {
 
   var theVote;
   var targetID; ///API URL of the annotation voted on
-  var outerSpan;
+  var outerSpanOpen;
   if (targetType == "transcription"){
     theVote = transcriptionURL + "voting/" + vote;
     targetID = transcriptionURL.concat(votedID);
@@ -425,10 +328,10 @@ var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
 
   if (typeof existingChildren[0] == false || existingChildren[0] == 'undefined' || existingChildren[0] == null) {  }
   else {  
-    var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div> <blockquote id='";
-    var middleHTML = "' class='content-area'>";
-    var endTextHTML = "</blockquote><br>";
-    var voteButtonsHTML = "<button type='button' class='btn voteBtn votingUpButton'>+1</button><button type='button' class='btn voteBtn votingDownButton'>-1</button><br>";
+    var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
+    var middleHTML = "' class='content-area' title='Annotation Text'>";
+    var endTextHTML = "</p><br>";
+    var voteButtonsHTML = "<button type='button' class='btn voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-triangle-top' aria-hidden='true'></span></button><button type='button' class='btn voteBtn votingDownButton'><span class='badge'></span><span class='glyphicon glyphicon-triangle-bottom' aria-hidden='true'></span></button><br>";
 /////////need to add metadata options!!!
     var metadataHTML = " ";
 /////////////////////////////
@@ -440,9 +343,25 @@ var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
       var itemID = text._id;
       var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
       $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
+/////////find votes up and down 
+      if (typeof text.votingInfo != (null || 'undefined')) {
+        var votesUp = text.votingInfo.votesUp;
+        $(popupIDstring).find(".votingUpButton").find(".badge").val(votesUp);
+        var votesDown = text.votingInfo.votesDown;
+        $(popupIDstring).find(".votingDownButton").find(".badge").val(votesDown);
+      };
 /////////update metadata options with defaults and placeholders???    
     });
   };
+
+  $('.openTranscriptionChildrenPopup').popover({ 
+    trigger: 'manual',
+    placement: 'top',
+    html : true,
+    content: function() {
+      return $('#popupTranscriptionChildrenMenu').html();
+    }
+  });
 
 };
 
@@ -511,10 +430,10 @@ var openEditorMenu = function() {
     $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
 
     //if it is targeting it's own type then it isn't a top parent OR it is targeting a vector with parents then you can vote and add
-    if ( (targetType.includes(textTypeSelected) == true) || ( (targetType.includes("vector") == true) && (checkForParent(vectorSelected) != null) ) ) {
-      canUserAdd = true; 
-      canUserVote = true; 
-      $(theTextString).siblings(".voteBtn").remove();
+    if ( (targetType.includes(textTypeSelected) == true) || ( (targetType.includes("vector") == true) && (checkForParent(vectorSelected) != null) ) ) {  }
+    else {
+      $(theTextString).siblings(".voteBtn").remove(); //////not siblings anymore
+      //////disable the add page
     };
   };
 
@@ -676,7 +595,7 @@ var setVectorVariables = function(textType) {
         lookupTarget.target.forEach(function(target){
           if(target.format == "text/html"){
             textSelectedHash = target.id;
-            var preHash = textSelectedParent.concat(".body.text#");
+            var preHash = textSelectedParent.concat("#");
             textSelectedID = textSelectedHash.substring(preHash.length);
           };
         });
@@ -713,7 +632,7 @@ var setTextVariables = function(textType) {
   textSelectedFragment = $(outerElementTextIDstring).html();
   textSelectedFragmentString = $(outerElementTextIDstring).html().toString(); //remove html tags
   textSelectedParent = baseURL + $(outerElementTextIDstring).parent().attr('id'); 
-  textSelectedHash = textSelectedParent.concat(".body.text"+textSelectedID);
+  textSelectedHash = textSelectedParent.concat(textSelectedID);
   textTypeSelected = textType;
 
   var openNewEditor = function() {
@@ -768,7 +687,7 @@ var controlOptions = {
     }
 };
 var popupVectorMenu = L.popup()
-    .setContent('<a class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><a class="openTranslationMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSLATION</a>');
+    .setContent('<div class="popupAnnoMenu"> <a class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><a class="openTranslationMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSLATION</a> </div>');
 //to track when editing
 var currentlyEditing = false;
 var currentlyDeleting = false;
@@ -922,30 +841,156 @@ map.on('popupopen', function() {
 
 });
 
-//////TRANSCRIPTIONS
+///////ANNOTATION EDITORS
 
-//NEW LOCATIONS
-$( "#popupTranscriptionNewMenu" ).on( "popupafteropen", function(event, ui) {
-    $('.openTranscriptionMenuNew').one("click", function(event) {
-      insertSpanDivs();
-      textSelectedParent = transcriptionURL.concat(startParentID);
-      newTranscriptionFragment();
-      textTypeSelected = "transcription";
-      targetType = "transcription";
-      openEditorMenu();
-      $('#popupTranscriptionNewMenu').popup("close");    
-    });
+$(document).ready(function() {
+  $('#page_body').on("mouseup", '.content-area', function(event) {
+
+    selection = getSelected(); 
+    textSelectedFragment = selection;
+
+    if(textSelectedFragment && (textSelectedFragment = new String(textSelectedFragment).replace(/^\s+|\s+$/g,''))) {
+      textSelectedFragmentString = textSelectedFragment.toString();
+    };
+
+    var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
+    var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
+    var startNodeTextEndIndex = startNodeText.toString().length;
+    startParentID = startNode.parentElement.id;
+    var startParentClass = startNode.parentElement.className;
+
+    var nodeLocationStart = selection.anchorOffset; //index from within startNode text where selection starts
+    var nodeLocationEnd = selection.focusOffset; //index from within endNode text where selection ends
+
+    var endNode = selection.focusNode; //the text type Node that end of the selection was in 
+    var endNodeText = endNode.textContent;
+    var endParentID = endNode.parentElement.id; //the ID of the element type Node that the text ends in
+
+    outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
+
+    //only checking here so that other info can still be accessed from reopening
+    if (startParentClass.includes('openTranscriptionChildrenPopup')) { 
+      /////
+      $('.openTranscriptionChildrenPopup').popover('show');
+    }
+    else if (startParentClass.includes('openTranslationChildrenPopup')) { 
+      /////
+      $('.openTranslationChildrenPopup').popover('show');
+    }
+    else if (startParentID != endParentID) {
+      alert("you can't select across existing fragments' borders sorry");
+    }
+    else {
+
+      var newSpanClass;
+      var newPopupMenu;
+      if (startParentClass.includes('transcription-text')) {
+        newSpanClass = "transcription-text openTranscriptionChildrenPopup";
+      }
+      else if (startParentClass.includes('translation-text')) {
+        newSpanClass = "translation-text openTranslationChildrenPopup";
+      }
+      else {
+        alert("Please select transcription translation text");
+      };
+
+      newNodeInsertID = Math.random().toString().substring(2);
+
+      var newSpan = "<a title='AnnotationHasChildren' class='" + newSpanClass + "' id='" + newNodeInsertID + "' >" + textSelectedFragment + "</a>";
+   
+      var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
+
+      ///CONTENT BEFORE HIGHLIGHT IN THE TEXT TYPE NODE
+      var previousSpanContent = startNodeText.slice(0, nodeLocationStart);
+
+      //CONTENT BEFORE HIGHLIGHT IN THE ELEMENT TYPE NODE
+      var previousSpan = startNode.previousElementSibling; //returns null if none i.e. this text node is first node in element node
+      var outerElementStartContent;
+      if (previousSpan == "null" || previousSpan == null) {outerElementStartContent = previousSpanContent}
+      else {
+        var previousSpanAll = previousSpan.outerHTML;
+        var StartIndex = outerElementHTML.indexOf(previousSpanAll) + previousSpanAll.length;
+        outerElementStartContent = outerElementHTML.slice(0, StartIndex).concat(previousSpanContent);
+      };
+
+      ///CONTENT AFTER HIGHLIGHT IN THE TEXT TYPE NODE
+      var nextSpanContent;
+      if (endNode == startNode) { nextSpanContent = startNodeText.slice(nodeLocationEnd, startNodeTextEndIndex)}
+      else {nextSpanContent = endNodeText.slice(0, nodeLocationEnd)};
+
+      ///CONTENT AFTER HIGHLIGHT IN ELEMENT TYPE NODE
+      var nextSpan = endNode.nextElementSibling; //returns null if none i.e. this text node is the last in the element node
+      var outerElementEndContent;
+      if (nextSpan == "null" || nextSpan == null) {outerElementEndContent = nextSpanContent}
+      else {
+        var nextSpanAll = nextSpan.outerHTML;
+        var EndIndex = outerElementHTML.indexOf(nextSpanAll);
+        outerElementEndContent = nextSpanContent.concat(outerElementHTML.substring(EndIndex));
+      };
+
+      newContent = outerElementStartContent + newSpan + outerElementEndContent;
+
+      $(outerElementTextIDstring).popover({ 
+        trigger: 'manual',
+        placement: 'top',
+        html : true,
+        container: 'body',
+        title: "  ",
+        content: function() {
+          return $('#popupTranscriptionNewMenu').html();
+        }
+      });
+
+      $(outerElementTextIDstring).popover('show');
+
+      $(outerElementTextIDstring).on("shown.bs.popover", function(event) {
+
+          $('#page_body').on("click", function(event) {
+            if ($(event.target).hasClass("popupAnnoMenu") == false) {
+              $(outerElementTextIDstring).popover("hide");
+            }
+          });
+
+          $('.openTranscriptionMenuNew').one("click", function(event) {
+            insertSpanDivs();
+            textSelectedParent = transcriptionURL.concat(startParentID);
+            newTranscriptionFragment();
+            textTypeSelected = "transcription";
+            targetType = "transcription";
+            openEditorMenu();
+            $(outerElementTextIDstring).popover('hide');    
+          });
+
+          $('.closeThePopover').on("click", function(event){
+            $(outerElementTextIDstring).popover("hide");
+          });
+      });
+
+    };
+
+  });
 });
 
-//EXISTING LOCATIONS
-$( "#popupTranscriptionChildrenMenu" ).on( "popupafteropen", function( event, ui ) {
-    $('.openTranscriptionMenuOld').one("click", function(event) {
-      setTextVariables("transcription");
-      $('#popupTranscriptionChildrenMenu').popup("close");
-    });
+/////maybe change to be more specific to the drawing?
+$('#map').popover({ 
+  trigger: 'manual',
+  placement: 'top',
+  html : true,
+  content: function() {
+    return $('popupLinkVectorMenu').html();
+  }
 });
 
-///EVENTS IN TEXT EDITOR BOXES
+$('#map').on("shown.bs.popover", function(event) {
+    $('#page_body').on("click", function(event) {
+      if ($(event.target).hasClass("popupAnnoMenu") == false) {
+        $('#map').popover("hide");
+      }
+    });
+    $('.closeThePopover').on("click", function(event){
+      $('#map').popover("hide");
+    });
+});
 
 $('#page_body').on("click", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).parent().attr("id");
@@ -968,7 +1013,8 @@ $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
 });
 
 $('#page_body').on("click", ".closePopupBtn", function(){
-  var thisEditor = $(event.target).parent().parent().parent().attr("id");
+  var thisEditor = $(event.target).parent().parent().parent().parent().attr("id");
+  alert(thisEditor);
   closeEditorMenu(thisEditor);
 });
 
@@ -991,21 +1037,51 @@ $('#page_body').on("click", ".addNewBtn", function(){
 
 $('#page_body').on("click", ".linkBtn", function(){
   selectingVector = childrenArray;
-  $("#popupLinkVectorMenu").popup( "open");
   $("#imageViewer").effect("bounce");
+  $("#map").popover( "show");
 });
 
 $('#page_body').on("click", '.votingUpButton', function(event) {
-  var votedID = $(event.target).siblings("blockquote").attr("id");
-  var currentTopText = $(event.target).parent().parent().parent().siblings(".currentTop").find("blockquote").html();
+  var votedID = $(event.target).siblings("p").attr("id");
+  var currentTopText = $(event.target).parent().parent().parent().siblings(".currentTop").find("p").html();
   votingFunction("up", votedID, currentTopText);
 });
 
 $('#page_body').on("click", '.votingDownButton', function(event) {
-  var votedID = $(event.target).siblings("blockquote").attr("id");
-  var currentTopText = $(event.target).parent().parent().parent().siblings(".currentTop").find("blockquote").html();
+  var votedID = $(event.target).siblings("p").attr("id");
+  var currentTopText = $(event.target).parent().parent().parent().siblings(".currentTop").find("p").html();
   votingFunction("up", votedID, currentTopText);
 });
 
+//////TRANSCRIPTIONS
 
+$('.openTranscriptionChildrenPopup').popover({ 
+  trigger: 'click',
+  placement: 'top',
+  html : true,
+  content: function() {
+    return $('#popupTranscriptionChildrenMenu').html();
+  }
+});
+
+$('.openTranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
+/*
+    $('#page_body').on("click", function(event) {
+      if ($(event.target).hasClass("popupAnnoMenu") == false) {
+        $('.openTranscriptionChildrenPopup').popover("hide");
+      }
+    });
+*/
+    $('.openTranscriptionMenuOld').one("click", function(event) {
+      setTextVariables("transcription");
+      $('.openTranscriptionChildrenPopup').popover('hide');
+    });
+
+    $('.closeThePopover').on("click", function(event){
+      $('.openTranscriptionChildrenPopup').popover("hide");
+    });
+
+});
+
+///////TRANSLATIONS
 

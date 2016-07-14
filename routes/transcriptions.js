@@ -232,15 +232,19 @@ exports.updateOne = function(req, res) {
 
         if (err) {res.send(err)};
 
-        console.dir(transcription);
+        if (typeof req.body.body != 'undefined' || req.body.body != null) {
 
-        if (typeof req.body.body.text != 'undefined' || req.body.body.text != null) {
-            transcription.body.text = 
-            req.body.body.text;
-        };
+            if (typeof req.body.body.text != 'undefined' || req.body.body.text != null) {
+                transcription.body.text = req.body.body.text;
+            };
 
-        if (typeof req.body.body.language != 'undefined' || req.body.body.language!= null) {
-            transcription.body.language = req.body.body.language;
+            if (typeof req.body.body.language != 'undefined' || req.body.body.language!= null) {
+                transcription.body.language = req.body.body.language;
+            };
+
+            if (typeof req.body.body.format != 'undefined' || req.body.body.format!= null) {
+                transcription.body.format = req.body.body.format;
+            };
         };
 
         if (typeof req.body.parent != 'undefined' || req.body.parent != null) {
@@ -299,9 +303,45 @@ exports.deleteOne = function(req, res) {
         });
 };
 
+var votingInfoTexts = function(targetID, textArray) {
+
+    var fragmentsArray = [];
+
+    var parentID = targetID.split("#", 1);
+    console.log(parentID);
+    var spanID = targetID.split("#", 2);
+    var parentSearch = newTranscription.findById(parentID, function(err, textParent){
+        if (err) {
+            textArray.forEach(function(textJSON){
+                fragmentsArray.push(textJSON);
+            });
+        }
+        else {
+        ///find the location in the parent of these children
+        textParent.children.forEach(function(location){
+            if (location.id == spanID) { 
+                ///for each child with this target find the corresponding voting info from parent array
+                textArray.forEach(function(theJSON){
+                    location.fragments.forEach(function(fragmentID){
+                        if (fragmentID == theJSON.body.id) {
+                            var theText = theJSON;
+                            ///adds new field before returning
+                            theText.votingInfo = fragmentID;
+                            fragmentsArray.push(theText);
+                        };
+                    });
+                });
+            };
+        });
+        };
+    });
+
+    return fragmentsArray;
+
+};
+
 exports.getByTarget = function(req, res) {
 
-    var textAnnos = [];
     var targetID = req.params.target;
     var theSearch = newTranscription.find({'target.id': targetID});
 
@@ -311,11 +351,15 @@ exports.getByTarget = function(req, res) {
             console.log(err);
             res.json({list: false});
         }
+        else if (targetID.includes("#")==true) {
+            var textWithVotes = votingInfoTexts(targetID, texts);  //function isn't working
+            res.json({list: textWithVotes});
+        }
         else {
+            var textAnnos = [];
             texts.forEach(function(textJSON){
                 textAnnos.push(textJSON);
             });
-
             res.json({list: textAnnos});
         };
     });
