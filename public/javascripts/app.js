@@ -146,7 +146,6 @@ var searchCookie = function(field) {
 var checkForVectorTarget = function(theText) {
   var isThere = "false";
   var theChecking = getTargetJSON(theText);
-  alert(theText);
   if (typeof theChecking.target != (null || 'undefined')) {
     theChecking.target.forEach(function(target){
       if(target.format == "SVG"){
@@ -284,7 +283,7 @@ var votingFunction = function(vote, votedID, currentTopText) {
 var findHghestRankingChild = function(parent, locationID) {
   var parentJSON = getTargetJSON(parent);
   var theChild = "";
-  var locationArray = parentJSON.target.forEach(function(location){
+  var locationArray = parentJSON.children.forEach(function(location){
     if (location.id == locationID) {
       location.fragments.forEach(function(alternative){
         if (alternative.rank == 0) {
@@ -424,6 +423,7 @@ var openEditorMenu = function() {
   else {
 
     var theTextString = "#" + textSelected.slice(baseURL.length, textSelected.length);
+    alert(theTextString);
     $(theTextString).parent().parent().parent().addClass("active"); //ensures it is the first slide people see
     $(theTextString).addClass("currentTop");
 
@@ -629,25 +629,22 @@ var setTextVariables = function(textType) {
   }
   else if (textType == "translation") {
     baseURL = translationURL;
-  }
+  };
   textSelectedID = startParentID;
-  textSelected = baseURL.concat(textSelectedID);
   textSelectedFragment = $(outerElementTextIDstring).html();
   textSelectedFragmentString = $(outerElementTextIDstring).html().toString(); 
 
   if ($(outerElementTextIDstring).parent().attr('id') != (null || 'undefined')){
     textSelectedParent = baseURL + $(outerElementTextIDstring).parent().attr('id'); 
   };
-///////is this always true??
-//  textSelectedParent = baseURL + $(outerElementTextIDstring).parent().attr('id'); 
 
   textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
   textTypeSelected = textType;
 
-  alert(textSelectedParent);
-
   var openNewEditor = function() {
+
     textSelected = findHghestRankingChild(textSelectedParent, textSelectedID);
+
     checkVectors = checkForVectorTarget(textSelected); 
     if (checkVectors != "false"){
       vectorSelected = checkVectors;

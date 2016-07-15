@@ -255,30 +255,52 @@ exports.updateOne = function(req, res) {
             vector.metadata.push(req.body.metadata);
         };
 
-        if (typeof req.body.children != 'undefined' || req.body.children != null) {
+        if (typeof req.body.children[0] != 'undefined' || req.body.children[0] != null) {
 
-            transcription.children.forEach(function(location){
-                if (location.id == req.body.children.id) {
-                    location.fragments.push({
-                            "id": req.body.children.fragments.id,
-                            "votesUp": 0,
-                            "votesDown": 0,
-                            "rank": 1
+            if (typeof transcription.children[0] != 'undefined' || transcription.children[0] != null) {
+
+                transcription.children.forEach(function(location){
+                    if (location.id == req.body.children.id) {
+                        location.fragments.push({
+                                "id": req.body.children.fragments[0].id,
+                                "votesUp": 0,
+                                "votesDown": 0,
+                                "rank": 1
+                            });
+                    }
+                    else {
+                        transcription.children.push({
+                            "id": req.body.children.id,
+                        
+                            "fragments": [{
+                                "id": req.body.children.fragments[0].id, ///////really confused
+                                "votesUp": 0,
+                                "votesDown": 0,
+                                "rank": 0
+                            }]
                         });
-                }
-                else {
+                    };
+                });
+            }
+
+            else {
+
+                req.body.children.forEach(function(location){
+                    console.dir(location.fragments[0].id);
                     transcription.children.push({
-                        "id": req.body.children.id,
+                        "id": location.id,
                     
                         "fragments": [{
-                            "id": req.body.children.fragments.id,
+                            "id": location.fragments[0].id, ///isn't going in with the rest of it....
                             "votesUp": 0,
                             "votesDown": 0,
                             "rank": 0
                         }]
                     });
-                };
-            });
+                    
+                });
+
+            };
         };
 
         transcription.save(function(err) {
