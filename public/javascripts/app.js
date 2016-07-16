@@ -250,7 +250,6 @@ var votingFunction = function(vote, votedID, currentTopText) {
     targetID = translationURL.concat(votedID);
     outerSpanOpen = "<a class='translation-text openTranslationChildrenPopup' id='"+ textSelectedID + "' >";
   };
-  var idString = "#" + textSelectedID;
 
   var votedTextBody = $(votedID).html(); 
   var currentText = outerSpanOpen + currentTopText + "</a>"; ///current most voted at that location, includes outerHTML
@@ -258,14 +257,14 @@ var votingFunction = function(vote, votedID, currentTopText) {
 
   var targetData = {
     parent: textSelectedParent, ///it is this that is updated containing the votedText within its body
-    children: {
-      id: idString, //ID of span location
-      fragments: {
-        id: targetID,
-      }
-    },
+    children: [{
+      id: textSelectedID, //ID of span location
+      fragments: [{
+        id: targetID
+      }]
+    }],
     votedText: votedText,
-    topText: topText
+    topText: currentText
   };
 
   $.ajax({
@@ -331,12 +330,13 @@ var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
   else {  
     var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
     var middleHTML = "' class='content-area' title='Annotation Text'>";
-    var endTextHTML = "</p><br>";
-    var voteButtonsHTML = "<button type='button' class='btn voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-triangle-top' aria-hidden='true'></span></button><button type='button' class='btn voteBtn votingDownButton'><span class='badge'></span><span class='glyphicon glyphicon-triangle-bottom' aria-hidden='true'></span></button><br>";
+    var endTextHTML = "</p></div>";
+    //<span class='badge'></span>
+    var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-plus' aria-hidden='true' ></span></button><button type='button' class='btn btn-default voteBtn votingDownButton'><span class='badge'></span><span class='glyphicon glyphicon-minus' aria-hidden='true'></span></button></div>";
 /////////need to add metadata options!!!
     var metadataHTML = " ";
 /////////////////////////////
-    var endDivHTML = "</div></div></div>";
+    var endDivHTML = "</div></div>";
     var closingHTML = endTextHTML + voteButtonsHTML + metadataHTML + endDivHTML;
 
     existingChildren.forEach(function(text) {
@@ -423,7 +423,6 @@ var openEditorMenu = function() {
   else {
 
     var theTextString = "#" + textSelected.slice(baseURL.length, textSelected.length);
-    alert(theTextString);
     $(theTextString).parent().parent().parent().addClass("active"); //ensures it is the first slide people see
     $(theTextString).addClass("currentTop");
 
@@ -434,7 +433,7 @@ var openEditorMenu = function() {
     //if it is targeting it's own type then it isn't a top parent OR it is targeting a vector with parents then you can vote and add
     if ( (targetType.includes(textTypeSelected) == true) || ( (targetType.includes("vector") == true) && (checkForParent(vectorSelected) != null) ) ) {  }
     else {
-      $(theTextString).siblings(".voteBtn").remove(); //////not siblings anymore
+      $(theTextString).parent().parent().find(".voteBtn").remove(); //////not siblings anymore
       //////disable the add page
     };
   };
@@ -1030,8 +1029,7 @@ $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
 });
 
 $('#page_body').on("click", ".closePopupBtn", function(){
-  var thisEditor = $(event.target).parent().parent().parent().parent().attr("id");
-  alert(thisEditor);
+  var thisEditor = $(event.target).parent().parent().parent().attr("id");
   closeEditorMenu(thisEditor);
 });
 
@@ -1059,14 +1057,15 @@ $('#page_body').on("click", ".linkBtn", function(){
 });
 
 $('#page_body').on("click", '.votingUpButton', function(event) {
-  var votedID = $(event.target).siblings("p").attr("id");
-  var currentTopText = $(event.target).parent().parent().parent().siblings(".currentTop").find("p").html();
+  var votedID = $(event.target).parent().parent().find("p").attr("id");
+  var currentTopText = $(event.target).parent().parent().parent().find(".currentTop").html();
+  alert(currentTopText);
   votingFunction("up", votedID, currentTopText);
 });
 
 $('#page_body').on("click", '.votingDownButton', function(event) {
-  var votedID = $(event.target).siblings("p").attr("id");
-  var currentTopText = $(event.target).parent().parent().parent().siblings(".currentTop").find("p").html();
+  var votedID = $(event.target).parent().parent().find("p").attr("id");
+  var currentTopText = $(event.target).parent().parent().parent().find(".currentTop").html();
   votingFunction("up", votedID, currentTopText);
 });
 

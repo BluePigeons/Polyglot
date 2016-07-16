@@ -71,52 +71,61 @@ var compareChild = function(vote, alternative, index, currentArray) {
 
 exports.voting = function(req, res) {
 
-    var voteOn = newTranscription.findById(req.body.parent);
+    var voteOn = newTranscription.findOne({'body.id':req.body.parent});
     voteOn.exec(function(err, transcription) {
 
-        if (err) {res.send(err)};
+        if (err) {res.send(err)}
 
-        var reload;
+        else {
 
-        transcription.children.forEach(function(location){
-            if (location.id == req.body.children.id) {
-                location.fragments.forEach(function(alternative, index, currentArray){
-                    if(alternative.id == req.body.children.fragments.id) {
-                        var oldRank = alternative.rank;
-                        var rankChange;
-                        if (req.params.voteType == "up") {
-                            rankChange = compareChild(1, alternative, index, currentArray);
-                            alternative.votesUp += 1;
-                        };
-                        if (req.params.voteType == "down") {
-                            rankChange = compareChild(1, alternative, index, currentArray);
-                            alternative.votesUp -= 1;
-                        };
-                        var currentRank = oldRank + rankChange[0];
-                        alternative.rank = currentRank;
-                        location.fragments[rankChange[1]].rank += rankChange[2];
-                        //check to see if now highest ranking child and update
-                        if (oldRank != 0 && currentRank == 0){ 
-                            var oldHTML = transcription.body.text;
-                            var newInsert = req.body.votedText;
-                            var oldInsert = req.body.topText;
-                            transcription.body.text = replaceChildText(oldHTML, newInsert, oldInsert);
-                            reload = "yes";
-                        }
-                        else {
-                            reload = "no";
-                        };
-                    }
-                    else { res.json({"fail":"what are you voting for??"}) };
-                });
-            }
-            else { res.json({"fail":"what are you voting for??"}) };
-        });
+            var reload;
 
-        transcription.save(function(err) {
-            if (err) {res.send(err)};
-            res.json({"reloadText": reload});
-        });
+            console.log("the span id sent is "+req.body.children[0].id);
+
+            transcription.children.forEach(function(location){
+                console.log("the parents child spans "+location.id);
+                if (location.id == req.body.children[0].id) {
+                    console.log("the parent span's fragments are "+JSON.stringify(location.fragments));
+                    location.fragments.forEach(function(alternative, index, currentArray){
+                        if(alternative.id == req.body.children[0].fragments[0].id) {
+                            var oldRank = alternative.rank;
+                            var rankChange;
+                            if (req.params.voteType == "up") {
+                                rankChange = compareChild(1, alternative, index, currentArray);
+                                alternative.votesUp += 1;
+                            };
+                            if (req.params.voteType == "down") {
+                                rankChange = compareChild(-1, alternative, index, currentArray);
+                                alternative.votesUp -= 1;
+                            };
+                            var currentRank = oldRank + rankChange[0];
+                            alternative.rank = currentRank;
+                            /////
+                            if (typeof location.fragments[rankChange[1]] != (null || 'undefined')) {
+                                location.fragments[rankChange[1]].rank += rankChange[2]; //////
+                            };
+                            //check to see if now highest ranking child and update
+                            if ((oldRank != 0) && (currentRank == 0)){ 
+                                var oldHTML = transcription.body.text;
+                                var newInsert = req.body.votedText;
+                                var oldInsert = req.body.topText;
+                                transcription.body.text = replaceChildText(oldHTML, newInsert, oldInsert);
+                                reload = "yes";
+                            }
+                            else {
+                                reload = "no";
+                            };
+                        };
+                    });
+                };
+            });
+
+            transcription.save(function(err) {
+                if (err) {res.send(err)}
+                else {  res.json({"reloadText": reload});   }
+            });
+
+        };
 
     });
 
@@ -261,23 +270,28 @@ exports.updateOne = function(req, res) {
 
                 transcription.children.forEach(function(location){
                     if (location.id == req.body.children.id) {
+                        var newRank = location.fragments.length;
                         location.fragments.push({
                                 "id": req.body.children.fragments[0].id,
                                 "votesUp": 0,
                                 "votesDown": 0,
-                                "rank": 1
+                                "rank": newRank
                             });
                     }
                     else {
-                        transcription.children.push({
-                            "id": req.body.children.id,
-                        
-                            "fragments": [{
-                                "id": req.body.children.fragments[0].id, ///////really confused
-                                "votesUp": 0,
-                                "votesDown": 0,
-                                "rank": 0
-                            }]
+                        req.body.children.forEach(function(location){
+                            console.dir(location.fragments[0].id);
+                            transcription.children.push({
+                                "id": location.id,
+                            
+                                "fragments": [{
+                                    "id": location.fragments[0].id, ///isn't going in with the rest of it....
+                                    "votesUp": 0,
+                                    "votesDown": 0,
+                                    "rank": 0
+                                }]
+                            });
+                            
                         });
                     };
                 });
@@ -330,9 +344,9 @@ var votingInfoTexts = function(targetID, textArray) {
     var fragmentsArray = [];
 
     var parentID = targetID.split("#", 1);
-    console.log(parentID);
+    console.log("the voting texts parent is "+parentID);
     var spanID = targetID.split("#", 2);
-    var parentSearch = newTranscription.findById(parentID, function(err, textParent){
+    var parentSearch = newTranscription.findOne({'body.id': parentID}, function(err, textParent){
         if (err) {
             textArray.forEach(function(textJSON){
                 fragmentsArray.push(textJSON);
