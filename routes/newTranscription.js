@@ -30,9 +30,6 @@ var transcriptionSchema   = new Schema({
     		"votesUp": {
     			type: Number
     		},
-    		"votesDown": {
-    			type: Number
-    		},
     		"rank": {
     			type: Number
     		}
