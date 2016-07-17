@@ -339,41 +339,83 @@ exports.deleteOne = function(req, res) {
         });
 };
 
-var votingInfoTexts = function(targetID, textArray) {
-
-    var fragmentsArray = [];
-
-    var parentID = targetID.split("#", 1);
-    console.log("the voting texts parent is "+parentID);
-    var spanID = targetID.split("#", 2);
-    var parentSearch = newTranscription.findOne({'body.id': parentID}, function(err, textParent){
-        if (err) {
-            textArray.forEach(function(textJSON){
-                fragmentsArray.push(textJSON);
-            });
-        }
-        else {
-        ///find the location in the parent of these children
-        textParent.children.forEach(function(location){
-            if (location.id == spanID) { 
-                ///for each child with this target find the corresponding voting info from parent array
-                textArray.forEach(function(theJSON){
-                    location.fragments.forEach(function(fragmentID){
-                        if (fragmentID == theJSON.body.id) {
-                            var theText = theJSON;
-                            ///adds new field before returning
-                            theText.votingInfo = fragmentID;
-                            fragmentsArray.push(theText);
-                        };
-                    });
-                });
-            };
+var asyncPush = function(addArray, oldArray) {
+    var i;
+    var theArray = oldArray;
+    theArray.then(function(theArray) {
+        addArray.forEach(function(addDoc){
+            theArray.push(addDoc);
         });
+        if (theArray.length = (oldArray.length + addArray.length)) {
+            return theArray;
+        };
+    });
+};
+
+var generateVoteJSON = function(fragmentChild, theJSON) {
+    ///adds new field before returning
+    var voteDoc = {"votingInfo" : fragmentChild};
+    var theText = [];
+    return theText
+        .then(asyncPush([theJSON], theText))
+        .then(asyncPush([voteDoc], theText));
+};
+
+///only for searchArrays where childDoc.id is to compare with checkID
+var idMatching = function(searchArray, checkID) {
+    searchArray.forEach(function(childDoc){
+        if (childDoc.id == checkID) {
+            return childDoc;
+        };
+    });
+};
+
+var arrayIDCompare = function(arrayA, arrayB) {
+
+    arrayA.forEach(function(doc){
+        var theCheck = idMatching(arrayB, arrayA.id);
+        if (typeof theCheck == (null || 'undefined' || false)) {}
+        else {
+            return [doc, theCheck];
         };
     });
 
-    return fragmentsArray;
+};
 
+var foundParent = function(textParent, spanID, textArray, fragmentsArray) {
+
+    var spanLocation;
+    var fragmentChild;
+    var theJSON;
+    var theText;
+
+    textParent.then(function(textParent) {
+        spanLocation = idMatching(textParent.children, spanID)}
+        ).then(function(spanLocation) {
+            var compareArray = arrayIDCompare(textArray, spanLocation.fragments);
+            theJSON = compareArray[0];
+            fragmentChild = compareArray[1];
+        }).then(function(theJSON, fragmentChild) {
+            theText = generateVoteJSON(fragmentChild, theJSON);
+        }).then(function(theText){
+            return fragmentsArray.push(theText);
+        });
+};
+
+var votingInfoTexts = function(targetID, textArray) {
+
+    var fragmentsArray = [];
+    var parts = targetID.split("#", 2); //////this will work with first two not last two.....
+    var parentID = parts[0];
+    var spanID = parts[1];
+    newTranscription.findOne({'body.id': parentID}, function(err, textParent){
+        if (err) { 
+            return fragmentsArray.then(asyncPush(textArray, fragmentsArray));
+        }
+        else {
+            return fragmentsArray.foundParent(textParent, spanID, textArray, fragmentsArray);
+        };
+    });
 };
 
 exports.getByTarget = function(req, res) {
@@ -388,15 +430,19 @@ exports.getByTarget = function(req, res) {
             res.json({list: false});
         }
         else if (targetID.includes("#")==true) {
-            var textWithVotes = votingInfoTexts(targetID, texts);  //function isn't working
-            res.json({list: textWithVotes});
+            var textWithVotes = votingInfoTexts(targetID, texts); 
+            textWithVotes.then(function(textWithVotes){
+                console.log("the textWithVotes is "+JSON.stringify(textWithVotes));
+                res.json({list: textWithVotes});
+            });
         }
         else {
             var textAnnos = [];
-            texts.forEach(function(textJSON){
-                textAnnos.push(textJSON);
+            ///add array brackets around each object in texts...
+            var thePush = asyncPush(texts, textAnnos);
+            thePush.then(function(thePush){
+                res.json({list: textAnnos});
             });
-            res.json({list: textAnnos});
         };
     });
 

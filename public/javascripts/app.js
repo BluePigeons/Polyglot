@@ -326,6 +326,8 @@ var getImageVectors = function(target) {
 
 var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
 
+  alert(existingChildren[0]);
+
   if (typeof existingChildren[0] == false || existingChildren[0] == 'undefined' || existingChildren[0] == null) {  }
   else {  
     var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
@@ -339,16 +341,17 @@ var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
     var endDivHTML = "</div></div>";
     var closingHTML = endTextHTML + voteButtonsHTML + metadataHTML + endDivHTML;
 
-    existingChildren.forEach(function(text) {
-      var itemText = text.body.text;
-      var itemID = text._id;
+    existingChildren.forEach(function(subarray) {
+      alert(JSON.stringify(subarray));
+      var itemText = subarray[0].body.text;
+      var itemID = subarray[0]._id;
       var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
       $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
 /////////find votes up and down 
-      if (typeof text.votingInfo != (null || 'undefined')) {
-        var votesUp = text.votingInfo.votesUp;
+      if (typeof subarray[1] != (null || 'undefined')) {
+        var votesUp = subarray[1].votingInfo.votesUp;
         $(popupIDstring).find(".votingUpButton").find(".badge").val(votesUp);
-        var votesDown = text.votingInfo.votesDown;
+        var votesDown = subarray[1].votingInfo.votesDown;
         $(popupIDstring).find(".votingDownButton").find(".badge").val(votesDown);
       };
 /////////update metadata options with defaults and placeholders???    
@@ -403,6 +406,7 @@ var openEditorMenu = function() {
 
   childrenArray = [];
   childrenArray = lookupAnnotationChildren(targetSelected[0], baseURL);
+  alert("new childrenArray is "+JSON.stringify(childrenArray));
   buildCarousel(childrenArray, baseURL, popupIDstring); 
   $(popupIDstring).find("#theEditor").attr("id", "newEditor");
   $(popupIDstring).find(".textEditorMainBox").find('*').addClass(wrapperClassList); 
