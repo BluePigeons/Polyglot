@@ -280,7 +280,6 @@ var votingFunction = function(vote, votedID, currentTopText) {
   if (targetType == "transcription"){
     theVote = transcriptionURL + "voting/" + vote;
     targetID = transcriptionURL.concat(votedID);
-    alert("the target here is "+targetID);
     outerSpanOpen = "<a class='transcription-text openTranscriptionChildrenPopup' id='"+ textSelectedID + "' >";
   } 
   else if (targetType == "translation"){
@@ -375,7 +374,7 @@ var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
     var middleHTML = "' class='content-area' title='Annotation Text'>";
     var endTextHTML = "</p></div>";
     //<span class='badge'></span>
-    var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-plus' aria-hidden='true' ></span></button><button type='button' class='btn btn-default voteBtn votingDownButton'><span class='badge'></span><span class='glyphicon glyphicon-minus' aria-hidden='true'></span></button></div>";
+    var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-plus' aria-hidden='true' ></span></button></div>";
 /////////need to add metadata options!!!
     var metadataHTML = " ";
 /////////////////////////////
@@ -641,9 +640,12 @@ var addAnnotation = function(thisEditor){
 
   }; 
   
+//////////if nothing is done with callbacks then make one post function using url and targetdata
+//////////update carousel properly
+
   //UPDATE CAROUSEL
   textData.body.id = createdText;
-  buildCarousel([textData], baseURL, editorString);
+  buildCarousel([[textData]], baseURL, editorString);
 
 };
 
@@ -1130,15 +1132,8 @@ $('#page_body').on("click", ".linkBtn", function(){
 });
 
 $('#page_body').on("click", '.votingUpButton', function(event) {
-  var votedID = $(event.target).parent().parent().find("p").attr("id");
-  var currentTopText = $(event.target).parent().parent().parent().find(".currentTop").html();
-  alert("the votedID is "+votedID);
-  votingFunction("up", votedID, currentTopText);
-});
-
-$('#page_body').on("click", '.votingDownButton', function(event) {
-  var votedID = $(event.target).parent().parent().find("p").attr("id");
-  var currentTopText = $(event.target).parent().parent().parent().find(".currentTop").html();
+  var votedID = $(event.target).parent().parent().parent().find("p").attr("id");
+  var currentTopText = $(event.target).parent().parent().parent().parent().parent().find(".currentTop").html();
   votingFunction("up", votedID, currentTopText);
 });
 

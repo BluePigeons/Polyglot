@@ -52,6 +52,8 @@ var replaceChildText = function(oldText, newInsert, oldInsert) {
 
 exports.voting = function(req, res) {
 
+    //////////order and reorder by ranking!!!
+
     var voteOn = newTranscription.findOne({'body.id':req.body.parent});
     voteOn.exec(function(err, transcription) {
 
@@ -64,12 +66,10 @@ exports.voting = function(req, res) {
             return transcription.children.indexOf(theLocation());
         };
         var theChildDoc = function(locIndex) {
-            console.log("the fragments are "+JSON.stringify(transcription.children[locIndex].fragments)+" and the id is "+req.body.children[0].fragments[0].id)
             return idMatching(transcription.children[locIndex].fragments, req.body.children[0].fragments[0].id);
         };
         var fragmentIndex = function() {
-            console.log(JSON.stringify(theChildDoc(0)));
-            return theLocation().fragments.indexOf(theChildDoc(locationIndex())); ///////?????
+            return theLocation().fragments.indexOf(theChildDoc(locationIndex())); 
         };
 
         var fragmentChild = function(nIndex) {
@@ -77,7 +77,6 @@ exports.voting = function(req, res) {
         };
 
         var votesChange = function(voteNumber) {
-            console.log("the locationIndex is "+ locationIndex()+ " and fragmentIndex "+fragmentIndex());
             return transcription.children[locationIndex()].fragments[fragmentIndex()].votesUp += voteNumber; 
         };
 
@@ -103,7 +102,7 @@ exports.voting = function(req, res) {
         ///NOTE: the ranking is ONLY changed if the vote is now above or below the neighbour, not if now equal
             var neighbourIndex = fragmentIndex() - voteNumber;
             if ( (neighbourIndex >= 0) && (fragmentChild(fragmentIndex()).rank < fragmentChild(neighbourIndex).rank) 
-                && ( theChildDoc().votesUp > fragmentChild(neighbourIndex).votesUp ) ) {
+                && ( theChildDoc(locationIndex()).votesUp > fragmentChild(neighbourIndex).votesUp ) ) {
 
                 var votingUpNow = function() {
                     rankChange(neighbourIndex, -1);
@@ -115,7 +114,7 @@ exports.voting = function(req, res) {
             }
             else if ( (typeof fragmentChild(neighbourIndex) != (null || 'undefined')) 
                 && (fragmentChild(fragmentIndex()).rank > fragmentChild(neighbourIndex).rank) 
-                &&  (theChildDoc().votesUp < fragmentChild(neighbourIndex)).votesUp ) {
+                &&  (theChildDoc(locationIndex()).votesUp < fragmentChild(neighbourIndex)).votesUp ) {
 
                 var votingDownNow = function() {
                     rankChange(neighbourIndex, 1);
@@ -193,7 +192,7 @@ var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
 
 var bodySetting = function(oldBody, reqDoc, bodyID) {
 
-    if ((typeof bodyID == ('undefined' || null)) && (typeof reqDoc == ('undefined' || null)) ){
+    if ((typeof bodyID == ('undefined' || null)) || (typeof reqDoc == ('undefined' || null)) ){
         return oldBody;
     }
     else {
