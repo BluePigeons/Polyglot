@@ -429,10 +429,10 @@ var votingInfoTexts = function(targetID, textArray) {
     var textWithVotes = function() {
         newTranscription.findOne({'body.id': parentID}, function(err, textParent){
             if (err) { 
-                return fragmentsArray.then(asyncPush(textArray, fragmentsArray));
+                return asyncPush(textArray, fragmentsArray);
             }
             else {
-                return fragmentsArray.foundParent(textParent, spanID, textArray, fragmentsArray);
+                return foundParent(textParent, spanID, textArray, fragmentsArray);
             };
         });
     };
@@ -451,10 +451,9 @@ exports.getByTarget = function(req, res) {
             res.json({list: false});
         }
         else if (targetID.includes("#")==true) {
-            votingInfoTexts(targetID, texts).then(function(textWithVotes){
-                console.log("the textWithVotes is "+JSON.stringify(textWithVotes));
-                res.json({list: textWithVotes});
-            });
+            var theVoteDocs = votingInfoTexts(targetID, texts);
+            console.log(JSON.stringify(theVoteDocs));
+            res.json({list: theVoteDocs});
         }
         else {
             var thePush = asyncPush(texts, []);

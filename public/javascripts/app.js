@@ -146,7 +146,9 @@ var searchCookie = function(field) {
 var checkForVectorTarget = function(theText) {
   var isThere = "false";
   var theChecking = getTargetJSON(theText);
-  if (typeof theChecking.target != (null || 'undefined')) {
+
+  if (typeof theChecking.target[0] == null || 'undefined') { } /////////this isn't working
+  else {                  
     theChecking.target.forEach(function(target){
       if(target.format == "SVG"){
         isThere = target.id;
@@ -251,16 +253,17 @@ var asyncPush = function(addArray, oldArray) {
 
 ///only for searchArrays where childDoc.id is to compare with checkID
 var idMatching = function(searchArray, checkID) {
+  var theMatch;
   searchArray.forEach(function(childDoc){
     if (childDoc.id == checkID) {
-      alert("in IDmatching "+JSON.stringify(childDoc));
-      return childDoc;
+      theMatch = childDoc;
     };
   });
+  return theMatch;
 };
 
 var arrayIDCompare = function(arrayA, arrayB) {
-  arrayA.forEach(function(doc){
+  return arrayA.forEach(function(doc){
     var theCheck = idMatching(arrayB, arrayA.id);
     if (typeof theCheck == (null || 'undefined' || false)) {}
     else {
@@ -316,21 +319,17 @@ var votingFunction = function(vote, votedID, currentTopText) {
 var findHghestRankingChild = function(parent, locationID) {
 
   var theChildren = getTargetJSON(parent).children;
-  alert(JSON.stringify(theChildren));
-  alert("the locationID is "+locationID);
+  var theLocation = idMatching(getTargetJSON(parent).children, locationID);
+  var the_child;
 
-  var theLocation = function() {
-    return idMatching(getTargetJSON(parent).children, locationID);
+  theLocation.fragments.forEach(function(alternative){
+    if (alternative.rank == 0) {  
+      the_child = alternative.id;  
+    };
+  });
+  if (the_child != 'undefined') {
+    return the_child;
   };
-  var theChild = function() {
-    theLocation().fragments.forEach(function(alternative){
-      if (alternative.rank == 0) {  
-        return alternative.id;  
-      };
-    });
-  };
-
-  return theChild();
 };
 
 ////IMAGE HANDLING
@@ -364,6 +363,8 @@ var getImageVectors = function(target) {
 ///// VIEWER WINDOWS
 
 var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
+
+  alert("building with "+existingChildren);
 
   if (typeof existingChildren[0] == false || existingChildren[0] == 'undefined' || existingChildren[0] == null) { 
     return null; 
@@ -712,8 +713,7 @@ var setTextVariables = function(textType) {
   var openNewEditor = function() {
 
     textSelected = findHghestRankingChild(textSelectedParent, textSelectedID);
-
-    checkVectors = checkForVectorTarget(textSelected); 
+    var checkVectors = checkForVectorTarget(textSelected); 
     if (checkVectors != "false"){
       vectorSelected = checkVectors;
       targetSelected = [textSelectedHash, vectorSelected];
