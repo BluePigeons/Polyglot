@@ -60,22 +60,29 @@ exports.voting = function(req, res) {
         var theLocation = function() {
             return idMatching(transcription.children, req.body.children[0].id);
         };
-        var theChildDoc = function(locationIndex) {
-            return idMatching(transcription.children[locationIndex].fragments, req.body.children[0].fragments[0].id);
+        var locationIndex = function() {
+            return transcription.children.indexOf(theLocation());
         };
-        var locationIndex = transcription.children.indexOf(theLocation());
-        var fragmentIndex = transcription.children[locationIndex].fragments.indexOf(theChildDoc(locationIndex));
+        var theChildDoc = function(locIndex) {
+            console.log("the fragments are "+JSON.stringify(transcription.children[locIndex].fragments)+" and the id is "+req.body.children[0].fragments[0].id)
+            return idMatching(transcription.children[locIndex].fragments, req.body.children[0].fragments[0].id);
+        };
+        var fragmentIndex = function() {
+            console.log(JSON.stringify(theChildDoc(0)));
+            return theLocation().fragments.indexOf(theChildDoc(locationIndex())); ///////?????
+        };
 
         var fragmentChild = function(nIndex) {
-            return transcription.children[locationIndex].fragments[nIndex];
+            return transcription.children[locationIndex()].fragments[nIndex];
         };
 
         var votesChange = function(voteNumber) {
-            return transcription.children[locationIndex].fragments[fragmentIndex].votesUp += voteNumber; 
+            console.log("the locationIndex is "+ locationIndex()+ " and fragmentIndex "+fragmentIndex());
+            return transcription.children[locationIndex()].fragments[fragmentIndex()].votesUp += voteNumber; 
         };
 
         var rankChange = function(indexNumber, rankChangeNumber) {
-            return transcription.children[locationIndex].fragments[indexNumber].rank += rankChangeNumber;
+            return transcription.children[locationIndex()].fragments[indexNumber].rank += rankChangeNumber;
         };
 
         var reload = function(newChildRank) {
@@ -94,25 +101,25 @@ exports.voting = function(req, res) {
 
         var voteRankChange = function(voteNumber) {
         ///NOTE: the ranking is ONLY changed if the vote is now above or below the neighbour, not if now equal
-            var neighbourIndex = fragmentIndex - voteNumber;
-            if ( (neighbourIndex >= 0) && (fragmentChild(fragmentIndex).rank < fragmentChild(neighbourIndex).rank) 
+            var neighbourIndex = fragmentIndex() - voteNumber;
+            if ( (neighbourIndex >= 0) && (fragmentChild(fragmentIndex()).rank < fragmentChild(neighbourIndex).rank) 
                 && ( theChildDoc().votesUp > fragmentChild(neighbourIndex).votesUp ) ) {
 
                 var votingUpNow = function() {
                     rankChange(neighbourIndex, -1);
-                    var newChildRank = rankChange(fragmentIndex, 1);
+                    var newChildRank = rankChange(fragmentIndex(), 1);
                     return reload(newChildRank);
                 };
                 return votingUpNow();
 
             }
             else if ( (typeof fragmentChild(neighbourIndex) != (null || 'undefined')) 
-                && (fragmentChild(fragmentIndex).rank > fragmentChild(neighbourIndex).rank) 
+                && (fragmentChild(fragmentIndex()).rank > fragmentChild(neighbourIndex).rank) 
                 &&  (theChildDoc().votesUp < fragmentChild(neighbourIndex)).votesUp ) {
 
                 var votingDownNow = function() {
                     rankChange(neighbourIndex, 1);
-                    var newChildRank = rankChange(fragmentIndex, -1);
+                    var newChildRank = rankChange(fragmentIndex(), -1);
                     return reload(newChildRank);                    
                 };
                 return votingDownNow();               
@@ -145,9 +152,7 @@ exports.voting = function(req, res) {
         };
 
         var updateVotes = voteCheckChange(req.params.voteType);
-        if (typeof updateVotes != ('undefined' || null)) {
-            savingFunction();
-        };
+        savingFunction();
 
     });
 
@@ -177,18 +182,9 @@ exports.deleteAll = function(req, res) {
     }); 
 };
 
-var jsonFieldPush = function(docField, bodyField) {
-    if (typeof bodyField != 'undefined' || bodyField != null) {
-        return docField.push(bodyField);
-    }
-    else {
-        return docField;
-    };
-};
-
-var jsonFieldEqual = function(docField, bodyField) {
-    if (typeof bodyField != 'undefined' || docField, bodyField != null) {
-        return bodyField;
+var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
+    if (typeof bodyDoc[bodyField] != 'undefined' || bodyDoc[bodyField] != null) {
+        return bodyDoc[bodyField];
     }
     else {
         return docField;
@@ -202,33 +198,17 @@ var bodySetting = function(oldBody, reqDoc, bodyID) {
     }
     else {
 
-        var makeNewBody = function(newBody) {
-            newBody.id = jsonFieldEqual(newBody.id, bodyID);
-            return newBody;
-        };
+        var newBody = {};
 
-        var textUpdate = function() {
-            makeNewBody(oldBody).text = jsonFieldEqual(newBodytext, reqDoc.text);
-            return newBody;
-        };
-        var formatUpdate = function(newBody) {
-            textUpdate().format = jsonFieldEqual(newBody.format, reqDoc.format);
-            return newBody;
-        };
+        newBody.id = bodyID;
+        newBody.text = jsonFieldEqual(oldBody, reqDoc, "text");
+        newBody.format = jsonFieldEqual(oldBody, reqDoc, "format");
+        newBody.language = jsonFieldEqual(oldBody, reqDoc, "format");
 
-        return formatUpdate().language = jsonFieldEqual(newBody.language, reqDoc.language);
-
+        return newBody;
+        
     };
 
-};
-
-var targetSetting = function(reqTarget, oldTarget) {
-    if (typeof reqTarget == ('undefined' || null)) {
-        return oldTarget;
-    }
-    else {
-        return asyncPush(req.body.target, transcription.target);
-    };
 };
 
 var newFragmentObject = function(theID, theRank) {
@@ -250,17 +230,17 @@ var newLocationObject = function(theID, theFragments) {
 
 var newChildrenLocationArray = function(oldChildren, newChildren) {
     var newFragmentChild = newFragmentObject(newChildren.fragments[0].id, 0);
-    var newLocation = newLocationObject(newChildren.id, [ newFragmentChild] );
+    var newLocation = newLocationObject(newChildren.id, [ newFragmentChild ] );
     return [-1, newLocation];
 };
 
 var newChildrenChecking = function(oldChildren, newChildren) {
 
-    if (typeof newChildren[0] != 'undefined' || newChildren[0] != null) {
-        return oldChildrenChecking(oldChildren, newChildren);
+    if ( (typeof newChildren == 'undefined' || newChildren == null) || (typeof newChildren[0] == 'undefined' || newChildren[0] == null) ){
+        return [-1,-1];
     }
     else {
-        return [-1,-1];
+        return oldChildrenChecking(oldChildren, newChildren[0]);
     };
 };
 
@@ -279,9 +259,10 @@ var childrenLocationChecking = function(oldChildren, newChildren) {
     var theLocation = idMatching(oldChildren, newChildren.id);
 
     if (typeof theLocation == ('undefined' || null)) {
-        return newChildrenLocationArray;
+        return newChildrenLocationArray(oldChildren, newChildren);
     }
     else {
+        ///////////same as voting problems.......
         var locationIndex = oldChildren.indexOf(theLocation);
         var newRank = theLocation.fragments.length;
         var newFragmentChild = newFragmentObject(newChildren.fragments[0].id, newRank);
@@ -290,39 +271,41 @@ var childrenLocationChecking = function(oldChildren, newChildren) {
 };
 
 exports.addNew = function(req, res) {
+
+//    console.log("being created "+JSON.stringify(req.body));
     
     var transcription = new newTranscription(); 
     var newTransID = transcription.id;
     var transURL = transcriptionURL.concat(newTransID);
 
-/*
-    req.body.target.forEach(function(newTarget){
-        transcription.target.push(
-            {"id": newTarget.id,
-            "format": newTarget.format}
-        );
-    });
-*/
+    var jsonFieldPush = function(bodyDoc, theField) {
+        if (typeof bodyDoc[theField] != 'undefined' || bodyDoc[theField] != null) {
+            bodyDoc[theField].forEach(function(subdoc){
+                transcription[theField].addToSet(subdoc);
+            });
+        };
+    };
 
     transcription.body = bodySetting(transcription.body, req.body.body, transURL);   
-    transcription.parent = jsonFieldEqual(transcription.parent, req.body.parent);
-    transcription.translation = jsonFieldEqual(transcription.translation, req.body.translation);
-    transcription.metadata.addToSet(jsonFieldPush(transcription.metadata, req.body.metadata));
-    transcription.creator.addToSet(jsonFieldPush(transcription.creator, req.body.creator));
-    transcription.target.addToSet(targetSetting(req.body.target, transcription.target));  ///if undefined??? 
+    transcription.parent = jsonFieldEqual(transcription.parent, req.body, "parent");
+    transcription.translation = jsonFieldEqual(transcription.translation, req.body, "translation");
+
+    jsonFieldPush(req.body, "metadata");
+    jsonFieldPush(req.body, "target");  
 
     var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
     if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
         && (newChildrenArray[0] != -1) ) {
-        transcription.children[0].fragments.addToSet(newChildrenArray);
+        transcription.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
     }
     else if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
-        && (newChildrenArray[0] == -1) ) {
-        transcription.children.addToSet(newChildrenArray);
+        && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
+        transcription.children.addToSet(newChildrenArray[1]);
     };
 
     transcription.save(function(err) {
         if (err) {
+            console.log(err);
             res.send(err);
         }
         else {
@@ -343,28 +326,35 @@ exports.getByID = function(req, res) {
 
 exports.updateOne = function(req, res) {
 
-    console.dir(req.body);
+    console.log("to be updated "+JSON.stringify(req.body));
 
     var updateDoc = newTranscription.findById(req.params.transcription_id);
     updateDoc.exec(function(err, transcription) {
 
         if (err) {res.send(err)};
 
+        var jsonFieldPush = function(bodyDoc, theField) {
+            if (typeof bodyDoc[theField] != 'undefined' || bodyDoc[theField] != null) {
+                bodyDoc[theField].forEach(function(subdoc){
+                    transcription[theField].addToSet(subdoc);
+                });
+            };
+        };
+
         transcription.body = bodySetting(transcription.body, req.body.body, transcription.body.id);   
-        transcription.parent = jsonFieldEqual(transcription.parent, req.body.parent);
-        transcription.translation = jsonFieldEqual(transcription.translation, req.body.translation);
-        transcription.metadata.addToSet(jsonFieldPush(transcription.metadata, req.body.metadata));
-        transcription.creator.addToSet(jsonFieldPush(transcription.creator, req.body.creator));
-        transcription.target.addToSet(targetSetting(req.body.target, transcription.target));  ///if undefined??? 
+        transcription.parent = jsonFieldEqual(transcription.parent, req.body, "parent");
+        transcription.translation = jsonFieldEqual(transcription.translation, req.body, "translation");
+        jsonFieldPush(req.body, "metadata");
+        jsonFieldPush(req.body, "target"); 
 
         var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
         if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
             && (newChildrenArray[0] != -1) ) {
-            transcription.children[0].fragments.addToSet(newChildrenArray);
+            transcription.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
         }
         else if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
-            && (newChildrenArray[0] == -1) ) {
-            transcription.children.addToSet(newChildrenArray);
+            && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
+            transcription.children.addToSet(newChildrenArray[1]);
         };
 
         transcription.save(function(err) {
@@ -432,7 +422,7 @@ var arrayIDCompare = function(arrayA, arrayB) {
         };
 
     });
-    
+
     if ( (i == arrayA.length) && (typeof returnArray[0] == ('undefined' || null)) ) {
         return null;
     }
@@ -460,7 +450,6 @@ var bracketedArray = function(texts) {
 
     });
     if (theArray.length == texts.length) {
-        console.log(JSON.stringify(theArray));
         return theArray;
     };
 };

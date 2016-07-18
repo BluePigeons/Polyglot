@@ -200,7 +200,6 @@ var lookupAnnotationChildren = function(target, baseURL) {
     success: 
       function (data) {
         childTexts = data.list;
-        alert("texts in ajax are "+JSON.stringify(childTexts));
       }
   });
   return childTexts;
@@ -281,6 +280,7 @@ var votingFunction = function(vote, votedID, currentTopText) {
   if (targetType == "transcription"){
     theVote = transcriptionURL + "voting/" + vote;
     targetID = transcriptionURL.concat(votedID);
+    alert("the target here is "+targetID);
     outerSpanOpen = "<a class='transcription-text openTranscriptionChildrenPopup' id='"+ textSelectedID + "' >";
   } 
   else if (targetType == "translation"){
@@ -365,7 +365,7 @@ var getImageVectors = function(target) {
 
 var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
 
-  alert("building with "+JSON.stringify(existingChildren));
+//  alert("building with "+JSON.stringify(existingChildren));
 
   if (typeof existingChildren[0] == false || existingChildren[0] == 'undefined' || existingChildren[0] == null) { 
     return null; 
@@ -405,14 +405,7 @@ var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
 
   };
 
-  $('.openTranscriptionChildrenPopup').popover({ 
-    trigger: 'manual',
-    placement: 'top',
-    html : true,
-    content: function() {
-      return $('#popupTranscriptionChildrenMenu').html();
-    }
-  });
+
 
 };
 
@@ -522,6 +515,16 @@ var openEditorMenu = function() {
   var popupIDhash = createEditorPopupBox();
   var popupIDstring = popupIDhash;
   buildCarousel(setChildrenArray(), findBaseURL(), popupIDstring);
+
+  $('.openTranscriptionChildrenPopup').popover({ 
+    trigger: 'manual',
+    placement: 'top',
+    html : true,
+    content: function() {
+      return $('#popupTranscriptionChildrenMenu').html();
+    }
+  });
+
   updateEditor(popupIDstring); 
   updateEditorsOpen(popupIDstring); 
 
@@ -1129,7 +1132,7 @@ $('#page_body').on("click", ".linkBtn", function(){
 $('#page_body').on("click", '.votingUpButton', function(event) {
   var votedID = $(event.target).parent().parent().find("p").attr("id");
   var currentTopText = $(event.target).parent().parent().parent().find(".currentTop").html();
-  alert(currentTopText);
+  alert("the votedID is "+votedID);
   votingFunction("up", votedID, currentTopText);
 });
 
