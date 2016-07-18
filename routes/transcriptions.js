@@ -28,24 +28,15 @@ var asyncPush = function(addArray, oldArray) {
     return mergedArray();
 };
 
-///only for searchArrays where childDoc.id is to compare with checkID --- change to find()????
+///only for searchArrays where childDoc.id is to compare with checkID
 var idMatching = function(searchArray, checkID) {
-    return searchArray.forEach(function(childDoc){
-        if (childDoc.id == checkID) {
-            return childDoc;
-        };
-    });
-};
-
-var arrayIDCompare = function(arrayA, arrayB) {
-
-    return arrayA.forEach(function(doc){
-        var theCheck = idMatching(arrayB, arrayA.id);
-        if (typeof theCheck == (null || 'undefined' || false)) {}
-        else {
-            return [doc, theCheck];
-        };
-    });
+  var theMatch;
+  searchArray.forEach(function(childDoc){
+    if (childDoc.id == checkID) {
+        theMatch = childDoc;
+    };
+  });
+  return theMatch;
 };
 
 var replaceChildText = function(oldText, newInsert, oldInsert) {
@@ -107,19 +98,24 @@ exports.voting = function(req, res) {
             if ( (neighbourIndex >= 0) && (fragmentChild(fragmentIndex).rank < fragmentChild(neighbourIndex).rank) 
                 && ( theChildDoc().votesUp > fragmentChild(neighbourIndex).votesUp ) ) {
 
-                return rankChange(neighbourIndex, -1)
-                .then(function(newNeighbourRank) {return rankChange(fragmentIndex, 1)})
-                .then(function(newChildRank) {return reload(newChildRank)})
-                .catch(console.log.bind(console));
+                var votingUpNow = function() {
+                    rankChange(neighbourIndex, -1);
+                    var newChildRank = rankChange(fragmentIndex, 1);
+                    return reload(newChildRank);
+                };
+                return votingUpNow();
+
             }
             else if ( (typeof fragmentChild(neighbourIndex) != (null || 'undefined')) 
                 && (fragmentChild(fragmentIndex).rank > fragmentChild(neighbourIndex).rank) 
                 &&  (theChildDoc().votesUp < fragmentChild(neighbourIndex)).votesUp ) {
 
-                return rankChange(neighbourIndex, 1)
-                .then(function(newNeighbourRank) {return rankChange(fragmentIndex, -1)})
-                .then(function(newChildRank) {return reload(newChildRank)})
-                .catch(console.log.bind(console));
+                var votingDownNow = function() {
+                    rankChange(neighbourIndex, 1);
+                    var newChildRank = rankChange(fragmentIndex, -1);
+                    return reload(newChildRank);                    
+                };
+                return votingDownNow();               
 
             }
             else {
@@ -129,14 +125,12 @@ exports.voting = function(req, res) {
 
         var voteCheckChange = function(voteType) {
             if (voteType == "up") {
-                return votesChange(1)
-                .then(function(updatedVotes) {return voteRankChange(1)})
-                .catch(console.log.bind(console));
+                votesChange(1);
+                return voteRankChange(1);
             }
             else if (voteType == "down") {
-                return votesChange(-1)
-                .then(function(updatedVotes) {return voteRankChange(-1)})
-                .catch(console.log.bind(console));
+                votesChange(-1);
+                return voteRankChange(-1);
             };
         };
 
@@ -150,11 +144,10 @@ exports.voting = function(req, res) {
             });
         };
 
-        voteCheckChange(req.params.voteType)
-        .then(function(updatedTranscription){
+        var updateVotes = voteCheckChange(req.params.voteType);
+        if (typeof updateVotes != ('undefined' || null)) {
             savingFunction();
-        })
-        .catch(console.log.bind(console));
+        };
 
     });
 
@@ -213,20 +206,18 @@ var bodySetting = function(oldBody, reqDoc, bodyID) {
             newBody.id = jsonFieldEqual(newBody.id, bodyID);
             return newBody;
         };
-        return makeNewBody(oldBody)
-        .then(function(newBody) {
-            newBody.text = jsonFieldEqual(newBodytext, reqDoc.text);
+
+        var textUpdate = function() {
+            makeNewBody(oldBody).text = jsonFieldEqual(newBodytext, reqDoc.text);
             return newBody;
-        })
-        .then(function(newBody) {
-            newBody.format = jsonFieldEqual(newBody.format, reqDoc.format);
+        };
+        var formatUpdate = function(newBody) {
+            textUpdate().format = jsonFieldEqual(newBody.format, reqDoc.format);
             return newBody;
-        })
-        .then(function(newBody) {
-            newBody.language = jsonFieldEqual(newBody.language, reqDoc.language);
-            return newBody;
-        })
-        .catch(console.log.bind(console));
+        };
+
+        return formatUpdate().language = jsonFieldEqual(newBody.language, reqDoc.language);
+
     };
 
 };
@@ -396,47 +387,99 @@ exports.deleteOne = function(req, res) {
     });
 };
 
+/*
 var generateVoteJSON = function(fragmentChild, theJSON) {
     ///adds new field before returning
     var voteDoc = {"votingInfo" : fragmentChild};
-    return asyncPush([theJSON], [])
-        .then(function(theText) {
-            return asyncPush([voteDoc], theText);
-        });
+    var JSONadded =  asyncPush([theJSON], []); 
+    return asyncPush([voteDoc], JSONadded);
+
+};
+*/
+
+var makeArray = function(anArray) {
+    if (Array.isArray(anArray) == false) {
+        return [anArray];
+    }
+    else { return anArray };
 };
 
-var foundParent = function(textParent, spanID, textArray, fragmentsArray) {
+/////////merge as part of idmatching???
+var theIDCheck = function(theArray, doc) {
+    if ( typeof idMatching(theArray, doc.body.id) != ('undefined' || null)) {
+        return idMatching(theArray, doc.body.id); 
+    }
+    else if ( typeof idMatching(theArray, doc.id) != ('undefined' || null)) {
+        return idMatching(theArray, doc.id); 
+    }
+    else {
+        return null;
+    };           
+};
 
-    var findSpanLocation = function(textParent) {
+/////should return an array of arrays of matching pairs
+var arrayIDCompare = function(arrayA, arrayB) {
+
+    var returnArray =[];
+    var i = 0;
+
+    arrayA.forEach(function(doc){
+
+        if (typeof theIDCheck(arrayB, doc) == (null || 'undefined' || false)) { i += 1; }
+        else {
+            i += 1;
+            returnArray.push([doc, theIDCheck(arrayB, doc)]); ////push a pair of matching docs
+        };
+
+    });
+    
+    if ( (i == arrayA.length) && (typeof returnArray[0] == ('undefined' || null)) ) {
+        return null;
+    }
+    else if ( (i == arrayA.length) && (typeof returnArray[0] != ('undefined' || null)) ) {
+        return returnArray;
+    };
+};
+
+var foundParent = function(textParent, spanID, textArray) {
+
+    var findSpanLocation = function() {
         return idMatching(textParent.children, spanID);
     };
-    return findSpanLocation(textParent)
-        .then(function(spanLocation) {
-            return arrayIDCompare(textArray, spanLocation.fragments);
-        }).then(function(compareArray) {
-            return generateVoteJSON(compareArray[1], compareArray[0]);
-        }).then(function(theText){
-            return fragmentsArray.push(theText);
-        });
+
+    return arrayIDCompare(textArray, findSpanLocation().fragments);
+
 };
 
-var votingInfoTexts = function(targetID, textArray) {
+var bracketedArray = function(texts) {
 
-    var fragmentsArray = [];
+    var theArray = [];
+    texts.forEach(function(doc){
+
+        theArray.push([doc]);
+
+    });
+    if (theArray.length == texts.length) {
+        console.log(JSON.stringify(theArray));
+        return theArray;
+    };
+};
+
+var votingInfoTexts = function(targetID, textArray, res) {
+
     var parts = targetID.split("#", 2); //////this will work with first two not last two.....
     var parentID = parts[0];
     var spanID = parts[1];
-    var textWithVotes = function() {
-        newTranscription.findOne({'body.id': parentID}, function(err, textParent){
-            if (err) { 
-                return asyncPush(textArray, fragmentsArray);
-            }
-            else {
-                return foundParent(textParent, spanID, textArray, fragmentsArray);
-            };
-        });
-    };
-    return textWithVotes();
+
+    newTranscription.findOne({'body.id': parentID}, function(err, textParent){
+        if (err) { 
+            res.json({list: bracketedArray(textArray, res)});
+        }
+        else {
+            var theVoteDocs = foundParent(textParent, spanID, textArray);
+            res.json({list: theVoteDocs});
+        };
+    });
 };
 
 exports.getByTarget = function(req, res) {
@@ -451,13 +494,11 @@ exports.getByTarget = function(req, res) {
             res.json({list: false});
         }
         else if (targetID.includes("#")==true) {
-            var theVoteDocs = votingInfoTexts(targetID, texts);
-            console.log(JSON.stringify(theVoteDocs));
-            res.json({list: theVoteDocs});
+            votingInfoTexts(targetID, texts, res);            
         }
         else {
-            var thePush = asyncPush(texts, []);
-            res.json({list: [thePush]});
+
+            res.json({list: bracketedArray(texts)});
         };
     });
 };

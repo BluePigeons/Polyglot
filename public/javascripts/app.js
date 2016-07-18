@@ -200,6 +200,7 @@ var lookupAnnotationChildren = function(target, baseURL) {
     success: 
       function (data) {
         childTexts = data.list;
+        alert("texts in ajax are "+JSON.stringify(childTexts));
       }
   });
   return childTexts;
@@ -364,7 +365,7 @@ var getImageVectors = function(target) {
 
 var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
 
-  alert("building with "+existingChildren);
+  alert("building with "+JSON.stringify(existingChildren));
 
   if (typeof existingChildren[0] == false || existingChildren[0] == 'undefined' || existingChildren[0] == null) { 
     return null; 
