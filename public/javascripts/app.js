@@ -52,7 +52,7 @@ var startParentID;
 
 var getTargetJSON = function(target) {
 
-  if ( rejectionOptions.has(typeof target) ) { return null;  }
+  if ( rejectionOptions.has(target) ) { return null;  }
   else {
     var targetJSON;
 
@@ -125,7 +125,7 @@ var asyncPush = function(addArray, oldArray) {
 var arrayIDCompare = function(arrayA, arrayB) {
   return arrayA.forEach(function(doc){
     var theCheck = fieldMatching(arrayB, "id", arrayA.id);
-    if (  rejectionOptions.has(typeof theCheck) ) { return false }
+    if (  rejectionOptions.has(theCheck) ) { return false }
     else {
       return [doc, theCheck];
     };
@@ -134,7 +134,7 @@ var arrayIDCompare = function(arrayA, arrayB) {
 
 var checkFor = function(target, field) {
   var theChecking = getTargetJSON(target);
-  if ( rejectionOptions.has(typeof field) || rejectionOptions.has(typeof theChecking) || rejectionOptions.has(typeof theChecking[field])  ) {  return false  } /////////////
+  if ( rejectionOptions.has(field) || rejectionOptions.has(theChecking) || rejectionOptions.has(theChecking[field])  ) {  return false  } /////////////
   else {  return theChecking[field] }; 
 };
 
@@ -175,7 +175,7 @@ var findClassID = function(classString, IDstring) {
 
 var setTextSelectedID = function(theText) {
   var theJSON = getTargetJSON(theText);
-  if (rejectionOptions.has(typeof theJSON)) { return null }
+  if (rejectionOptions.has(theJSON)) { return null }
   else {
     var theTarget = fieldMatching(theJSON.target, "format", "text/html");
     textSelectedHash = theTarget.id;
@@ -200,7 +200,7 @@ var searchCookie = function(field) {
 
 var checkForVectorTarget = function(theText) {
   var theChecking = getTargetJSON(theText);
-  if (  rejectionOptions.has(typeof theChecking.target[0])  ) { return false } 
+  if (  rejectionOptions.has(theChecking.target[0])  ) { return false } 
   else {   return fieldMatching(theChecking.target, "format", "SVG").id;  };
 };
 
@@ -279,7 +279,7 @@ var votingFunction = function(vote, votedID, currentTopText) {
 var findHighestRankingChild = function(parent, locationID) {
   var theLocation = fieldMatching(getTargetJSON(parent).children, "id", locationID);
   var the_child = fieldMatching(theLocation.fragments, "rank", 0); 
-  if (rejectionOptions.has(typeof the_child.id) ) {  return false;  }
+  if (rejectionOptions.has(the_child.id) ) {  return false;  }
   else {  return the_child.id;  };
 };
 
@@ -294,7 +294,7 @@ var loadImage = function() {
 
 var buildCarousel = function(existingChildren, popupIDstring) {
 
-  if (rejectionOptions.has(typeof existingChildren[0]) ) {   return null;   }
+  if (rejectionOptions.has(existingChildren[0]) ) {   return null;   }
   else {  
     var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
     var middleHTML = "' class='content-area' title='Annotation Text'>";
@@ -340,7 +340,7 @@ var updateEditor = function(popupIDstring) {
   };
 
   //if a highest ranking exists then highlight it
-  if (rejectionOptions.has(typeof childrenArray[0]) ) {
+  if (rejectionOptions.has(childrenArray[0]) ) {
     $(popupIDstring).find(".addNewItem").addClass("active");
     $(popupIDstring).find(".carousel-control").css("display", "none");
   }
@@ -353,11 +353,15 @@ var updateEditor = function(popupIDstring) {
 ///////////choose better styling later!!!!!///////
     $(theTextString).css("color", "grey");
     $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
+    var theVectorParent = checkFor(vectorSelected, "parent");
 
     //if it is targeting it's own type then it isn't a top parent OR it is targeting a vector with parents then you can vote and add
-    if ( (targetType.includes(textTypeSelected) == true) || ( (targetType.includes("vector") == true) && (checkFor(vectorSelected, "parent") != null) ) ) {  }
+    if ( targetType.includes(textTypeSelected) || ( ( targetType.includes("vector") ) && ( rejectionOptions.has(theVectorParent) == false  ) ) ) 
+      { alert("so the vector test is "+ ( ( targetType.includes("vector") ) && ( rejectionOptions.has(theVectorParent) == false  ) ) +" because the parent rejection test is "+ rejectionOptions.has(theVectorParent) +" because the parent is "+theVectorParent  ) }
     else {
-      $(theTextString).parent().parent().find(".voteBtn").remove(); //////
+      $(popupIDstring).find(".voteBtn").css("display", "none"); //////
+      $(popupIDstring).find(".addNewItem").css("display", "none"); //////remove instead??
+      alert("top anno no voting or adding");
       //////disable the add page
     };
   };
@@ -434,13 +438,13 @@ var removeEditorChild = function(thisEditor) {
   var theParent = document.getElementById("ViewerBox1");
   var toRemove = document.getElementById(thisEditor);
   theParent.removeChild(toRemove);
-  if (  rejectionOptions.has(typeof toRemove) == false  ) {  return thisEditor;  };
+  if (  rejectionOptions.has(toRemove) == false  ) {  return thisEditor;  };
 };
 
 var removeEditorsOpen = function(popupIDstring) {
   var theEditorItem = fieldMatching(editorsOpen, "editor", popupIDstring);
   var currentIndex = editorsOpen.indexOf(theEditorItem); 
-  editorsOpen.splice(currentIndex(),1);
+  editorsOpen.splice(currentIndex,1);
 };
 
 var closeEditorMenu = function(thisEditor) {
@@ -448,8 +452,9 @@ var closeEditorMenu = function(thisEditor) {
   return removeEditorChild(thisEditor);
 };
 
-var findNewTextData = function() {
+var findNewTextData = function(editorString) {
 
+  var newText = $(editorString).find(".newAnnotation").val();
   var textData = {body: {text: newText, format: "text"}, target: []};
 
   if (targetType.includes("vector") == true) {
@@ -473,26 +478,25 @@ var findNewTextData = function() {
 var addAnnotation = function(thisEditor){
 
   var editorString = "#" + thisEditor;
-  var newText = $(editorString).find(".newAnnotation").val();
   var createdText;
 
   $.ajax({
     type: "POST",
     url: findBaseURL(),
     async: false,
-    data: findNewTextData(),
+    data: findNewTextData(editorString),
     success: 
       function (data) {
         createdText = data.url;
       }
   });
 
-  $(editorString).find(".newAnnotation").val("");  newText = ""; 
+  $(editorString).find(".newAnnotation").val("");  
   if (targetType.includes(textTypeSelected)==true) {
     var targetData = {children: [{id: textSelectedID, fragments: [{id: createdText}] }]};
     updateAnno(textSelectedParent, targetData);
   };
-  if ((targetType.includes("vector")==true) && (rejectionOptions.has(typeof childrenArray[0]) )) {
+  if ((targetType.includes("vector")==true) && (rejectionOptions.has(childrenArray[0]) )) {
     var targetData = {};
     targetData[textTypeSelected] = createdText;
     updateAnno(vectorSelected, targetData);
@@ -505,11 +509,12 @@ var addAnnotation = function(thisEditor){
 };
 
 var setTargets = function() {
-  if (  rejectionOptions.has(typeof vectorSelected) ){
+ 
+  if (  rejectionOptions.has(vectorSelected) ){ 
     targetSelected = [textSelectedHash];
     targetType = textTypeSelected;
   }
-  else if ( rejectionOptions.has(typeof textSelected || typeof textSelectedParent) ) { 
+  else if ( rejectionOptions.has(textSelected) || rejectionOptions.has(textSelectedParent) ) { 
     targetSelected = [vectorSelected];
     targetType = "vector";
   }
