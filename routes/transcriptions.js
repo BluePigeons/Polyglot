@@ -52,8 +52,6 @@ var replaceChildText = function(oldText, newInsert, oldInsert) {
 
 exports.voting = function(req, res) {
 
-    //////////order and reorder by ranking!!!
-
     var voteOn = newTranscription.findOne({'body.id':req.body.parent});
     voteOn.exec(function(err, transcription) {
 
@@ -85,7 +83,7 @@ exports.voting = function(req, res) {
         };
 
         var reload = function(newChildRank) {
-            //check to see if now highest ranking child and update if so
+            //check to see if now highest ranking child and update the main transcription if so
             if (newChildRank == 0){ 
                 var oldHTML = transcription.body.text;
                 var newInsert = req.body.votedText;
@@ -98,6 +96,20 @@ exports.voting = function(req, res) {
             };
         };
 
+        var reorderByRank = function(voteIndex, nIndex) {
+            var neigbourFrag = fragmentChild(nIndex);
+            var voteFrag = fragmentChild(locationIndex());
+
+            transcription.children[locationIndex()].fragments.set(nIndex, voteFrag); //put the voted fragment in the neighbour's index
+            transcription.children[locationIndex()].fragments.set(voteIndex, neighbourFrag); //put the neighbour fragment in the old voted fragment's index
+
+            if ((transcription.children[locationIndex()].fragments[nIndex] == voteFrag)
+                &&(transcription.children[locationIndex()].fragments[voteIndex] == neighbourFrag)) {
+
+                return transcription; ///only return once process is done
+            };
+        };
+
         var voteRankChange = function(voteNumber) {
         ///NOTE: the ranking is ONLY changed if the vote is now above or below the neighbour, not if now equal
             var neighbourIndex = fragmentIndex() - voteNumber;
@@ -105,9 +117,10 @@ exports.voting = function(req, res) {
                 && ( theChildDoc(locationIndex()).votesUp > fragmentChild(neighbourIndex).votesUp ) ) {
 
                 var votingUpNow = function() {
-                    rankChange(neighbourIndex, -1);
-                    var newChildRank = rankChange(fragmentIndex(), 1);
-                    return reload(newChildRank);
+                    rankChange(neighbourIndex, 1);
+                    var newChildRank = rankChange(fragmentIndex(), -1);
+                    reload(newChildRank);
+                    return reorderByRank(fragmentIndex(), neighbourIndex);
                 };
                 return votingUpNow();
 
@@ -117,9 +130,10 @@ exports.voting = function(req, res) {
                 &&  (theChildDoc(locationIndex()).votesUp < fragmentChild(neighbourIndex)).votesUp ) {
 
                 var votingDownNow = function() {
-                    rankChange(neighbourIndex, 1);
-                    var newChildRank = rankChange(fragmentIndex(), -1);
-                    return reload(newChildRank);                    
+                    rankChange(neighbourIndex, -1);
+                    var newChildRank = rankChange(fragmentIndex(), 1);
+                    reload(newChildRank);  
+                    return reorderByRank(fragmentIndex(), neighbourIndex);                 
                 };
                 return votingDownNow();               
 
@@ -144,8 +158,7 @@ exports.voting = function(req, res) {
             transcription.save(function(err) {
                 if (err) {res.send(err)}
                 else {  
-                    res.json({"reloadText": transcription}); 
-                    //return transcription;  
+                    res.json({"reloadText": transcription});  
                 };
             });
         };
@@ -170,14 +183,14 @@ exports.deleteAll = function(req, res) {
         if (err) {res.send(err)};
 
         transcriptions.forEach(function(transcription){
-            newTranscription.remove({_id: transcription._id},
+            transcription.remove({_id: transcription._id},
             function(err){
                 if (err) {res.send(err)};
             });
-            if (transcriptions.length == 0) {
-                res.send("all gone");
-            };
         });
+        if (transcriptions.length == 0) {
+            res.send("all gone");
+        };
     }); 
 };
 

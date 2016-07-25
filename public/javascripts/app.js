@@ -2,7 +2,7 @@
 
 var currentWebsite = window.location.href;
 //alert(currentWebsite);
-
+var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
 var websiteAddress = "http://localhost:8080";
 
 var vectorURL = websiteAddress.concat("/api/vectors/");
@@ -28,7 +28,6 @@ var textSelectedID;
 var textSelectedHash;
 //HTML Selection Object
 var textSelectedFragment = "";
-var textSelectedFragmentString = "";
 var textTypeSelected = "";
 
 //URLs
@@ -51,8 +50,39 @@ var newContent;
 var newNodeInsertID;
 var startParentID;
 
-//based on the code from https://davidwalsh.name/text-selection-ajax
-// attempt to find a text selection 
+var getTargetJSON = function(target) {
+
+  if ( rejectionOptions.has(typeof target) ) { return null;  }
+  else {
+    var targetJSON;
+
+    $.ajax({
+    type: "GET",
+    dataType: "json",
+    url: target,
+    async: false,
+    success: 
+      function (data) {
+        targetJSON = data;
+      }
+    });
+
+    return targetJSON;
+  };
+};
+
+var updateAnno = function(targetURL, targetData) {
+  $.ajax({
+    type: "PUT",
+    url: targetURL,
+    async: false,
+    dataType: "json",
+    data: targetData,
+    success:
+      function (data) {  }
+  });
+};
+
 function getSelected() {
   if(window.getSelection) { return window.getSelection() }
   else if(document.getSelection) { return document.getSelection(); }
@@ -69,11 +99,55 @@ var insertSpanDivs = function() {
   textSelectedID = newNodeInsertID;
 };
 
+var fieldMatching = function(searchArray, field, fieldValue) {
+  var theMatch;
+  searchArray.forEach(function(childDoc){
+    if (childDoc[field] == fieldValue) {
+        theMatch = childDoc;
+    };
+  });
+  return theMatch;
+};
+
+var asyncPush = function(addArray, oldArray) {
+    var theArray = oldArray;
+    var mergedArray = function() {
+        addArray.forEach(function(addDoc){
+            theArray.push(addDoc);
+        });
+        if (theArray.length = (oldArray.length + addArray.length)) {
+            return theArray;
+        };
+    };
+    return mergedArray();
+};
+
+var arrayIDCompare = function(arrayA, arrayB) {
+  return arrayA.forEach(function(doc){
+    var theCheck = fieldMatching(arrayB, "id", arrayA.id);
+    if (  rejectionOptions.has(typeof theCheck) ) { return false }
+    else {
+      return [doc, theCheck];
+    };
+  });
+};
+
+var checkFor = function(target, field) {
+  var theChecking = getTargetJSON(target);
+  if ( rejectionOptions.has(typeof field) || rejectionOptions.has(typeof theChecking) || rejectionOptions.has(typeof theChecking[field])  ) {  return false  } /////////////
+  else {  return theChecking[field] }; 
+};
+
+var findBaseURL = function() {
+  if (textTypeSelected == "transcription") {  return transcriptionURL;  }
+  else if (textTypeSelected == "translation") {  return translationURL;  };
+};
+
 var newTranscriptionFragment = function() {
 
   textSelectedHash = textSelectedParent.concat("#"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
   targetSelected = [textSelectedHash];
-  var targetData = {body: {text: textSelectedFragmentString, format: "text/html"}, target: [{id: textSelectedHash, format: "text/html"}], parent: textSelectedParent};
+  var targetData = {body: {text: textSelectedFragment.toString(), format: "text/html"}, target: [{id: textSelectedHash, format: "text/html"}], parent: textSelectedParent};
   
   $.ajax({
     type: "POST",
@@ -88,16 +162,7 @@ var newTranscriptionFragment = function() {
 
   var newHTML = $(outerElementTextIDstring).html();
   var parentData = {body: {text: newHTML}, children: [{id: textSelectedID, fragments: [{id: textSelected}]}]};
-
-  $.ajax({
-    type: "PUT",
-    url: textSelectedParent,
-    async: false,
-    dataType: "json",
-    data: parentData,
-    success:
-      function (data) {}
-  });
+  updateAnno(textSelectedParent, parentData);
 
 };
 
@@ -108,24 +173,14 @@ var findClassID = function(classString, IDstring) {
   return theID[0];
 };
 
-///// API FUNCTIONS
-
-var getTargetJSON = function(target) {
-
-  var targetJSON;
-
-  $.ajax({
-  type: "GET",
-  dataType: "json",
-  url: target,
-  async: false,
-  success: 
-    function (data) {
-      targetJSON = data;
-    }
-  });
-
-  return targetJSON;
+var setTextSelectedID = function(theText) {
+  var theJSON = getTargetJSON(theText);
+  if (rejectionOptions.has(typeof theJSON)) { return null }
+  else {
+    var theTarget = fieldMatching(theJSON.target, "format", "text/html");
+    textSelectedHash = theTarget.id;
+    textSelectedID = textSelectedHash.substring(textSelectedParent.length + 1); //the extra one for the hash
+  };
 };
 
 var searchCookie = function(field) {
@@ -144,50 +199,12 @@ var searchCookie = function(field) {
 };
 
 var checkForVectorTarget = function(theText) {
-  var isThere = "false";
   var theChecking = getTargetJSON(theText);
-
-  if (typeof theChecking.target[0] == null || 'undefined') { } /////////this isn't working
-  else {                  
-    theChecking.target.forEach(function(target){
-      if(target.format == "SVG"){
-        isThere = target.id;
-      };
-    });
-  };
-  return isThere;
+  if (  rejectionOptions.has(typeof theChecking.target[0])  ) { return false } 
+  else {   return fieldMatching(theChecking.target, "format", "SVG").id;  };
 };
 
-var checkForAnnotation = function(target, textType) {
-
-  var targetChecking = getTargetJSON(target);
-  var targetAnno;
-  if (textType == "transcription") {
-    targetAnno = targetChecking.transcription;
-  }
-  else if (textType == "translation") {
-    targetAnno = targetChecking.translation;
-  };
-
-  if (targetAnno == '""') {  return false  }
-  else if (targetAnno == "") {  return false  }
-  else {  return targetAnno  };
-
-};
-
-var checkForParent = function(target) {
-
-  var targetChecking = getTargetJSON(target);
-  var parent = targetChecking.parent;
-
-  if (parent == '""') { return false }
-  else if (parent == "") {  return false }
-  else if (parent == false) {  return false }
-  else {  return parent   };
-
-};
-
-var lookupAnnotationChildren = function(target, baseURL) {
+var lookupTargetChildren = function(target, baseURL) {
 
   var childTexts;
   var targetParam = encodeURIComponent(target);
@@ -208,90 +225,27 @@ var lookupAnnotationChildren = function(target, baseURL) {
 var updateVectorSelection = function(vectorURL) {
 
   var textData = {target: {id: vectorURL, format: "SVG"}};
-  var vectorData;
-  if (textTypeSelected == "transcription") {  vectorData = {transcription: textSelected};  }
-  else if (textTypeSelected == "translation") {  vectorData = {translation: textSelected};  };
+  var vectorData = {};
+  vectorData[textTypeSelected] = textSelected;
 
   selectingVector.forEach(function(child){
-    $.ajax({
-      type: "PUT",
-      dataType: "json",
-      url: child.body.id,
-      async: false,
-      data: textData,
-      success: 
-        function (data) {}
-    });
+    updateAnno(child.body.id, textData);
   });
 
-  $.ajax({
-    type: "PUT",
-    dataType: "json",
-    url: vectorURL,
-    async: false,
-    data: vectorData,
-    success: 
-      function (data) {
-        selectingVector = false;
-      }
-  }); 
+  updateAnno(vectorURL, vectorData);
+  selectingVector = false;
 
-};
-
-var asyncPush = function(addArray, oldArray) {
-    var theArray = oldArray;
-    var mergedArray = function() {
-        addArray.forEach(function(addDoc){
-            theArray.push(addDoc);
-        });
-        if (theArray.length = (oldArray.length + addArray.length)) {
-            return theArray;
-        };
-    };
-    return mergedArray();
-};
-
-///only for searchArrays where childDoc.id is to compare with checkID
-var idMatching = function(searchArray, checkID) {
-  var theMatch;
-  searchArray.forEach(function(childDoc){
-    if (childDoc.id == checkID) {
-      theMatch = childDoc;
-    };
-  });
-  return theMatch;
-};
-
-var arrayIDCompare = function(arrayA, arrayB) {
-  return arrayA.forEach(function(doc){
-    var theCheck = idMatching(arrayB, arrayA.id);
-    if (typeof theCheck == (null || 'undefined' || false)) {}
-    else {
-      return [doc, theCheck];
-    };
-  });
 };
 
 var votingFunction = function(vote, votedID, currentTopText) {
+  var baseURL = findBaseURL();
 
-  var theVote;
-  var targetID; ///API URL of the annotation voted on
-  var outerSpanOpen;
-  if (targetType == "transcription"){
-    theVote = transcriptionURL + "voting/" + vote;
-    targetID = transcriptionURL.concat(votedID);
-    outerSpanOpen = "<a class='transcription-text openTranscriptionChildrenPopup' id='"+ textSelectedID + "' >";
-  } 
-  else if (targetType == "translation"){
-    theVote = translationURL + "voting/" + vote;
-    targetID = translationURL.concat(votedID);
-    outerSpanOpen = "<a class='translation-text openTranslationChildrenPopup' id='"+ textSelectedID + "' >";
-  };
-
+  var theVote = baseURL + "voting/" + vote;
+  var targetID = baseURL.concat(votedID);; ///API URL of the annotation voted on
+  var outerSpanOpen = "<a class='"+targetType+"-text open"+targetType+"ChildrenPopup' id='"+ textSelectedID + "' >";
   var votedTextBody = $(votedID).html(); 
   var currentText = outerSpanOpen + currentTopText + "</a>"; ///current most voted at that location, includes outerHTML
   var votedText = outerSpanOpen + votedTextBody + "</a>"; ///text just voted on, includes outerHTML
-
   var targetData = {
     parent: textSelectedParent, ///it is this that is updated containing the votedText within its body
     children: [{
@@ -300,9 +254,9 @@ var votingFunction = function(vote, votedID, currentTopText) {
         id: targetID
       }]
     }],
-    votedText: votedText,
-    topText: currentText
+    votedText: votedText,  topText: currentText
   };
+  var updatedTranscription;
 
   $.ajax({
     type: "PUT",
@@ -311,64 +265,36 @@ var votingFunction = function(vote, votedID, currentTopText) {
     dataType: "json",
     data: targetData,
     success:
-      function (data) {}
+      function (data) {
+        updatedTranscription = data.reloadText;
+      }
   });
+
+////if the highest ranking has changed
+///////rebuild carousel with new textSelected
+///////if the parent is open in an editor rebuild carousel with new transcription 
 
 };
 
-var findHghestRankingChild = function(parent, locationID) {
-
-  var theChildren = getTargetJSON(parent).children;
-  var theLocation = idMatching(getTargetJSON(parent).children, locationID);
-  var the_child;
-
-  theLocation.fragments.forEach(function(alternative){
-    if (alternative.rank == 0) {  
-      the_child = alternative.id;  
-    };
-  });
-  if (the_child != 'undefined') {
-    return the_child;
-  };
+var findHighestRankingChild = function(parent, locationID) {
+  var theLocation = fieldMatching(getTargetJSON(parent).children, "id", locationID);
+  var the_child = fieldMatching(theLocation.fragments, "rank", 0); 
+  if (rejectionOptions.has(typeof the_child.id) ) {  return false;  }
+  else {  return the_child.id;  };
 };
-
-////IMAGE HANDLING
 
 var loadImage = function() {
-
   imageSelected = searchCookie("imageviewing=");
   var theImage = getTargetJSON(imageSelected);
   imageSelectedFormats = theImage.formats;
   imageSelectedMetadata = theImage.metadata;
-
-};
-
-var getImageVectors = function(target) {
-  var imageVectors;
-  var targetParam = encodeURIComponent(target);
-  var imageSearch = vectorURL.concat("targets/"+targetParam);
-  $.ajax({
-    type: "GET",
-    dataType: "json",
-    url: imageSearch,
-    async: false,
-    success: 
-      function (data) {
-        imageVectors = data.list;
-      }
-  });
-  return imageVectors;
 };
 
 ///// VIEWER WINDOWS
 
-var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
+var buildCarousel = function(existingChildren, popupIDstring) {
 
-//  alert("building with "+JSON.stringify(existingChildren));
-
-  if (typeof existingChildren[0] == false || existingChildren[0] == 'undefined' || existingChildren[0] == null) { 
-    return null; 
-  }
+  if (rejectionOptions.has(typeof existingChildren[0]) ) {   return null;   }
   else {  
     var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
     var middleHTML = "' class='content-area' title='Annotation Text'>";
@@ -387,51 +313,25 @@ var buildCarousel = function(existingChildren, baseURL, popupIDstring) {
       var itemID = subarray[0]._id;
       var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
       $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
-/////////find votes up and down 
-
+/////////find votes up for badges
 ///////////////////for some reeeaalllly inexplicable reason this isn't working
-/*
-      if ((typeof subarray[1] == null || subarray[1] == 'undefined') || (typeof subarray[1].votingInfo == null || subarray[1].votingInfo == 'undefined')) {} 
+    /*  if ((typeof subarray[1] == null || subarray[1] == 'undefined') || (typeof subarray[1].votingInfo == null || subarray[1].votingInfo == 'undefined')) {} 
       else {
         var votesUp = subarray[1].votingInfo.votesUp;
         $(popupIDstring).find(".votingUpButton").find(".badge").val(votesUp);
         var votesDown = subarray[1].votingInfo.votesDown;
         $(popupIDstring).find(".votingDownButton").find(".badge").val(votesDown);
-      };
-*/
+      }; */
 /////////update metadata options with defaults and placeholders???    
     });
-
-  };
-
-
-
-};
-
-var findBaseURL = function() {
-  if (textTypeSelected == "transcription") {  return transcriptionURL;  }
-  else if (textTypeSelected == "translation") {  return translationURL;  };
-};
-
-var wrapperClassList = function() {
-  if (textTypeSelected == "transcription") {  return "transcription-text ";  }
-  else if (textTypeSelected == "translation") {  return "translation-text ";  };
-};
-
-var titleHTML = function() {
-  if (textTypeSelected == "transcription") {
-    return "TRANSCRIPTION";
-  }
-  else if (textTypeSelected == "translation") {
-    return "TRANSLATION";
   };
 };
 
 var updateEditor = function(popupIDstring) {
 
   $(popupIDstring).find("#theEditor").attr("id", "newEditor");
-  $(popupIDstring).find(".textEditorMainBox").find('*').addClass(wrapperClassList()); 
-  $(popupIDstring).find(".editorTitle").html(titleHTML());
+  $(popupIDstring).find(".textEditorMainBox").find('*').addClass(textTypeSelected+"-text"); 
+  $(popupIDstring).find(".editorTitle").html(textTypeSelected.toUpperCase());
 
   //if a vector target doesn't already exist then user can link to a vector target either by creating or clicking on an existing one 
   if (targetType.includes("vector") == false){ 
@@ -440,8 +340,9 @@ var updateEditor = function(popupIDstring) {
   };
 
   //if a highest ranking exists then highlight it
-  if (childrenArray[0] == null || childrenArray[0] == 'undefined' || childrenArray[0] == false || childrenArray[0] == []) {
+  if (rejectionOptions.has(typeof childrenArray[0]) ) {
     $(popupIDstring).find(".addNewItem").addClass("active");
+    $(popupIDstring).find(".carousel-control").css("display", "none");
   }
   else {
 
@@ -454,7 +355,7 @@ var updateEditor = function(popupIDstring) {
     $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
 
     //if it is targeting it's own type then it isn't a top parent OR it is targeting a vector with parents then you can vote and add
-    if ( (targetType.includes(textTypeSelected) == true) || ( (targetType.includes("vector") == true) && (checkForParent(vectorSelected) != null) ) ) {  }
+    if ( (targetType.includes(textTypeSelected) == true) || ( (targetType.includes("vector") == true) && (checkFor(vectorSelected, "parent") != null) ) ) {  }
     else {
       $(theTextString).parent().parent().find(".voteBtn").remove(); //////
       //////disable the add page
@@ -465,10 +366,9 @@ var updateEditor = function(popupIDstring) {
   $(".textEditorPopup").draggable({
     handle: ".popupBoxHandlebar"
   });
-
 };
 
-var updateEditorsOpen = function(popupIDstring) {
+var addEditorsOpen = function(popupIDstring) {
   return editorsOpen.push({
     "editor": popupIDstring,
     "typesFor": targetType,
@@ -506,16 +406,16 @@ var createEditorPopupBox = function() {
 };
 
 var setChildrenArray = function() {
-  return childrenArray = lookupAnnotationChildren(targetSelected[0], findBaseURL());
+  return childrenArray = lookupTargetChildren(targetSelected[0], findBaseURL()); //////setting childrenArray
 };
 
 var openEditorMenu = function() {
 
   var popupIDhash = createEditorPopupBox();
   var popupIDstring = popupIDhash;
-  buildCarousel(setChildrenArray(), findBaseURL(), popupIDstring);
+  buildCarousel(setChildrenArray(), popupIDstring);
 
-  $('.openTranscriptionChildrenPopup').popover({ 
+  $('.opentranscriptionChildrenPopup').popover({ 
     trigger: 'manual',
     placement: 'top',
     html : true,
@@ -525,14 +425,49 @@ var openEditorMenu = function() {
   });
 
   updateEditor(popupIDstring); 
-  updateEditorsOpen(popupIDstring); 
+  addEditorsOpen(popupIDstring); 
 
 };
 
-var closeEditorMenu = function(thisEditor) {
+var removeEditorChild = function(thisEditor) {
+
   var theParent = document.getElementById("ViewerBox1");
   var toRemove = document.getElementById(thisEditor);
   theParent.removeChild(toRemove);
+  if (  rejectionOptions.has(typeof toRemove) == false  ) {  return thisEditor;  };
+};
+
+var removeEditorsOpen = function(popupIDstring) {
+  var theEditorItem = fieldMatching(editorsOpen, "editor", popupIDstring);
+  var currentIndex = editorsOpen.indexOf(theEditorItem); 
+  editorsOpen.splice(currentIndex(),1);
+};
+
+var closeEditorMenu = function(thisEditor) {
+  removeEditorsOpen(thisEditor);
+  return removeEditorChild(thisEditor);
+};
+
+var findNewTextData = function() {
+
+  var textData = {body: {text: newText, format: "text"}, target: []};
+
+  if (targetType.includes("vector") == true) {
+    textData.target.push({id: vectorSelected, format: "image/SVG"});
+  };
+
+  if (targetType.includes(textTypeSelected) == true) {
+      textData.target.push({id: textSelectedHash, format: "text/html"});
+      textData.parent = textSelectedParent;
+  }
+  else if (targetType.includes(textTypeSelected) == false) {
+      //textData.target.push({id: ???, format: "text/html"});
+  };
+
+  if (textData.target[0] != 'undefined') {
+    return textData;
+  };
+  
 };
 
 var addAnnotation = function(thisEditor){
@@ -540,211 +475,77 @@ var addAnnotation = function(thisEditor){
   var editorString = "#" + thisEditor;
   var newText = $(editorString).find(".newAnnotation").val();
   var createdText;
-  var baseURL;
-  var textData = {body: {text: newText, format: "text"}, target: []};
-  var targetData;
-
-  if (targetType.includes("vector") == true) {
-    textData.target.push({id: vectorSelected, format: "image/SVG"});
-  };
-
-  if (textTypeSelected == "transcription") {
-    baseURL = transcriptionURL;
-    if (targetType.includes("transcription") == true) {
-      textData.target.push({id: textSelectedHash, format: "text/html"});
-      textData.parent = textSelectedParent;
-    };
-    if (targetType.includes("translation") == true) {
-      //textData.target.push({id: ???, format: "text/html"});
-    };
-  };
-
-  if (textTypeSelected == "translation") {
-    baseURL = translationURL;
-    if (targetType.includes("translation") == true) {
-      textData.target.push({id: textSelectedHash, format: "text/html"});
-      textData.parent = textSelectedParent;
-    };
-    if (targetType.includes("transcription") == true) {
-      //textData.target.push({id: ???, format: "text/html"});
-    };
-  };
 
   $.ajax({
     type: "POST",
-    url: baseURL,
+    url: findBaseURL(),
     async: false,
-    data: textData,
+    data: findNewTextData(),
     success: 
       function (data) {
         createdText = data.url;
       }
   });
 
-  $(editorString).find(".newAnnotation").val(""); //reset
-  newText = "";
-
-  if (textTypeSelected == "transcription") {
-
-    if (targetType.includes("transcription")==true) {
-      targetData = {children: [{id: textSelectedID, fragments: [{id: createdText}] }]};
-      $.ajax({
-        type: "PUT",
-        url: textSelectedParent,
-        async: false,
-        data: targetData,
-        success:
-          function (data) {}
-      });
-    };
-
-    if ((targetType.includes("vector")==true)&&(childrenArray[0] == null || childrenArray[0] == 'undefined' || childrenArray[0] == false || childrenArray[0] == [])) {
-      targetData = {transcription: createdText};
-      $.ajax({
-        type: "PUT",
-        url: vectorSelected,
-        async: false,
-        data: targetData,
-        success:
-          function (data) {}
-      });
-    };
-
-  }; 
-
-  if (textTypeSelected == "translation") {
-
-    if (targetType.includes("translation")==true) {
-      targetData = {children: {id: textSelectedID, fragments: {id: createdText}}};
-      $.ajax({
-        type: "PUT",
-        url: textSelectedParent,
-        async: false,
-        data: targetData,
-        success:
-          function (data) {}
-      });
-    };
-
-    if ((targetType.includes("vector")==true)&&(childrenArray[0] == null || childrenArray[0] == 'undefined' || childrenArray[0] == false || childrenArray[0] == [])) {
-      targetData = {translation: createdText};
-      $.ajax({
-        type: "PUT",
-        url: vectorSelected,
-        async: false,
-        data: targetData,
-        success:
-          function (data) {}
-      });
-    };
-
-  }; 
-  
-//////////if nothing is done with callbacks then make one post function using url and targetdata
-//////////update carousel properly
-
-  //UPDATE CAROUSEL
-  textData.body.id = createdText;
-  buildCarousel([[textData]], baseURL, editorString);
-
-};
-
-var setVectorVariables = function(textType) {
-  var textType = textType;
-  textTypeSelected = textType;
-  targetSelected = [vectorSelected];
-  targetType = "vector";
-  var openNewEditor = function() {
-    var targetText = checkForAnnotation(vectorSelected, textType); //return the api url NOT json file
-    if (targetText == false || targetText == 'undefined' || targetText == null){   }
-    else { 
-
-      textSelected = targetText; //initially for editor and target info the textSelected is highest ranking
-
-      var lookupTarget = getTargetJSON(textSelected);
-      textSelectedFragment = lookupTarget.body.text;
-      textSelectedFragmentString = textSelectedFragment;
-      textSelectedHash = "";
-      textSelectedID = "";
-      textSelectedParent = lookupTarget.parent; 
-      if (textSelectedParent == "''" || textSelectedParent == "" || textSelectedParent == false || textSelectedParent == null || textSelectedParent == "undefined") {}
-      else {
-        lookupTarget.target.forEach(function(target){
-          if(target.format == "text/html"){
-            textSelectedHash = target.id;
-            var preHash = textSelectedParent.concat("#");
-            textSelectedID = textSelectedHash.substring(preHash.length);
-          };
-        });
-        targetSelected = [vectorSelected, textSelectedHash];
-        targetType = "vector "+textType;
-      };
-    };
-    openEditorMenu();
+  $(editorString).find(".newAnnotation").val("");  newText = ""; 
+  if (targetType.includes(textTypeSelected)==true) {
+    var targetData = {children: [{id: textSelectedID, fragments: [{id: createdText}] }]};
+    updateAnno(textSelectedParent, targetData);
+  };
+  if ((targetType.includes("vector")==true) && (rejectionOptions.has(typeof childrenArray[0]) )) {
+    var targetData = {};
+    targetData[textTypeSelected] = createdText;
+    updateAnno(vectorSelected, targetData);
   };
 
-  if (editorsOpen == null || editorsOpen == 'undefined') {  openNewEditor();  }
+  //rebuild editor 
+  closeEditorMenu(editorString);
+/////////reset variables......?
+  openEditorMenu(); 
+};
+
+var setTargets = function() {
+  if (  rejectionOptions.has(typeof vectorSelected) ){
+    targetSelected = [textSelectedHash];
+    targetType = textTypeSelected;
+  }
+  else if ( rejectionOptions.has(typeof textSelected || typeof textSelectedParent) ) { 
+    targetSelected = [vectorSelected];
+    targetType = "vector";
+  }
+  else {
+    targetSelected = [textSelectedHash, vectorSelected];
+    targetType = "vector " + textTypeSelected;
+  };
+};
+
+var openNewEditor = function(fromType) {
+
+  if (fromType == "vector") {
+    textSelected = checkFor(vectorSelected, textTypeSelected); //return the api url NOT json file
+    textSelectedParent = checkFor(textSelected, "parent");
+    setTextSelectedID(textSelected);
+  }
+  else if (fromType == "text") {
+    textSelected = findHighestRankingChild(textSelectedParent, textSelectedID);
+    vectorSelected = checkForVectorTarget(textSelected); 
+  };
+  setTargets();
+  openEditorMenu();
+};
+
+var checkEditorsOpen = function(fromType, textType) {
+  textTypeSelected = textType;
+  if (editorsOpen == null || editorsOpen == 'undefined') {    openNewEditor(fromType);  }
   else {
     var canOpen = true;
     editorsOpen.forEach(function(editorOpen){
-      if ((editorOpen.vectorSelected == vectorSelected) && (editorOpen.textTypeSelected == textType)){
+      if ( ((editorOpen[vectorSelected] == vectorSelected)||(editorOpen[textSelectedParent] == textSelectedParent)) && (editorOpen[textTypeSelected] == textType)){
         $(editorOpen.editor).effect("shake");
         canOpen = false;
       }
     });
-    if (canOpen == true) {  openNewEditor() };
-  };
-
-};
-
-var setTextVariables = function(textType) {
-  var baseURL;
-  if (textType == "transcription") {
-    baseURL = transcriptionURL;
-  }
-  else if (textType == "translation") {
-    baseURL = translationURL;
-  };
-  textSelectedID = startParentID;
-  textSelectedFragment = $(outerElementTextIDstring).html();
-  textSelectedFragmentString = $(outerElementTextIDstring).html().toString(); 
-
-  if ($(outerElementTextIDstring).parent().attr('id') != (null || 'undefined')){
-    textSelectedParent = baseURL + $(outerElementTextIDstring).parent().attr('id'); 
-  };
-
-  textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
-  textTypeSelected = textType;
-
-  var openNewEditor = function() {
-
-    textSelected = findHghestRankingChild(textSelectedParent, textSelectedID);
-    var checkVectors = checkForVectorTarget(textSelected); 
-    if (checkVectors != "false"){
-      vectorSelected = checkVectors;
-      targetSelected = [textSelectedHash, vectorSelected];
-      targetType = " vector " + textType;
-    }
-    else {
-      vectorSelected = "";
-      targetSelected = [textSelectedHash];
-      targetType = textType;
-    };
-    openEditorMenu();
-  };
-
-  if (editorsOpen == null || editorsOpen == 'undefined') {  openNewEditor();  }
-  else {
-    var canOpen = true;
-    editorsOpen.forEach(function(targetOpen){
-      if ((targetOpen.textSelectedParent == textSelectedParent) && (targetOpen.textType == textType)) {
-        $(targetOpen.editor).effect("shake"); 
-        canOpen = false; 
-      };
-    });
-    if (canOpen == true) {
-      openNewEditor();
-    };
+    if (canOpen == true) {  openNewEditor(fromType) };
   };
 };
 
@@ -756,16 +557,13 @@ var baseLayer;
 var allDrawnItems = new L.FeatureGroup();
 var controlOptions = {
     draw: {
-//disables the polyline and marker feature as this is unnecessary for annotation of text as it cannot enclose it
-        polyline: false,
+        polyline: false,  //disables the polyline and marker feature as this is unnecessary for annotation of text as it cannot enclose it
         marker: false,
-//disabling polygons and circles as IIIF image region API does not specify how to encode anything but rectangular regions
-        polygon: false,
+        polygon: false, //disabling polygons and circles as IIIF image region API does not specify how to encode anything but rectangular regions
         circle: false
     },
-//passes draw controlOptions to the FeatureGroup of editable layers
     edit: {
-        featureGroup: allDrawnItems,
+        featureGroup: allDrawnItems, //passes draw controlOptions to the FeatureGroup of editable layers
     }
 };
 var popupVectorMenu = L.popup()
@@ -773,7 +571,7 @@ var popupVectorMenu = L.popup()
 //to track when editing
 var currentlyEditing = false;
 var currentlyDeleting = false;
-var existingVectors = getImageVectors(imageSelected);
+var existingVectors = lookupTargetChildren(imageSelected, vectorURL);
 
 map = L.map('map');
 map.options.crs = L.CRS.Simple;
@@ -855,16 +653,9 @@ map.on('draw:created', function(evt) {
 allDrawnItems.on('click', function(vec) {
 
   vectorSelected = vec.layer._leaflet_id;
-
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
-
-  else if (selectingVector != false) {
-    updateVectorSelection(vectorSelected);
-  }
-
-  else {
-    vec.layer.openPopup();
-  };
+  else if (selectingVector != false) {  updateVectorSelection(vectorSelected);  }
+  else {  vec.layer.openPopup();  };
 
 });
 
@@ -883,41 +674,29 @@ map.on('draw:editstop', function(){
 
 //////update DB whenever vector coordinates are changed
 allDrawnItems.on('edit', function(vec){
-
   var shape = vec.layer.toGeoJSON();
-
-  $.ajax({
-    type: "PUT",
-    url: vectorSelected,
-    async: false,
-    data: shape,
-    success:
-      function (data) {}
-  });
-
+  updateAnno(vectorSelected, shape);
 });
 
 //////update DB whenever vector is deleted
 allDrawnItems.on('remove', function(vec){
-
   $.ajax({
     type: "DELETE",
     url: vectorSelected,
     success:
       function (data) {}
   });
-
 });
 
 map.on('popupopen', function() {
 
   $('.openTranscriptionMenu').one("click", function(event) {
-    setVectorVariables("transcription");
+    checkEditorsOpen("vector", "transcription");
     map.closePopup();
   });
 
   $('.openTranslationMenu').one("click", function(event) {
-    setVectorVariables("translation");
+    checkEditorsOpen("vector", "translation");
     map.closePopup();
   });
 
@@ -925,7 +704,27 @@ map.on('popupopen', function() {
 
 ///////ANNOTATION EDITORS
 
-$(document).ready(function() {
+var newSpanClass = function(startParentClass) {
+  if (startParentClass.includes('transcription-text')) {
+    return "transcription-text opentranscriptionChildrenPopup";
+  }
+  else if (startParentClass.includes('translation-text')) {
+    return "translation-text opentranslationChildrenPopup";
+  }
+  else {
+    alert("Please select transcription translation text");
+    return null;
+  };
+};
+
+var strangeTrimmingFunction = function() {
+////is this necesary???
+  if(textSelectedFragment && (textSelectedFragment = new String(textSelectedFragment).replace(/^\s+|\s+$/g,''))) {
+    textSelectedFragmentString = textSelectedFragment.toString();
+  }; 
+};
+
+$(document).ready(function() { ////necessary???
   $('#page_body').on("mouseup", '.content-area', function(event) {
 
     selection = getSelected(); 
@@ -933,18 +732,22 @@ $(document).ready(function() {
 
     if (classCheck.includes('openTranscriptionMenuOld')) { 
 
-      setTextVariables("transcription");
-      $('.openTranscriptionChildrenPopup').popover('hide');
+      textSelectedID = startParentID;
+      if ($(outerElementTextIDstring).parent().attr('id') != (null || 'undefined' || false
+        )){
+        textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
+      };
+      textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
+
+      checkEditorsOpen("text", "transcription");
+
+      $('.opentranscriptionChildrenPopup').popover('hide');
 
     }   
 
     else {
 
       textSelectedFragment = selection;
-
-      if(textSelectedFragment && (textSelectedFragment = new String(textSelectedFragment).replace(/^\s+|\s+$/g,''))) {
-        textSelectedFragmentString = textSelectedFragment.toString();
-      };
 
       var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
       var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
@@ -961,32 +764,20 @@ $(document).ready(function() {
 
       outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
 
-      if (classCheck.includes('openTranscriptionChildrenPopup')) { 
-        $('.openTranscriptionChildrenPopup').popover('show');
+      if (classCheck.includes('opentranscriptionChildrenPopup')) { 
+        $('.opentranscriptionChildrenPopup').popover('show');
       }
-      else if (classCheck.includes('openTranslationChildrenPopup')) { 
-        $('.openTranslationChildrenPopup').popover('show');
+      else if (classCheck.includes('opentranslationChildrenPopup')) { 
+        $('.opentranslationChildrenPopup').popover('show');
       }
       else if (startParentID != endParentID) {
         alert("you can't select across existing fragments' borders sorry");
       }
       else {
 
-        var newSpanClass;
-        var newPopupMenu;
-        if (startParentClass.includes('transcription-text')) {
-          newSpanClass = "transcription-text openTranscriptionChildrenPopup";
-        }
-        else if (startParentClass.includes('translation-text')) {
-          newSpanClass = "translation-text openTranslationChildrenPopup";
-        }
-        else {
-          alert("Please select transcription translation text");
-        };
-
         newNodeInsertID = Math.random().toString().substring(2);
 
-        var newSpan = "<a title='AnnotationHasChildren' class='" + newSpanClass + "' id='" + newNodeInsertID + "' >" + textSelectedFragment + "</a>";
+        var newSpan = "<a title='AnnotationHasChildren' class='" + newSpanClass() + "' id='" + newNodeInsertID + "' >" + textSelectedFragment + "</a>";
      
         var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
 
@@ -1139,7 +930,7 @@ $('#page_body').on("click", '.votingUpButton', function(event) {
 
 //////TRANSCRIPTIONS
 
-$('.openTranscriptionChildrenPopup').popover({ 
+$('.opentranscriptionChildrenPopup').popover({ 
   trigger: 'click',
   placement: 'top',
   html : true,
@@ -1148,21 +939,29 @@ $('.openTranscriptionChildrenPopup').popover({
   }
 });
 
-$('.openTranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
+$('.opentranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
 
   $('#page_body').on("click", function(event) {
     if ($(event.target).hasClass("popupAnnoMenu") == false) {
-      $('.openTranscriptionChildrenPopup').popover("hide");
+      $('.opentranscriptionChildrenPopup').popover("hide");
     }
   });
 
   $('.openTranscriptionMenuOld').on("click", function(event) {
-    setTextVariables("transcription");
-    $('.openTranscriptionChildrenPopup').popover('hide');
+
+    textSelectedID = startParentID;
+    if ($(outerElementTextIDstring).parent().attr('id') != (null || 'undefined')){
+      textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
+    };
+    textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
+
+    checkEditorsOpen("text", "transcription");
+
+    $('.opentranscriptionChildrenPopup').popover('hide');
   });
 
   $('.closeThePopover').on("click", function(event){
-    $('.openTranscriptionChildrenPopup').popover("hide");
+    $('.opentranscriptionChildrenPopup').popover("hide");
   });
 
 });
