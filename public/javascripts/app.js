@@ -1,33 +1,30 @@
 
 
 var currentWebsite = window.location.href;
-//alert(currentWebsite);
-var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
 var websiteAddress = "http://localhost:8080";
 
+var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
 var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
-//info.json format URL
-var imageSelected;
+var addNewAnnoHTML = "<div class='item addNewItem'> <div class='addNewContainer'> <h3>Add New</h3> <textarea class='newAnnotation' rows='5'></textarea><br><button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   </div>  </div>";
+var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-plus' aria-hidden='true' ></span></button></div>";
+//var metaHTML = ; ///////////
+
+var imageSelected; //info.json format URL
 var imageSelectedFormats;
 var imageSelectedMetadata = [];
 
-//API URL
-var vectorSelected = "";
+var vectorSelected = ""; //API URL
+var vectorSelectedParent; //API URL
 var currentCoords;
 
-//API URL
-var textSelected = "";
-//API URL
-var textSelectedParent = "";
-//DOM id
-var textSelectedID;
-//parent API URL + ID
-var textSelectedHash;
-//HTML Selection Object
-var textSelectedFragment = "";
+var textSelected = ""; //API URL
+var textSelectedParent = ""; //API URL
+var textSelectedID; //DOM id
+var textSelectedHash; //parent API URL + ID
+var textSelectedFragment; //HTML Selection Object
 var textTypeSelected = "";
 
 //URLs
@@ -35,12 +32,8 @@ var targetSelected; //array
 var targetType = ""; 
 var childrenArray;
 
-//those targets currently open in editors
-var editorsOpen = [];
-
-//used to indicate if the user is currently searching for a vector to link or not
-var selectingVector = false;
-
+var editorsOpen = []; //those targets currently open in editors
+var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
 var findingcookies = document.cookie;
 
 ///// TEXT SELECTION
@@ -50,9 +43,14 @@ var newContent;
 var newNodeInsertID;
 var startParentID;
 
+var isUseless = function(something) {
+  if (rejectionOptions.has(something) || rejectionOptions.has(typeof something)) {  return true;  }
+  else {  return false;  };
+};
+
 var getTargetJSON = function(target) {
 
-  if ( rejectionOptions.has(target) ) { return null;  }
+  if ( isUseless(target) ) { return null;  }
   else {
     var targetJSON;
 
@@ -83,30 +81,17 @@ var updateAnno = function(targetURL, targetData) {
   });
 };
 
-function getSelected() {
-  if(window.getSelection) { return window.getSelection() }
-  else if(document.getSelection) { return document.getSelection(); }
-  else {
-    var selection = document.selection && document.selection.createRange();
-    if(selection.text) { return selection.text; }
-    return false;
-  }
-  return false;
-};
-
-var insertSpanDivs = function() {
-  $(outerElementTextIDstring).html(newContent); 
-  textSelectedID = newNodeInsertID;
-};
-
 var fieldMatching = function(searchArray, field, fieldValue) {
-  var theMatch;
-  searchArray.forEach(function(childDoc){
-    if (childDoc[field] == fieldValue) {
-        theMatch = childDoc;
-    };
-  });
-  return theMatch;
+  if (isUseless(searchArray) || isUseless(field) || isUseless(fieldValue)) {  return false  }
+  else {
+    var theMatch = false; 
+    searchArray.forEach(function(childDoc){
+      if (childDoc[field] == fieldValue) {
+          theMatch = childDoc;
+      };
+    });
+    return theMatch;
+  };
 };
 
 var asyncPush = function(addArray, oldArray) {
@@ -125,17 +110,37 @@ var asyncPush = function(addArray, oldArray) {
 var arrayIDCompare = function(arrayA, arrayB) {
   return arrayA.forEach(function(doc){
     var theCheck = fieldMatching(arrayB, "id", arrayA.id);
-    if (  rejectionOptions.has(theCheck) ) { return false }
+    if (  isUseless(theCheck) ) { return false }
     else {
       return [doc, theCheck];
     };
   });
 };
 
+var findField = function(target, field) {
+  if ( isUseless(field) || isUseless(target) || isUseless(target[field])  ) {  return false  } 
+  else {  return target[field] }; 
+};
+
 var checkFor = function(target, field) {
   var theChecking = getTargetJSON(target);
-  if ( rejectionOptions.has(field) || rejectionOptions.has(theChecking) || rejectionOptions.has(theChecking[field])  ) {  return false  } /////////////
-  else {  return theChecking[field] }; 
+  return findField(theChecking, field);
+};
+
+function getSelected() {
+  if(window.getSelection) { return window.getSelection() }
+  else if(document.getSelection) { return document.getSelection(); }
+  else {
+    var selection = document.selection && document.selection.createRange();
+    if(selection.text) { return selection.text; }
+    return false;
+  }
+  return false;
+};
+
+var insertSpanDivs = function() {
+  $(outerElementTextIDstring).html(newContent); 
+  textSelectedID = newNodeInsertID;
 };
 
 var findBaseURL = function() {
@@ -143,7 +148,7 @@ var findBaseURL = function() {
   else if (textTypeSelected == "translation") {  return translationURL;  };
 };
 
-var newTranscriptionFragment = function() {
+var newAnnotationFragment = function(baseURL) {
 
   textSelectedHash = textSelectedParent.concat("#"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
   targetSelected = [textSelectedHash];
@@ -151,7 +156,7 @@ var newTranscriptionFragment = function() {
   
   $.ajax({
     type: "POST",
-    url: transcriptionURL,
+    url: baseURL,
     async: false,
     data: targetData,
     success: 
@@ -174,24 +179,18 @@ var findClassID = function(classString, IDstring) {
 };
 
 var setTextSelectedID = function(theText) {
-  var theJSON = getTargetJSON(theText);
-  if (rejectionOptions.has(theJSON)) { return null }
-  else {
-    var theTarget = fieldMatching(theJSON.target, "format", "text/html");
+  var theTarget = fieldMatching(checkFor(theText, "target"), "format", "text/html");
+  if ( theTarget != false ) { 
     textSelectedHash = theTarget.id;
-    textSelectedID = textSelectedHash.substring(textSelectedParent.length + 1); //the extra one for the hash
+    textSelectedID = textSelectedHash.substring(textSelectedParent.length + 1); //the extra one for the hash        
   };
 };
 
 var searchCookie = function(field) {
-
-  var searchTerm = field;
-  var fieldIndex = findingcookies.lastIndexOf(searchTerm);
-  if (fieldIndex == -1) {
-    return false;
-  }
+  var fieldIndex = findingcookies.lastIndexOf(field);
+  if (fieldIndex == -1) {  return false;  }
   else {
-    var postField = findingcookies.substring(fieldIndex+searchTerm.length);
+    var postField = findingcookies.substring(fieldIndex+field.length);
     var theValueEncoded = postField.split(";", 1);
     var theValue = theValueEncoded[0];
     return theValue;
@@ -199,13 +198,12 @@ var searchCookie = function(field) {
 };
 
 var checkForVectorTarget = function(theText) {
-  var theChecking = getTargetJSON(theText);
-  if (  rejectionOptions.has(theChecking.target[0])  ) { return false } 
-  else {   return fieldMatching(theChecking.target, "format", "SVG").id;  };
+  var theChecking = checkFor(theText, "target");
+  if (  isUseless(theChecking[0])  ) { return false } 
+  else {   return fieldMatching(theChecking, "format", "SVG").id;  };
 };
 
 var lookupTargetChildren = function(target, baseURL) {
-
   var childTexts;
   var targetParam = encodeURIComponent(target);
   var aSearch = baseURL.concat("targets/"+targetParam);
@@ -227,11 +225,9 @@ var updateVectorSelection = function(vectorURL) {
   var textData = {target: {id: vectorURL, format: "SVG"}};
   var vectorData = {};
   vectorData[textTypeSelected] = textSelected;
-
   selectingVector.forEach(function(child){
     updateAnno(child.body.id, textData);
   });
-
   updateAnno(vectorURL, vectorData);
   selectingVector = false;
 
@@ -239,10 +235,9 @@ var updateVectorSelection = function(vectorURL) {
 
 var votingFunction = function(vote, votedID, currentTopText) {
   var baseURL = findBaseURL();
-
   var theVote = baseURL + "voting/" + vote;
   var targetID = baseURL.concat(votedID);; ///API URL of the annotation voted on
-  var outerSpanOpen = "<a class='"+targetType+"-text open"+targetType+"ChildrenPopup' id='"+ textSelectedID + "' >";
+  var outerSpanOpen = "<a class='"+textTypeSelected+"-text open"+textTypeSelected+"ChildrenPopup' id='"+ textSelectedID + "' >";
   var votedTextBody = $(votedID).html(); 
   var currentText = outerSpanOpen + currentTopText + "</a>"; ///current most voted at that location, includes outerHTML
   var votedText = outerSpanOpen + votedTextBody + "</a>"; ///text just voted on, includes outerHTML
@@ -279,8 +274,7 @@ var votingFunction = function(vote, votedID, currentTopText) {
 var findHighestRankingChild = function(parent, locationID) {
   var theLocation = fieldMatching(getTargetJSON(parent).children, "id", locationID);
   var the_child = fieldMatching(theLocation.fragments, "rank", 0); 
-  if (rejectionOptions.has(the_child.id) ) {  return false;  }
-  else {  return the_child.id;  };
+  return findField(the_child, "id");
 };
 
 var loadImage = function() {
@@ -292,84 +286,91 @@ var loadImage = function() {
 
 ///// VIEWER WINDOWS
 
-var buildCarousel = function(existingChildren, popupIDstring) {
-
-  if (rejectionOptions.has(existingChildren[0]) ) {   return null;   }
-  else {  
-    var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
-    var middleHTML = "' class='content-area' title='Annotation Text'>";
-    var endTextHTML = "</p></div>";
-    //<span class='badge'></span>
-    var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-plus' aria-hidden='true' ></span></button></div>";
-/////////need to add metadata options!!!
-    var metadataHTML = " ";
-/////////////////////////////
-    var endDivHTML = "</div></div>";
-    var closingHTML = endTextHTML + voteButtonsHTML + metadataHTML + endDivHTML;
-
-    existingChildren.forEach(function(subarray) {
-
-      var itemText = subarray[0].body.text;
-      var itemID = subarray[0]._id;
-      var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
-      $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
-/////////find votes up for badges
-///////////////////for some reeeaalllly inexplicable reason this isn't working
-    /*  if ((typeof subarray[1] == null || subarray[1] == 'undefined') || (typeof subarray[1].votingInfo == null || subarray[1].votingInfo == 'undefined')) {} 
-      else {
-        var votesUp = subarray[1].votingInfo.votesUp;
-        $(popupIDstring).find(".votingUpButton").find(".badge").val(votesUp);
-        var votesDown = subarray[1].votingInfo.votesDown;
-        $(popupIDstring).find(".votingDownButton").find(".badge").val(votesDown);
-      }; */
-/////////update metadata options with defaults and placeholders???    
-    });
-  };
+var setChildrenArray = function() {
+  return childrenArray = lookupTargetChildren(targetSelected[0], findBaseURL()); //////setting childrenArray
 };
 
-var updateEditor = function(popupIDstring) {
+var buildCarousel = function(existingChildren, popupIDstring, extraHTML) {
 
-  $(popupIDstring).find("#theEditor").attr("id", "newEditor");
-  $(popupIDstring).find(".textEditorMainBox").find('*').addClass(textTypeSelected+"-text"); 
-  $(popupIDstring).find(".editorTitle").html(textTypeSelected.toUpperCase());
+  var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
+  var middleHTML = "' class='content-area' title='X '>";
+  var endTextHTML = "</p></div>";
+  var endDivHTML = "</div></div>";
+  var closingHTML = endTextHTML + extraHTML + endDivHTML;
 
-  //if a vector target doesn't already exist then user can link to a vector target either by creating or clicking on an existing one 
+  existingChildren.forEach(function(subarray) {
+
+    var itemText = subarray[0].body.text;
+    var itemID = subarray[0]._id;
+    var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
+    $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
+/////////find votes up for badges
+///////////////////for some reeeaalllly inexplicable reason this isn't working
+  /*  if ((typeof subarray[1] == null || subarray[1] == 'undefined') || (typeof subarray[1].votingInfo == null || subarray[1].votingInfo == 'undefined')) {} 
+    else {
+      var votesUp = subarray[1].votingInfo.votesUp;
+      $(popupIDstring).find(".votingUpButton").find(".badge").val(votesUp);
+      var votesDown = subarray[1].votingInfo.votesDown;
+      $(popupIDstring).find(".votingDownButton").find(".badge").val(votesDown);
+    }; */
+/////////update metadata options with defaults and placeholders???    
+  });
+
+};
+
+var highlightTopVoted = function() {
+  var theTextString = "#" + textSelected.slice(findBaseURL().length, textSelected.length);
+  $(theTextString).parent().parent().parent().addClass("active"); //ensures it is the first slide people see
+  $(theTextString).addClass("currentTop");
+///////////choose better styling later!!!!!///////
+  $(theTextString).css("color", "grey");
+  $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
+};
+
+var canLink = function(popupIDstring) {
   if (targetType.includes("vector") == false){ 
     var linkButtonHTML = "<button type='button' class='btn linkBtn'>Link Vector</button><br>";
     $(popupIDstring).find(".textEditorMainBox").append(linkButtonHTML);
   };
+};
 
-  //if a highest ranking exists then highlight it
-  if (rejectionOptions.has(childrenArray[0]) ) {
+var canVoteAdd = function(popupIDstring, theVectorParent) {
+  //if it is targeting it's own type OR it is targeting a vector with parents THEN you can vote and add
+  if ( targetType.includes(textTypeSelected) || ( ( targetType.includes("vector") ) && ( isUseless(theVectorParent) == false ) ) ) { 
+    $(popupIDstring).find(".editorCarouselWrapper").append(addNewAnnoHTML);
+    return voteButtonsHTML; ///////metadata stuff too!!!!!!!
+  }
+  else {
+    $(popupIDstring).find(".carousel-control").css("display", "none");
+    return "";
+  };
+};
+
+var addCarouselItems = function(popupIDstring) {
+  var theVectorParent = checkFor(vectorSelected, "parent");
+  if (  isUseless(childrenArray[0]) && isUseless(theVectorParent) ) {
+    $(popupIDstring).find(".editorCarouselWrapper").append(addNewAnnoHTML);
     $(popupIDstring).find(".addNewItem").addClass("active");
     $(popupIDstring).find(".carousel-control").css("display", "none");
   }
   else {
-
-    var theTextString = "#" + textSelected.slice(findBaseURL().length, textSelected.length);
-    $(theTextString).parent().parent().parent().addClass("active"); //ensures it is the first slide people see
-    $(theTextString).addClass("currentTop");
-
-///////////choose better styling later!!!!!///////
-    $(theTextString).css("color", "grey");
-    $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
-    var theVectorParent = checkFor(vectorSelected, "parent");
-
-    //if it is targeting it's own type then it isn't a top parent OR it is targeting a vector with parents then you can vote and add
-    if ( targetType.includes(textTypeSelected) || ( ( targetType.includes("vector") ) && ( rejectionOptions.has(theVectorParent) == false  ) ) ) 
-      { alert("so the vector test is "+ ( ( targetType.includes("vector") ) && ( rejectionOptions.has(theVectorParent) == false  ) ) +" because the parent rejection test is "+ rejectionOptions.has(theVectorParent) +" because the parent is "+theVectorParent  ) }
-    else {
-      $(popupIDstring).find(".voteBtn").css("display", "none"); //////
-      $(popupIDstring).find(".addNewItem").css("display", "none"); //////remove instead??
-      alert("top anno no voting or adding");
-      //////disable the add page
-    };
+    var theExtras = canVoteAdd(popupIDstring, theVectorParent);
+    buildCarousel(childrenArray, popupIDstring, theExtras);
+    highlightTopVoted();
   };
+};
 
+var updateEditor = function(popupIDstring) {
+  $(popupIDstring).find("#theEditor").attr("id", "newEditor");
+  $(popupIDstring).find(".editorTitle").html(textTypeSelected.toUpperCase());
   $(".textEditorPopup").draggable();
   $(".textEditorPopup").draggable({
     handle: ".popupBoxHandlebar"
   });
+  canLink(popupIDstring);
+  setChildrenArray();
+  addCarouselItems(popupIDstring);
+  $(popupIDstring).find(".textEditorMainBox").find('*').addClass(textTypeSelected+"-text"); 
 };
 
 var addEditorsOpen = function(popupIDstring) {
@@ -409,36 +410,28 @@ var createEditorPopupBox = function() {
 
 };
 
-var setChildrenArray = function() {
-  return childrenArray = lookupTargetChildren(targetSelected[0], findBaseURL()); //////setting childrenArray
-};
-
 var openEditorMenu = function() {
 
-  var popupIDhash = createEditorPopupBox();
-  var popupIDstring = popupIDhash;
-  buildCarousel(setChildrenArray(), popupIDstring);
-
+  var popupIDstring = createEditorPopupBox();
   $('.opentranscriptionChildrenPopup').popover({ 
     trigger: 'manual',
     placement: 'top',
     html : true,
+    title: "  ",
     content: function() {
       return $('#popupTranscriptionChildrenMenu').html();
     }
   });
-
   updateEditor(popupIDstring); 
   addEditorsOpen(popupIDstring); 
 
 };
 
 var removeEditorChild = function(thisEditor) {
-
   var theParent = document.getElementById("ViewerBox1");
   var toRemove = document.getElementById(thisEditor);
   theParent.removeChild(toRemove);
-  if (  rejectionOptions.has(toRemove) == false  ) {  return thisEditor;  };
+  if (  isUseless(toRemove) != true ) {  return thisEditor;  };
 };
 
 var removeEditorsOpen = function(popupIDstring) {
@@ -496,25 +489,25 @@ var addAnnotation = function(thisEditor){
     var targetData = {children: [{id: textSelectedID, fragments: [{id: createdText}] }]};
     updateAnno(textSelectedParent, targetData);
   };
-  if ((targetType.includes("vector")==true) && (rejectionOptions.has(childrenArray[0]) )) {
+  if ((targetType.includes("vector")==true) && (  isUseless(childrenArray[0]) )) {
     var targetData = {};
     targetData[textTypeSelected] = createdText;
     updateAnno(vectorSelected, targetData);
   };
 
   //rebuild editor 
-  closeEditorMenu(editorString);
+  closeEditorMenu(thisEditor);
 /////////reset variables......?
   openEditorMenu(); 
 };
 
 var setTargets = function() {
  
-  if (  rejectionOptions.has(vectorSelected) ){ 
+  if (  isUseless(vectorSelected) ){ 
     targetSelected = [textSelectedHash];
     targetType = textTypeSelected;
   }
-  else if ( rejectionOptions.has(textSelected) || rejectionOptions.has(textSelectedParent) ) { 
+  else if ( isUseless(textSelected) || isUseless(textSelectedParent) ) { 
     targetSelected = [vectorSelected];
     targetType = "vector";
   }
@@ -529,7 +522,7 @@ var openNewEditor = function(fromType) {
   if (fromType == "vector") {
     textSelected = checkFor(vectorSelected, textTypeSelected); //return the api url NOT json file
     textSelectedParent = checkFor(textSelected, "parent");
-    setTextSelectedID(textSelected);
+    if ( textSelected != false ) { setTextSelectedID(textSelected) };
   }
   else if (fromType == "text") {
     textSelected = findHighestRankingChild(textSelectedParent, textSelectedID);
@@ -548,7 +541,7 @@ var checkEditorsOpen = function(fromType, textType) {
       if ( ((editorOpen[vectorSelected] == vectorSelected)||(editorOpen[textSelectedParent] == textSelectedParent)) && (editorOpen[textTypeSelected] == textType)){
         $(editorOpen.editor).effect("shake");
         canOpen = false;
-      }
+      };
     });
     if (canOpen == true) {  openNewEditor(fromType) };
   };
@@ -571,8 +564,19 @@ var controlOptions = {
         featureGroup: allDrawnItems, //passes draw controlOptions to the FeatureGroup of editable layers
     }
 };
+
+var popupVectorMenuHTML = function() {
+  var openHTML = "<div class='popupAnnoMenu'>";
+  var transcriptionOpenHTML = "<a class='openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline'>TRANSCRIPTION</a><br>";
+  var translationOpenHTML = "<a class='openTranslationMenu ui-btn ui-corner-all ui-shadow ui-btn-inline'>TRANSLATION</a>";
+  var endHTML = "</div>";
+  var totalHTML = openHTML + transcriptionOpenHTML + translationOpenHTML + endHTML;
+  /////this as a function instead of one line string allows for flexibility during development but may fix later 
+  return totalHTML;
+};
+
 var popupVectorMenu = L.popup()
-    .setContent('<div class="popupAnnoMenu"> <a class="openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSCRIPTION</a><br><a class="openTranslationMenu ui-btn ui-corner-all ui-shadow ui-btn-inline">TRANSLATION</a> </div>');
+    .setContent(popupVectorMenuHTML());
 //to track when editing
 var currentlyEditing = false;
 var currentlyDeleting = false;
@@ -594,63 +598,77 @@ map.whenReady(function(){
   mapset = true;
 });
 
+var tempGeoJSON = {  "type": "Feature",  "properties":{},  "geometry":{}  };
+
 //load the existing vectors
 if (existingVectors != false) {
   existingVectors.forEach(function(vector) {
 
-    var oldData = {
-        "type": "Feature",
-        "properties":{},
-        "geometry":{
-          "type": vector.notFeature.notGeometry.notType,
-          "coordinates": [vector.notFeature.notGeometry.notCoordinates]
-        }
-      };
+    var oldData = tempGeoJSON;
+    oldData.geometry.type = vector.notFeature.notGeometry.notType;
+    oldData.geometry.coordinates = [vector.notFeature.notGeometry.notCoordinates];
+    oldData.properties.transcription = findField(vector, "transcription");
+    oldData.properties.translation = findField(vector, "translation");
+    oldData.properties.parent = findField(vector, "parent");
 
-    var existingVectorFeature = L.geoJson(oldData, {
-      onEachFeature: function (feature, layer) {
-        layer._leaflet_id = vector.body.id,
-        allDrawnItems.addLayer(layer),
-        layer.bindPopup(popupVectorMenu)
-      }
-
-    }).addTo(map);
+    var existingVectorFeature = L.geoJson(oldData, 
+      { onEachFeature: function (feature, layer) {
+          layer._leaflet_id = vector.body.id,
+          allDrawnItems.addLayer(layer),
+          layer.bindPopup(popupVectorMenu)
+          }
+      }).addTo(map);
 
   });
 };
 
+var findVectorParent = function(coordinatesArray, parentCoordsArray) {
+  var xBounds = [ parentCoordsArray[0][0], parentCoordsArray[2][0] ];
+  var yBounds = [ parentCoordsArray[0][1], parentCoordsArray[2][1] ];
+  var counter = 0;
+  coordinatesArray.forEach(function(pair){
+    if (  (xBounds[0] <= pair[0] <= xBounds[1]) && (yBounds[0] <= pair[1] <= yBounds[1])  ) {  counter += 1;  };
+  });
+  if (counter >= 3) {  return true;  }
+  else {  return false;  };
+};
 
-////whenever a new vector is created within the app
+var searchForVectorParents = function(allDrawnItems, theCoordinates) {
+  var overlapping = false;
+  allDrawnItems.forEach(function(drawnItem){
+    var check = findVectorParent(theCoordinates, drawnItem.geometry.coordinates);
+    if (check == true) {  overlapping = drawnItem.body.id;  };
+  });
+  return overlapping;
+};
+
 map.on('draw:created', function(evt) {
 
 	var layer = evt.layer;
   var shape = layer.toGeoJSON();
-
-	allDrawnItems.addLayer(layer);
-
-//check for parents of created vector and if so then add to targetData
-
-  var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata};
-
-  $.ajax({
-    type: "POST",
-    url: vectorURL,
-    async: false,
-    data: targetData,
-    success: 
-      function (data) {
-        vectorSelected = data.url;
-        targetSelected = [data.url];
-        targetType = "vector";
-      }
-  });
-
-  layer._leaflet_id = vectorSelected;
-  layer.bindPopup(popupVectorMenu).openPopup();
-
-    if (selectingVector != false) {
-      updateVectorSelection(vectorSelected);
-    }
+  var vectorOverlapping = false;
+  //var vectorOverlapping = searchForVectorParents(allDrawnItems, shape.geometry.coordinates[0]);
+  if (  (vectorOverlapping != false) && (selectingVector == false)  ) {    }
+  else {
+    allDrawnItems.addLayer(layer);
+    var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata, parent: vectorOverlapping };
+    $.ajax({
+      type: "POST",
+      url: vectorURL,
+      async: false,
+      data: targetData,
+      success: 
+        function (data) {
+          vectorSelected = data.url;
+        }
+    });
+    layer._leaflet_id = vectorSelected;
+    layer.bindPopup(popupVectorMenu).openPopup();
+    if (selectingVector != false) {  
+      vectorSelectedParent = vectorOverlapping;
+      updateVectorSelection(vectorSelected);  
+    };
+  };
 
 });
 
@@ -722,17 +740,16 @@ var newSpanClass = function(startParentClass) {
   };
 };
 
-var strangeTrimmingFunction = function() {
-////is this necesary???
-  if(textSelectedFragment && (textSelectedFragment = new String(textSelectedFragment).replace(/^\s+|\s+$/g,''))) {
-    textSelectedFragmentString = textSelectedFragment.toString();
+var strangeTrimmingFunction = function(thetext) {
+  if(thetext && (thetext = new String(thetext).replace(/^\s+|\s+$/g,''))) {
+    return thetext.toString();
   }; 
 };
 
 $(document).ready(function() { ////necessary???
   $('#page_body').on("mouseup", '.content-area', function(event) {
 
-    selection = getSelected(); 
+    var selection = getSelected(); 
     var classCheck = selection.anchorNode.parentElement.className;
 
     if (classCheck.includes('openTranscriptionMenuOld')) { 
@@ -751,8 +768,6 @@ $(document).ready(function() { ////necessary???
     }   
 
     else {
-
-      textSelectedFragment = selection;
 
       var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
       var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
@@ -782,7 +797,8 @@ $(document).ready(function() { ////necessary???
 
         newNodeInsertID = Math.random().toString().substring(2);
 
-        var newSpan = "<a title='AnnotationHasChildren' class='" + newSpanClass() + "' id='" + newNodeInsertID + "' >" + textSelectedFragment + "</a>";
+        var newSpan = "<a class='" + newSpanClass(startParentClass) + "' id='" + newNodeInsertID + "' >" + selection + "</a>";
+        var currentTextString = strangeTrimmingFunction(selection);
      
         var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
 
@@ -815,6 +831,7 @@ $(document).ready(function() { ////necessary???
         };
 
         newContent = outerElementStartContent + newSpan + outerElementEndContent;
+        textSelectedFragment = currentTextString;
 
         $(outerElementTextIDstring).popover({ 
           trigger: 'manual',
@@ -840,7 +857,7 @@ $(document).ready(function() { ////necessary???
           $('.openTranscriptionMenuNew').one("click", function(event) {
             insertSpanDivs();
             textSelectedParent = transcriptionURL.concat(startParentID);
-            newTranscriptionFragment();
+            newAnnotationFragment(transcriptionURL);
             textTypeSelected = "transcription";
             targetType = "transcription";
             openEditorMenu();
@@ -939,6 +956,7 @@ $('.opentranscriptionChildrenPopup').popover({
   trigger: 'click',
   placement: 'top',
   html : true,
+  title: "  ",
   content: function() {
     return $('#popupTranscriptionChildrenMenu').html();
   }

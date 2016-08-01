@@ -57,20 +57,6 @@
 <!-- Image Viewer Panel -->
 
 	<div id="imageViewer" class="col-md-4">
-	<!--
-		<div class="progress">
-
-		  <div class="progress-bar progress-bar-success" style="width: 33%">
-		    <span class="Type">Vectors</span><span class="stage"></span>
-		  </div>
-		  <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 11%">
-		    <span class="Type">Transcribing</span><span class="stage"></span>
-		  </div>
-		  <div class="progress-bar progress-bar-danger" style="width: 22%">
-		    <span class="Type">Translating</span><span class="stage"></span>
-		  </div>
-		</div>
-	-->
 		<div id='map'></div>
 	</div>
 
@@ -102,15 +88,7 @@
 				<!-- Wrapper for slides -->
 				<div class="editorCarouselWrapper carousel-inner" role="listbox">
 
-				    <div class="item addNewItem">
-				      	<div class="addNewContainer">
-						    <h3>Add New</h3>
-						    <textarea class="newAnnotation" rows="5"></textarea><br>
-						    <button type="button" class="btn addAnnotationSubmit">SUBMIT</button><br>		
-						</div>
-				    </div>
-
-				    <!--appended transcription slides go here-->
+				    <!--appended slides go here-->
 
 				</div>
 
@@ -134,15 +112,23 @@
 
 	<!-- Link Vector Popup Menu -->
 	<div id="popupLinkVectorMenu" class="popupAnnoMenu">
-		<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
+		<!--<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>-->
 	  <div data-role="main" class="ui-content">
 	  	<p>Select an existing vector or create a new one on the image for this text selection</p>
 	  </div>
 	</div>
 
+	<!-- Vector Has a Parent Popup Menu -->
+	<div id="popupVectorParentMenu" class="popupAnnoMenu">
+		<!--<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>-->
+	  <div data-role="main" class="ui-content">
+	  	<p>Please link children of the larger section to this</p>
+	  </div>
+	</div>
+
 	<!-- New Transcription Text Select Popup Menu -->
 	<div id="popupTranscriptionNewMenu" class="popupAnnoMenu">
-		<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
+		<!--<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>-->
 		 <div data-role="main" class="ui-content">
 		  	<a class="openTranscriptionMenuNew transcriptionTarget editorPopover ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSCRIPTION</a>
 		 </div>
@@ -150,7 +136,7 @@
 
 	<!-- New Translation Text Select Popup Menu -->
 	<div id="popupTranslationNewMenu" class="popupAnnoMenu" >
-	<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
+	<!--<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>-->
 	  	<div data-role="main" class="ui-content">
 	  		<a class="openTranslationMenuNew translationTarget editorPopover ui-btn ui-corner-all ui-shadow ui-btn-inline">ADD NEW TRANSLATION</a>
 	  	</div>
@@ -158,7 +144,7 @@
 
 	<!-- Children Transcription Text Select Popup Menu-->
 	<div id="popupTranscriptionChildrenMenu" class="popupAnnoMenu">
-		<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>
+		<!--<div class="closeThePopover"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></div>-->
 	  	<div data-role="main" class="ui-content">
 	  		<a class="openTranscriptionMenuOld editorPopover ui-btn ui-corner-all ui-shadow ui-btn-inline">VIEW OTHER TRANSCRIPTIONS</a>
 	  	</div>
