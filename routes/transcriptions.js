@@ -13,7 +13,14 @@ var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
+var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
+
 //ROUTE FUNCTIONS
+
+var isUseless = function(something) {
+  if (rejectionOptions.has(something) || rejectionOptions.has(typeof something)) {  return true;  }
+  else {  return false;  };
+};
 
 var asyncPush = function(addArray, oldArray) {
     var theArray = oldArray;
@@ -28,25 +35,34 @@ var asyncPush = function(addArray, oldArray) {
     return mergedArray();
 };
 
-///only for searchArrays where childDoc.id is to compare with checkID
-var idMatching = function(searchArray, checkID) {
-  var theMatch;
-  searchArray.forEach(function(childDoc){
-    if (childDoc.id == checkID) {
-        theMatch = childDoc;
-    };
-  });
-  return theMatch;
+var fieldMatching = function(searchArray, field, fieldValue) {
+  if (isUseless(searchArray) || isUseless(field) || isUseless(fieldValue)) {  return false  }
+  else {
+    var theMatch = false; 
+    searchArray.forEach(function(childDoc){
+      if (childDoc[field] == fieldValue) {
+          theMatch = childDoc;
+      };
+    });
+    return theMatch;
+  };
 };
 
-var replaceChildText = function(oldText, newInsert, oldInsert) {
+var replaceChildText = function(oldText, spanID, newInsert, oldInsert) {
 
-    var StartIndex = oldText.indexOf(oldInsert);
-    var startHTML = oldText.slice(0, StartIndex).concat(newInsert);
-    var EndIndex = oldText.indexOf(oldInsert) + oldInsert.length;
+    console.log("trying to replace child text of "+oldInsert+" with "+newInsert);
+
+    var idIndex = oldText.indexOf(spanID);
+    var startIndex = oldText.indexOf(oldInsert, idIndex);
+    console.log("so the start index is "+startIndex); 
+    var startHTML = oldText.slice(0, startIndex);
+    var EndIndex = startIndex + oldInsert.length;
     var endHTML = oldText.substring(EndIndex);
 
-    var newText = startHTML + endHTML;
+    console.log("the startHTML is "+startHTML);
+    console.log("but the end is "+endHTML);
+
+    var newText = startHTML + newInsert+ endHTML;
     return newText;
 };
 
@@ -57,38 +73,44 @@ exports.voting = function(req, res) {
 
         if (err) {res.send(err)};
 
-        var theLocation = function() {
-            return idMatching(transcription.children, req.body.children[0].id);
-        };
-        var locationIndex = function() {
-            return transcription.children.indexOf(theLocation());
-        };
-        var theChildDoc = function(locIndex) {
-            return idMatching(transcription.children[locIndex].fragments, req.body.children[0].fragments[0].id);
-        };
-        var fragmentIndex = function() {
-            return theLocation().fragments.indexOf(theChildDoc(locationIndex())); 
+        var findLocationIndex = function(loc) {    
+            return transcription.children.indexOf(loc);    
         };
 
+        var theLocation = fieldMatching(transcription.children, "id", req.body.children[0].id);
+        var thelocationIndex = findLocationIndex(theLocation);
+
+        var findFragmentIndex = function(thefrag) {
+            return theLocation.fragments.indexOf(thefrag); 
+        };
+
+        var theChildDoc =  fieldMatching(transcription.children[thelocationIndex].fragments, "id", req.body.children[0].fragments[0].id);
+        var thefragmentIndex = findFragmentIndex(theChildDoc); 
+
         var fragmentChild = function(nIndex) {
-            return transcription.children[locationIndex()].fragments[nIndex];
+            return transcription.children[thelocationIndex].fragments[nIndex];
+        };
+
+        var fragmentChildByRank = function(therank) {
+            return fieldMatching(transcription.children[thelocationIndex].fragments, "rank", therank);
         };
 
         var votesChange = function(voteNumber) {
-            return transcription.children[locationIndex()].fragments[fragmentIndex()].votesUp += voteNumber; 
+            return transcription.children[thelocationIndex].fragments[thefragmentIndex].votesUp += voteNumber; 
         };
 
         var rankChange = function(indexNumber, rankChangeNumber) {
-            return transcription.children[locationIndex()].fragments[indexNumber].rank += rankChangeNumber;
+            return transcription.children[thelocationIndex].fragments[indexNumber].rank += rankChangeNumber;
         };
 
         var reload = function(newChildRank) {
+            console.log("in reload the new rank is "+newChildRank);
             //check to see if now highest ranking child and update the main transcription if so
             if (newChildRank == 0){ 
                 var oldHTML = transcription.body.text;
                 var newInsert = req.body.votedText;
                 var oldInsert = req.body.topText;
-                transcription.body.text = replaceChildText(oldHTML, newInsert, oldInsert);
+                transcription.body.text = replaceChildText(oldHTML, req.body.children[0].id, newInsert, oldInsert);
                 return transcription;
             }
             else {
@@ -98,13 +120,13 @@ exports.voting = function(req, res) {
 
         var reorderByRank = function(voteIndex, nIndex) {
             var neigbourFrag = fragmentChild(nIndex);
-            var voteFrag = fragmentChild(locationIndex());
+            var voteFrag = theChildDoc;
 
-            transcription.children[locationIndex()].fragments.set(nIndex, voteFrag); //put the voted fragment in the neighbour's index
-            transcription.children[locationIndex()].fragments.set(voteIndex, neighbourFrag); //put the neighbour fragment in the old voted fragment's index
+            transcription.children[thelocationIndex].fragments.set(nIndex, voteFrag); //put the voted fragment in the neighbour's index
+            transcription.children[thelocationIndex].fragments.set(voteIndex, neighbourFrag); //put the neighbour fragment in the old voted fragment's index
 
-            if ((transcription.children[locationIndex()].fragments[nIndex] == voteFrag)
-                &&(transcription.children[locationIndex()].fragments[voteIndex] == neighbourFrag)) {
+            if ((transcription.children[thelocationIndex].fragments[nIndex] == voteFrag)
+                &&(transcription.children[thelocationIndex].fragments[voteIndex] == neighbourFrag)) {
 
                 return transcription; ///only return once process is done
             };
@@ -112,31 +134,25 @@ exports.voting = function(req, res) {
 
         var voteRankChange = function(voteNumber) {
         ///NOTE: the ranking is ONLY changed if the vote is now above or below the neighbour, not if now equal
-            var neighbourIndex = fragmentIndex() - voteNumber;
-            if ( (neighbourIndex >= 0) && (fragmentChild(fragmentIndex()).rank < fragmentChild(neighbourIndex).rank) 
-                && ( theChildDoc(locationIndex()).votesUp > fragmentChild(neighbourIndex).votesUp ) ) {
-
-                var votingUpNow = function() {
-                    rankChange(neighbourIndex, 1);
-                    var newChildRank = rankChange(fragmentIndex(), -1);
-                    reload(newChildRank);
-                    return reorderByRank(fragmentIndex(), neighbourIndex);
-                };
+            var neighbourRank =  theChildDoc.rank - voteNumber; 
+            var theNeighbour = function() {    return fragmentChildByRank(neighbourRank);    };
+            var neighbourIndex = function() {    return findFragmentIndex(theNeighbour());    };
+            var votingUpNow = function() {
+                rankChange(neighbourIndex(), 1);
+                var newChildRank = rankChange(thefragmentIndex, -1);
+                return reload(newChildRank);
+            };
+            var votingDownNow = function() {
+                rankChange(neighbourIndex(), -1);
+                var newChildRank = rankChange(thefragmentIndex, 1);
+                return reload(newChildRank);                 
+            };
+           
+            if ( (neighbourRank >= 0) && (theChildDoc.rank > neighbourRank) && ( theChildDoc.votesUp > theNeighbour().votesUp ) ) {
                 return votingUpNow();
-
             }
-            else if ( (typeof fragmentChild(neighbourIndex) != (null || 'undefined')) 
-                && (fragmentChild(fragmentIndex()).rank > fragmentChild(neighbourIndex).rank) 
-                &&  (theChildDoc(locationIndex()).votesUp < fragmentChild(neighbourIndex)).votesUp ) {
-
-                var votingDownNow = function() {
-                    rankChange(neighbourIndex, -1);
-                    var newChildRank = rankChange(fragmentIndex(), 1);
-                    reload(newChildRank);  
-                    return reorderByRank(fragmentIndex(), neighbourIndex);                 
-                };
+            else if ( ( isUseless(fragmentChildByRank(neighbourRank)) == false) && (  theChildDoc.rank < neighbourRank  ) &&  (   theChildDoc.votesUp < theNeighbour().votesUp ) ) {
                 return votingDownNow();               
-
             }
             else {
                 return transcription;
@@ -145,7 +161,7 @@ exports.voting = function(req, res) {
 
         var voteCheckChange = function(voteType) {
             if (voteType == "up") {
-                votesChange(1);
+                votesChange(1); /////make this into a promise setup ....?
                 return voteRankChange(1);
             }
             else if (voteType == "down") {
@@ -154,6 +170,7 @@ exports.voting = function(req, res) {
             };
         };
 
+/////make saving more general in this doc....
         var savingFunction = function() {
             transcription.save(function(err) {
                 if (err) {res.send(err)}
@@ -268,17 +285,17 @@ var oldChildrenChecking = function(oldChildren, newChildren) {
 
 var childrenLocationChecking = function(oldChildren, newChildren) {
 
-    var theLocation = idMatching(oldChildren, newChildren.id);
+    var theLocation = fieldMatching(oldChildren, "id", newChildren.id);
 
-    if (typeof theLocation == ('undefined' || null)) {
+    if (isUseless(theLocation)) {
         return newChildrenLocationArray(oldChildren, newChildren);
     }
     else {
         ///////////same as voting problems.......
-        var locationIndex = oldChildren.indexOf(theLocation);
+        var thelocationIndex = oldChildren.indexOf(theLocation);
         var newRank = theLocation.fragments.length;
         var newFragmentChild = newFragmentObject(newChildren.fragments[0].id, newRank);
-        return [locationIndex, newFragmentChild];
+        return [thelocationIndex, newFragmentChild];
     };
 };
 
@@ -291,7 +308,7 @@ exports.addNew = function(req, res) {
     var transURL = transcriptionURL.concat(newTransID);
 
     var jsonFieldPush = function(bodyDoc, theField) {
-        if (typeof bodyDoc[theField] != 'undefined' || bodyDoc[theField] != null) {
+        if ( isUseless(bodyDoc[theField]) == false ) {
             bodyDoc[theField].forEach(function(subdoc){
                 transcription[theField].addToSet(subdoc);
             });
@@ -306,11 +323,11 @@ exports.addNew = function(req, res) {
     jsonFieldPush(req.body, "target");  
 
     var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
-    if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
+    if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
         && (newChildrenArray[0] != -1) ) {
         transcription.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
     }
-    else if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
+    else if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
         && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
         transcription.children.addToSet(newChildrenArray[1]);
     };
@@ -346,7 +363,7 @@ exports.updateOne = function(req, res) {
         if (err) {res.send(err)};
 
         var jsonFieldPush = function(bodyDoc, theField) {
-            if (typeof bodyDoc[theField] != 'undefined' || bodyDoc[theField] != null) {
+            if (isUseless(bodyDoc[theField]) == false ) {
                 bodyDoc[theField].forEach(function(subdoc){
                     transcription[theField].addToSet(subdoc);
                 });
@@ -360,11 +377,11 @@ exports.updateOne = function(req, res) {
         jsonFieldPush(req.body, "target"); 
 
         var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
-        if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
+        if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
             && (newChildrenArray[0] != -1) ) {
             transcription.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
         }
-        else if ( (transcription.children != ('undefined' || null)) && (newChildrenArray[0] != ('undefined' || null))
+        else if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
             && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
             transcription.children.addToSet(newChildrenArray[1]);
         };
@@ -408,11 +425,11 @@ var makeArray = function(anArray) {
 
 /////////merge as part of idmatching???
 var theIDCheck = function(theArray, doc) {
-    if ( typeof idMatching(theArray, doc.body.id) != ('undefined' || null)) {
-        return idMatching(theArray, doc.body.id); 
+    if ( typeof fieldMatching(theArray, "id", doc.body.id) != ('undefined' || null)) {
+        return fieldMatching(theArray, "id", doc.body.id); 
     }
-    else if ( typeof idMatching(theArray, doc.id) != ('undefined' || null)) {
-        return idMatching(theArray, doc.id); 
+    else if ( typeof fieldMatching(theArray, "id", doc.id) != ('undefined' || null)) {
+        return fieldMatching(theArray, "id", doc.id); 
     }
     else {
         return null;
@@ -446,7 +463,7 @@ var arrayIDCompare = function(arrayA, arrayB) {
 var foundParent = function(textParent, spanID, textArray) {
 
     var findSpanLocation = function() {
-        return idMatching(textParent.children, spanID);
+        return fieldMatching(textParent.children, "id", spanID);
     };
 
     return arrayIDCompare(textArray, findSpanLocation().fragments);

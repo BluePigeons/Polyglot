@@ -234,13 +234,9 @@ var updateVectorSelection = function(vectorURL) {
 };
 
 var votingFunction = function(vote, votedID, currentTopText) {
-  var baseURL = findBaseURL();
-  var theVote = baseURL + "voting/" + vote;
-  var targetID = baseURL.concat(votedID);; ///API URL of the annotation voted on
-  var outerSpanOpen = "<a class='"+textTypeSelected+"-text open"+textTypeSelected+"ChildrenPopup' id='"+ textSelectedID + "' >";
-  var votedTextBody = $(votedID).html(); 
-  var currentText = outerSpanOpen + currentTopText + "</a>"; ///current most voted at that location, includes outerHTML
-  var votedText = outerSpanOpen + votedTextBody + "</a>"; ///text just voted on, includes outerHTML
+  var theVote = findBaseURL() + "voting/" + vote;
+  var targetID = findBaseURL().concat(votedID); ///API URL of the annotation voted on
+  var votedTextBody = $("#"+votedID).html(); 
   var targetData = {
     parent: textSelectedParent, ///it is this that is updated containing the votedText within its body
     children: [{
@@ -249,7 +245,7 @@ var votingFunction = function(vote, votedID, currentTopText) {
         id: targetID
       }]
     }],
-    votedText: votedText,  topText: currentText
+    votedText: votedTextBody,  topText: currentTopText
   };
   var updatedTranscription;
 
