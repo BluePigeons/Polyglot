@@ -233,7 +233,7 @@ var updateVectorSelection = function(vectorURL) {
 
 };
 
-var votingFunction = function(vote, votedID, currentTopText) {
+var votingFunction = function(vote, votedID, currentTopText, editorID) {
   var theVote = findBaseURL() + "voting/" + vote;
   var targetID = findBaseURL().concat(votedID); ///API URL of the annotation voted on
   var votedTextBody = $("#"+votedID).html(); 
@@ -248,7 +248,6 @@ var votingFunction = function(vote, votedID, currentTopText) {
     votedText: votedTextBody,  topText: currentTopText
   };
   var updatedTranscription;
-
   $.ajax({
     type: "PUT",
     url: theVote,
@@ -943,7 +942,8 @@ $('#page_body').on("click", ".linkBtn", function(){
 $('#page_body').on("click", '.votingUpButton', function(event) {
   var votedID = $(event.target).parent().parent().parent().find("p").attr("id");
   var currentTopText = $(event.target).parent().parent().parent().parent().parent().find(".currentTop").html();
-  votingFunction("up", votedID, currentTopText);
+  var thisEditor = $(event.target).parent().parent().parent().attr("id"); ////////////// correct and make voting function refresh windows
+  votingFunction("up", votedID, currentTopText, thisEditor);
 });
 
 //////TRANSCRIPTIONS

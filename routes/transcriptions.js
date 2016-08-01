@@ -49,19 +49,11 @@ var fieldMatching = function(searchArray, field, fieldValue) {
 };
 
 var replaceChildText = function(oldText, spanID, newInsert, oldInsert) {
-
-    console.log("trying to replace child text of "+oldInsert+" with "+newInsert);
-
     var idIndex = oldText.indexOf(spanID);
     var startIndex = oldText.indexOf(oldInsert, idIndex);
-    console.log("so the start index is "+startIndex); 
     var startHTML = oldText.slice(0, startIndex);
     var EndIndex = startIndex + oldInsert.length;
     var endHTML = oldText.substring(EndIndex);
-
-    console.log("the startHTML is "+startHTML);
-    console.log("but the end is "+endHTML);
-
     var newText = startHTML + newInsert+ endHTML;
     return newText;
 };
@@ -125,9 +117,7 @@ exports.voting = function(req, res) {
             transcription.children[thelocationIndex].fragments.set(nIndex, voteFrag); //put the voted fragment in the neighbour's index
             transcription.children[thelocationIndex].fragments.set(voteIndex, neighbourFrag); //put the neighbour fragment in the old voted fragment's index
 
-            if ((transcription.children[thelocationIndex].fragments[nIndex] == voteFrag)
-                &&(transcription.children[thelocationIndex].fragments[voteIndex] == neighbourFrag)) {
-
+            if ((transcription.children[thelocationIndex].fragments[nIndex] == voteFrag) &&(transcription.children[thelocationIndex].fragments[voteIndex] == neighbourFrag)) {
                 return transcription; ///only return once process is done
             };
         };
