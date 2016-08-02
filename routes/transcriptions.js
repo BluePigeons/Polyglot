@@ -95,21 +95,16 @@ exports.voting = function(req, res) {
             return transcription.children[thelocationIndex].fragments[indexNumber].rank += rankChangeNumber;
         };
 
-        var reload = function(newChildRank) {
-            console.log("in reload the new rank is "+newChildRank);
-            //check to see if now highest ranking child and update the main transcription if so
+        var reload = function(newChildRank) {   //check to see if now highest ranking child and update the main transcription if so
             if (newChildRank == 0){ 
-                var oldHTML = transcription.body.text;
-                var newInsert = req.body.votedText;
-                var oldInsert = req.body.topText;
-                transcription.body.text = replaceChildText(oldHTML, req.body.children[0].id, newInsert, oldInsert);
-                return transcription;
+                transcription.body.text = replaceChildText(transcription.body.text, req.body.children[0].id, req.body.votedText, req.body.topText);
+                return {"reloadText": true};
             }
             else {
-                return transcription;
+                return {"reloadText": false};
             };
         };
-
+/*
         var reorderByRank = function(voteIndex, nIndex) {
             var neigbourFrag = fragmentChild(nIndex);
             var voteFrag = theChildDoc;
@@ -121,7 +116,7 @@ exports.voting = function(req, res) {
                 return transcription; ///only return once process is done
             };
         };
-
+*/
         var voteRankChange = function(voteNumber) {
         ///NOTE: the ranking is ONLY changed if the vote is now above or below the neighbour, not if now equal
             var neighbourRank =  theChildDoc.rank - voteNumber; 
@@ -145,7 +140,7 @@ exports.voting = function(req, res) {
                 return votingDownNow();               
             }
             else {
-                return transcription;
+                return {"reloadText": false};
             };
         };
 
@@ -165,7 +160,7 @@ exports.voting = function(req, res) {
             transcription.save(function(err) {
                 if (err) {res.send(err)}
                 else {  
-                    res.json({"reloadText": transcription});  
+                    res.json(updateVotes);  
                 };
             });
         };
@@ -202,36 +197,23 @@ exports.deleteAll = function(req, res) {
 };
 
 var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
-    if (typeof bodyDoc[bodyField] != 'undefined' || bodyDoc[bodyField] != null) {
-        return bodyDoc[bodyField];
-    }
-    else {
-        return docField;
-    };
+    if (isUseless(bodyDoc[bodyField]) == false ) {    return bodyDoc[bodyField];    }
+    else {    return docField;    };
 };
 
 var bodySetting = function(oldBody, reqDoc, bodyID) {
-
-    if ((typeof bodyID == ('undefined' || null)) || (typeof reqDoc == ('undefined' || null)) ){
-        return oldBody;
-    }
+    if (( isUseless(bodyID) ) || (isUseless(reqDoc) ) ){    return oldBody;    }
     else {
-
         var newBody = {};
-
         newBody.id = bodyID;
         newBody.text = jsonFieldEqual(oldBody, reqDoc, "text");
         newBody.format = jsonFieldEqual(oldBody, reqDoc, "format");
         newBody.language = jsonFieldEqual(oldBody, reqDoc, "format");
-
-        return newBody;
-        
+        return newBody;  
     };
-
 };
 
 var newFragmentObject = function(theID, theRank) {
-
     return  {
         "id": theID,
         "votesUp": 0,
@@ -276,12 +258,10 @@ var oldChildrenChecking = function(oldChildren, newChildren) {
 var childrenLocationChecking = function(oldChildren, newChildren) {
 
     var theLocation = fieldMatching(oldChildren, "id", newChildren.id);
-
     if (isUseless(theLocation)) {
         return newChildrenLocationArray(oldChildren, newChildren);
     }
     else {
-        ///////////same as voting problems.......
         var thelocationIndex = oldChildren.indexOf(theLocation);
         var newRank = theLocation.fragments.length;
         var newFragmentChild = newFragmentObject(newChildren.fragments[0].id, newRank);
@@ -431,42 +411,28 @@ var arrayIDCompare = function(arrayA, arrayB) {
 
     var returnArray =[];
     var i = 0;
-
     arrayA.forEach(function(doc){
-
-        if (typeof theIDCheck(arrayB, doc) == (null || 'undefined' || false)) { i += 1; }
+        if (isUseless(theIDCheck(arrayB, doc) )) { i += 1; }
         else {
             i += 1;
             returnArray.push([doc, theIDCheck(arrayB, doc)]); ////push a pair of matching docs
         };
-
     });
 
-    if ( (i == arrayA.length) && (typeof returnArray[0] == ('undefined' || null)) ) {
-        return null;
-    }
-    else if ( (i == arrayA.length) && (typeof returnArray[0] != ('undefined' || null)) ) {
-        return returnArray;
-    };
+    if ( (i == arrayA.length) && ( isUseless(returnArray[0]) ) ) {    return null;    }
+    else if ( (i == arrayA.length) && (isUseless(returnArray[0]) == false ) ) {    return returnArray;    };
 };
 
 var foundParent = function(textParent, spanID, textArray) {
-
-    var findSpanLocation = function() {
-        return fieldMatching(textParent.children, "id", spanID);
-    };
-
+    var findSpanLocation = function() {    return fieldMatching(textParent.children, "id", spanID);    };
     return arrayIDCompare(textArray, findSpanLocation().fragments);
-
 };
 
 var bracketedArray = function(texts) {
 
     var theArray = [];
     texts.forEach(function(doc){
-
         theArray.push([doc]);
-
     });
     if (theArray.length == texts.length) {
         return theArray;
@@ -478,7 +444,6 @@ var votingInfoTexts = function(targetID, textArray, res) {
     var parts = targetID.split("#", 2); //////this will work with first two not last two.....
     var parentID = parts[0];
     var spanID = parts[1];
-
     newTranscription.findOne({'body.id': parentID}, function(err, textParent){
         if (err) { 
             res.json({list: bracketedArray(textArray, res)});
@@ -501,11 +466,10 @@ exports.getByTarget = function(req, res) {
             console.log(err);
             res.json({list: false});
         }
-        else if (targetID.includes("#")==true) {
+        else if (targetID.includes("#")) {
             votingInfoTexts(targetID, texts, res);            
         }
         else {
-
             res.json({list: bracketedArray(texts)});
         };
     });

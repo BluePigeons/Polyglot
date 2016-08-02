@@ -9,7 +9,7 @@ var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
 var addNewAnnoHTML = "<div class='item addNewItem'> <div class='addNewContainer'> <h3>Add New</h3> <textarea class='newAnnotation' rows='5'></textarea><br><button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   </div>  </div>";
-var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='badge'></span><span class='glyphicon glyphicon-plus' aria-hidden='true' ></span></button></div>";
+var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='glyphicon glyphicon-thumbs-up' aria-hidden='true' ></span></button><button type='button' class='btn btn-default votesUpBadge'><span class='badge'></span></button></div>";
 //var metaHTML = ; ///////////
 
 var imageSelected; //info.json format URL
@@ -260,9 +260,26 @@ var votingFunction = function(vote, votedID, currentTopText, editorID) {
       }
   });
 
-////if the highest ranking has changed
-///////rebuild carousel with new textSelected
+  if (updatedTranscription) {    textSelected = targetID;  };
+  if (updatedTranscription && (!isUseless(vectorSelected))) {
+    var updateTargetData = {};
+    updateTargetData[textTypeSelected] = targetID;
+    updateAnno(vectorSelected, updateTargetData);
+  };
+
+  closeEditorMenu(editorID);
+  openEditorMenu(); 
+
 ///////if the parent is open in an editor rebuild carousel with new transcription 
+  editorsOpen.forEach(function(editorOpen){
+    editorOpen.children.forEach(function(eachChild){
+      if ( eachChild.id == textSelectedID ){
+        closeEditorMenu(editorOpen.editor);
+        ////reopen???
+        //$(editorOpen.editor).effect("shake");
+      };
+    });
+  });
 
 };
 
@@ -281,13 +298,12 @@ var loadImage = function() {
 
 ///// VIEWER WINDOWS
 
-var setChildrenArray = function() {
-  return childrenArray = lookupTargetChildren(targetSelected[0], findBaseURL()); //////setting childrenArray
-};
+var setChildrenArray = function() {  return childrenArray = lookupTargetChildren(targetSelected[0], findBaseURL()); };
 
 var buildCarousel = function(existingChildren, popupIDstring, extraHTML) {
 
-  var openingHTML = "<div class='item pTextDisplayItem'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
+  var openingHTML = "<div class='item pTextDisplayItem ";
+  var openingHTML2 = "'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
   var middleHTML = "' class='content-area' title='X '>";
   var endTextHTML = "</p></div>";
   var endDivHTML = "</div></div>";
@@ -297,17 +313,13 @@ var buildCarousel = function(existingChildren, popupIDstring, extraHTML) {
 
     var itemText = subarray[0].body.text;
     var itemID = subarray[0]._id;
-    var itemHTML = openingHTML + itemID + middleHTML + itemText + closingHTML;
+    var itemHTML = openingHTML + itemID + openingHTML2 + itemID + middleHTML + itemText + closingHTML;
     $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
-/////////find votes up for badges
-///////////////////for some reeeaalllly inexplicable reason this isn't working
-  /*  if ((typeof subarray[1] == null || subarray[1] == 'undefined') || (typeof subarray[1].votingInfo == null || subarray[1].votingInfo == 'undefined')) {} 
-    else {
-      var votesUp = subarray[1].votingInfo.votesUp;
-      $(popupIDstring).find(".votingUpButton").find(".badge").val(votesUp);
-      var votesDown = subarray[1].votingInfo.votesDown;
-      $(popupIDstring).find(".votingDownButton").find(".badge").val(votesDown);
-    }; */
+
+    if ( !isUseless(subarray[1]) )  {
+      var votesUp = subarray[1].votesUp;
+      $("."+itemID).find(".votesUpBadge").find(".badge").html(votesUp); 
+    }; 
 /////////update metadata options with defaults and placeholders???    
   });
 
@@ -436,6 +448,7 @@ var removeEditorsOpen = function(popupIDstring) {
 };
 
 var closeEditorMenu = function(thisEditor) {
+  if (thisEditor.includes("#")) { thisEditor = thisEditor.split("#")[0] };
   removeEditorsOpen(thisEditor);
   return removeEditorChild(thisEditor);
 };
@@ -443,6 +456,7 @@ var closeEditorMenu = function(thisEditor) {
 var findNewTextData = function(editorString) {
 
   var newText = $(editorString).find(".newAnnotation").val();
+  textSelected = newText; ////////
   var textData = {body: {text: newText, format: "text"}, target: []};
 
   if (targetType.includes("vector") == true) {
@@ -484,16 +498,16 @@ var addAnnotation = function(thisEditor){
     var targetData = {children: [{id: textSelectedID, fragments: [{id: createdText}] }]};
     updateAnno(textSelectedParent, targetData);
   };
-  if ((targetType.includes("vector")==true) && (  isUseless(childrenArray[0]) )) {
+  if (  targetType.includes("vector") && (  isUseless(childrenArray[0]) )) {
     var targetData = {};
     targetData[textTypeSelected] = createdText;
     updateAnno(vectorSelected, targetData);
   };
 
-  //rebuild editor 
+//  textSelected = createdText; //////only if there was none before??
   closeEditorMenu(thisEditor);
-/////////reset variables......?
-  openEditorMenu(); 
+  if (  targetType.includes("vector") ) { openNewEditor("vector") }
+  else { openNewEditor("text")  };
 };
 
 var setTargets = function() {
@@ -533,7 +547,8 @@ var checkEditorsOpen = function(fromType, textType) {
   else {
     var canOpen = true;
     editorsOpen.forEach(function(editorOpen){
-      if ( ((editorOpen[vectorSelected] == vectorSelected)||(editorOpen[textSelectedParent] == textSelectedParent)) && (editorOpen[textTypeSelected] == textType)){
+      if ( ((editorOpen[vSelected] == vectorSelected)||(editorOpen[tSelectedParent] == textSelectedParent)) && (editorOpen[tTypeSelected] == textType)){
+        alert(editorOpen.editor);
         $(editorOpen.editor).effect("shake");
         canOpen = false;
       };
@@ -942,7 +957,7 @@ $('#page_body').on("click", ".linkBtn", function(){
 $('#page_body').on("click", '.votingUpButton', function(event) {
   var votedID = $(event.target).parent().parent().parent().find("p").attr("id");
   var currentTopText = $(event.target).parent().parent().parent().parent().parent().find(".currentTop").html();
-  var thisEditor = $(event.target).parent().parent().parent().attr("id"); ////////////// correct and make voting function refresh windows
+  var thisEditor = $(event.target).parent().parent().parent().parent().parent().parent().parent().parent().parent().attr("id"); 
   votingFunction("up", votedID, currentTopText, thisEditor);
 });
 
@@ -973,7 +988,6 @@ $('.opentranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
       textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
     };
     textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
-
     checkEditorsOpen("text", "transcription");
 
     $('.opentranscriptionChildrenPopup').popover('hide');
