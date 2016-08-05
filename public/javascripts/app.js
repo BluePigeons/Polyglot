@@ -220,10 +220,10 @@ var lookupTargetChildren = function(target, baseURL) {
   return childTexts;
 };
 
-var updateVectorSelection = function(vectorURL) {
+var updateVectorSelection = function(vectorURL, vectorParent) {
 
   var textData = {target: {id: vectorURL, format: "SVG"}};
-  var vectorData = {};
+  var vectorData = {parent: vectorParent};
   vectorData[textTypeSelected] = textSelected;
   selectingVector.forEach(function(child){
     updateAnno(child.body.id, textData);
@@ -304,7 +304,7 @@ var buildCarousel = function(existingChildren, popupIDstring, extraHTML) {
 
   var openingHTML = "<div class='item pTextDisplayItem ";
   var openingHTML2 = "'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
-  var middleHTML = "' class='content-area' title='X '>";
+  var middleHTML = "' class='content-area' title=' '>";
   var endTextHTML = "</p></div>";
   var endDivHTML = "</div></div>";
   var closingHTML = endTextHTML + extraHTML + endDivHTML;
@@ -547,7 +547,8 @@ var checkEditorsOpen = function(fromType, textType) {
   else {
     var canOpen = true;
     editorsOpen.forEach(function(editorOpen){
-      if ( ((editorOpen[vSelected] == vectorSelected)||(editorOpen[tSelectedParent] == textSelectedParent)) && (editorOpen[tTypeSelected] == textType)){
+      alert(JSON.stringify(editorOpen));
+      if ( ( (  !isUseless(editorOpen[vSelected]) && (editorOpen[vSelected] == vectorSelected)  )||(editorOpen[tSelectedParent] == textSelectedParent)) && (editorOpen[tTypeSelected] == textType)){
         alert(editorOpen.editor);
         $(editorOpen.editor).effect("shake");
         canOpen = false;
@@ -567,8 +568,8 @@ var controlOptions = {
     draw: {
         polyline: false,  //disables the polyline and marker feature as this is unnecessary for annotation of text as it cannot enclose it
         marker: false,
-        polygon: false, //disabling polygons and circles as IIIF image region API does not specify how to encode anything but rectangular regions
-        circle: false
+        //polygon: false,
+        //circle: false
     },
     edit: {
         featureGroup: allDrawnItems, //passes draw controlOptions to the FeatureGroup of editable layers
@@ -637,17 +638,19 @@ var findVectorParent = function(coordinatesArray, parentCoordsArray) {
   var yBounds = [ parentCoordsArray[0][1], parentCoordsArray[2][1] ];
   var counter = 0;
   coordinatesArray.forEach(function(pair){
-    if (  (xBounds[0] <= pair[0] <= xBounds[1]) && (yBounds[0] <= pair[1] <= yBounds[1])  ) {  counter += 1;  };
+    if (  (xBounds[0] <= pair[0]) && ( pair[0]<= xBounds[1]) && (yBounds[0] <= pair[1]) && (pair[1] <= yBounds[1])  ) {  counter += 1;  };
   });
   if (counter >= 3) {  return true;  }
   else {  return false;  };
 };
 
-var searchForVectorParents = function(allDrawnItems, theCoordinates) {
+var searchForVectorParents = function(theDrawnItems, theCoordinates) {
   var overlapping = false;
-  allDrawnItems.forEach(function(drawnItem){
-    var check = findVectorParent(theCoordinates, drawnItem.geometry.coordinates);
-    if (check == true) {  overlapping = drawnItem.body.id;  };
+  theDrawnItems.eachLayer(function(layer){
+    var drawnItem = layer.toGeoJSON();
+    if (findVectorParent(theCoordinates, drawnItem.geometry.coordinates[0])) {  
+      overlapping = layer._leaflet_id ;  
+    };
   });
   return overlapping;
 };
@@ -656,11 +659,17 @@ map.on('draw:created', function(evt) {
 
 	var layer = evt.layer;
   var shape = layer.toGeoJSON();
-  var vectorOverlapping = false;
-  //var vectorOverlapping = searchForVectorParents(allDrawnItems, shape.geometry.coordinates[0]);
-  if (  (vectorOverlapping != false) && (selectingVector == false)  ) {    }
+  var vectorOverlapping = searchForVectorParents(allDrawnItems, shape.geometry.coordinates[0]); 
+  allDrawnItems.addLayer(layer);
+  if (  (vectorOverlapping != false) && (selectingVector == false)  ) { 
+    ///// open popup and do not save/save and remove?
+    alert("to add a new section in here then please select the area in the parent text");
+    allDrawnItems.removeLayer(layer);
+    vectorSelected = vectorOverlapping;
+    $("#map").popover();
+    $("#map").popover('show');
+  }
   else {
-    allDrawnItems.addLayer(layer);
     var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata, parent: vectorOverlapping };
     $.ajax({
       type: "POST",
@@ -675,8 +684,7 @@ map.on('draw:created', function(evt) {
     layer._leaflet_id = vectorSelected;
     layer.bindPopup(popupVectorMenu).openPopup();
     if (selectingVector != false) {  
-      vectorSelectedParent = vectorOverlapping;
-      updateVectorSelection(vectorSelected);  
+      updateVectorSelection(vectorSelected, vectorOverlapping);  
     };
   };
 
@@ -687,7 +695,7 @@ allDrawnItems.on('click', function(vec) {
 
   vectorSelected = vec.layer._leaflet_id;
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
-  else if (selectingVector != false) {  updateVectorSelection(vectorSelected);  }
+  else if (selectingVector != false) {  alert("make a new vector!");  }
   else {  vec.layer.openPopup();  };
 
 });
@@ -762,17 +770,14 @@ $(document).ready(function() { ////necessary???
     var selection = getSelected(); 
     var classCheck = selection.anchorNode.parentElement.className;
 
-    if (classCheck.includes('openTranscriptionMenuOld')) { 
+    if (classCheck.includes('openTranscriptionMenuOld')) { //if it is a popover within the selection rather than the text itself
 
       textSelectedID = startParentID;
-      if ($(outerElementTextIDstring).parent().attr('id') != (null || 'undefined' || false
-        )){
+      if (  !isUseless($(outerElementTextIDstring).parent().attr('id')) ){
         textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
       };
       textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
-
       checkEditorsOpen("text", "transcription");
-
       $('.opentranscriptionChildrenPopup').popover('hide');
 
     }   
@@ -795,6 +800,8 @@ $(document).ready(function() { ////necessary???
       outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
 
       if (classCheck.includes('opentranscriptionChildrenPopup')) { 
+        alert("you are trying to open an existing child");
+        $('.opentranscriptionChildrenPopup').popover();
         $('.opentranscriptionChildrenPopup').popover('show');
       }
       else if (classCheck.includes('opentranslationChildrenPopup')) { 
@@ -886,16 +893,17 @@ $(document).ready(function() { ////necessary???
 });
 
 /////maybe change to be more specific to the drawing?
-$('#map').popover({ 
+$('#imageViewer').popover({ 
   trigger: 'manual',
   placement: 'top',
   html : true,
+  title: " ",
   content: function() {
-    return $('popupLinkVectorMenu').html();
+    return $('#popupLinkVectorMenu').html();
   }
 });
 
-$('#map').on("shown.bs.popover", function(event) {
+$('#imageViewer').on("shown.bs.popover", function(event) {
     $('#page_body').on("click", function(event) {
       if ($(event.target).hasClass("popupAnnoMenu") == false) {
         $('#map').popover("hide");
@@ -904,6 +912,32 @@ $('#map').on("shown.bs.popover", function(event) {
     $('.closeThePopover').on("click", function(event){
       $('#map').popover("hide");
     });
+});
+
+$('#map').popover({ 
+  trigger: 'manual',
+  placement: 'top',
+  html : true,
+  title: "  ",
+  content: function() {
+    return $('#popupVectorParentMenu').html();
+  }
+});
+
+$('#map').on("shown.bs.popover", function(event) {
+  $('#page_body').one("click", '.openTranscriptionMenu', function(event) {
+    checkEditorsOpen("vector", "transcription");
+    $('#map').popover('hide');
+  });
+
+/*  $('#page_body').on("click", function(event) {
+    if ($(event.target).hasClass("popupAnnoMenu") == false) {
+      $('#map').popover("hide");
+    }
+  });*/
+  $('.closeThePopover').on("click", function(event){
+    $('#map').popover("hide");
+  });
 });
 
 $('#page_body').on("click", ".textEditorBox", function(event){
@@ -984,17 +1018,16 @@ $('.opentranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
   $('.openTranscriptionMenuOld').on("click", function(event) {
 
     textSelectedID = startParentID;
-    if ($(outerElementTextIDstring).parent().attr('id') != (null || 'undefined')){
+    if (  !isUseless($(outerElementTextIDstring).parent().attr('id')) ){
       textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
     };
     textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
     checkEditorsOpen("text", "transcription");
-
     $('.opentranscriptionChildrenPopup').popover('hide');
   });
 
   $('.closeThePopover').on("click", function(event){
-    $('.opentranscriptionChildrenPopup').popover("hide");
+    $('.opentranscriptionChildrenPopup').popover("hide"); /////is this working?
   });
 
 });
