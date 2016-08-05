@@ -230,6 +230,7 @@ var updateVectorSelection = function(vectorURL, vectorParent) {
   });
   updateAnno(vectorURL, vectorData);
   selectingVector = false;
+  alert("trying to update vectors");
 
 };
 
@@ -381,7 +382,7 @@ var updateEditor = function(popupIDstring) {
 };
 
 var addEditorsOpen = function(popupIDstring) {
-  return editorsOpen.push({
+  editorsOpen.push({
     "editor": popupIDstring,
     "typesFor": targetType,
     "vSelected": vectorSelected,
@@ -391,6 +392,7 @@ var addEditorsOpen = function(popupIDstring) {
     "tTypeSelected": textTypeSelected,
     "children": childrenArray
   });
+  return editorsOpen;
 };
 
 var createEditorPopupBox = function() {
@@ -438,6 +440,7 @@ var removeEditorChild = function(thisEditor) {
   var theParent = document.getElementById("ViewerBox1");
   var toRemove = document.getElementById(thisEditor);
   theParent.removeChild(toRemove);
+  if(!isUseless(vectorSelected)){ highlightVectorChosen(vectorSelected, '#03f'); };
   if (  isUseless(toRemove) != true ) {  return thisEditor;  };
 };
 
@@ -543,12 +546,12 @@ var openNewEditor = function(fromType) {
 
 var checkEditorsOpen = function(fromType, textType) {
   textTypeSelected = textType;
-  if (editorsOpen == null || editorsOpen == 'undefined') {    openNewEditor(fromType);  }
+  if (isUseless(editorsOpen)) {    openNewEditor(fromType);  }
   else {
     var canOpen = true;
     editorsOpen.forEach(function(editorOpen){
-      alert(JSON.stringify(editorOpen));
-      if ( ( (  !isUseless(editorOpen[vSelected]) && (editorOpen[vSelected] == vectorSelected)  )||(editorOpen[tSelectedParent] == textSelectedParent)) && (editorOpen[tTypeSelected] == textType)){
+      alert("the vectorSelected is "+vectorSelected);
+      if ( ( (  !isUseless(editorOpen["vSelected"]) && (editorOpen["vSelected"] == vectorSelected)  )||(editorOpen["tSelectedParent"] == textSelectedParent)) && (editorOpen["tTypeSelected"] == textType)){
         alert(editorOpen.editor);
         $(editorOpen.editor).effect("shake");
         canOpen = false;
@@ -612,6 +615,7 @@ map.whenReady(function(){
 var tempGeoJSON = {  "type": "Feature",  "properties":{},  "geometry":{}  };
 
 //load the existing vectors
+var currentVectorLayers = {};
 if (existingVectors != false) {
   existingVectors.forEach(function(vector) {
 
@@ -655,6 +659,14 @@ var searchForVectorParents = function(theDrawnItems, theCoordinates) {
   return overlapping;
 };
 
+var highlightVectorChosen = function(chosenVector, colourChange) {
+  allDrawnItems.eachLayer(function(layer){
+    if(layer._leaflet_id == chosenVector) {
+      layer.setStyle({color: colourChange});
+    };
+  });
+};
+
 map.on('draw:created', function(evt) {
 
 	var layer = evt.layer;
@@ -662,8 +674,6 @@ map.on('draw:created', function(evt) {
   var vectorOverlapping = searchForVectorParents(allDrawnItems, shape.geometry.coordinates[0]); 
   allDrawnItems.addLayer(layer);
   if (  (vectorOverlapping != false) && (selectingVector == false)  ) { 
-    ///// open popup and do not save/save and remove?
-    alert("to add a new section in here then please select the area in the parent text");
     allDrawnItems.removeLayer(layer);
     vectorSelected = vectorOverlapping;
     $("#map").popover();
@@ -694,6 +704,7 @@ map.on('draw:created', function(evt) {
 allDrawnItems.on('click', function(vec) {
 
   vectorSelected = vec.layer._leaflet_id;
+  alert(vectorSelected);
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
   else if (selectingVector != false) {  alert("make a new vector!");  }
   else {  vec.layer.openPopup();  };
@@ -716,11 +727,12 @@ map.on('draw:editstop', function(){
 //////update DB whenever vector coordinates are changed
 allDrawnItems.on('edit', function(vec){
   var shape = vec.layer.toGeoJSON();
-  updateAnno(vectorSelected, shape);
+  updateAnno(vectorSelected, shape); ////////////
 });
 
 //////update DB whenever vector is deleted
 allDrawnItems.on('remove', function(vec){
+  //////
   $.ajax({
     type: "DELETE",
     url: vectorSelected,
@@ -925,11 +937,14 @@ $('#map').popover({
 });
 
 $('#map').on("shown.bs.popover", function(event) {
-  $('#page_body').one("click", '.openTranscriptionMenu', function(event) {
+  $('#page_body').one("click", '.openTranscriptionMenuParent', function(event) {
     checkEditorsOpen("vector", "transcription");
     $('#map').popover('hide');
   });
-
+  $('#page_body').one("click", '.openTranslationMenuParent', function(event) {
+    checkEditorsOpen("vector", "translation");
+    $('#map').popover('hide');
+  });
 /*  $('#page_body').on("click", function(event) {
     if ($(event.target).hasClass("popupAnnoMenu") == false) {
       $('#map').popover("hide");
@@ -952,11 +967,23 @@ $('#page_body').on("click", ".textEditorBox", function(event){
       textTypeSelected = target.tTypeSelected;
       childrenArray = target.children;
     };
-  })
+  });
+});
+
+$('#page_body').on("mouseover", ".textEditorBox", function(event){
+  var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
+  var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
+  if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, "#FFFF00");  };
+});
+
+$('#page_body').on("mouseout", ".textEditorBox", function(event){
+  var thisEditor = "#" + $(event.target).attr("id");
+  var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
+  if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, "#03f");  };
 });
 
 $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
-  var thisEditor = $(event.target).parent().parent().parent().parent().parent().parent().parent().attr("id");
+  var thisEditor = $(event.target).parent().parent().parent().parent().parent().parent().parent().attr("id"); /////change to search through closest????
   addAnnotation(thisEditor);
 });
 
@@ -994,6 +1021,8 @@ $('#page_body').on("click", '.votingUpButton', function(event) {
   var thisEditor = $(event.target).parent().parent().parent().parent().parent().parent().parent().parent().parent().attr("id"); 
   votingFunction("up", votedID, currentTopText, thisEditor);
 });
+
+
 
 //////TRANSCRIPTIONS
 
