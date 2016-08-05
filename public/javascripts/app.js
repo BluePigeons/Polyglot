@@ -344,12 +344,13 @@ var canLink = function(popupIDstring) {
 
 var canVoteAdd = function(popupIDstring, theVectorParent) {
   //if it is targeting it's own type OR it is targeting a vector with parents THEN you can vote and add
-  if ( targetType.includes(textTypeSelected) || ( ( targetType.includes("vector") ) && ( isUseless(theVectorParent) == false ) ) ) { 
+  if ( targetType.includes(textTypeSelected) || ( ( targetType.includes("vector") ) && ( !isUseless(theVectorParent) ) ) ) { 
     $(popupIDstring).find(".editorCarouselWrapper").append(addNewAnnoHTML);
     return voteButtonsHTML; ///////metadata stuff too!!!!!!!
   }
   else {
     $(popupIDstring).find(".carousel-control").css("display", "none");
+    $(popupIDstring).find(".addNewBtn").css("display", "none");
     return "";
   };
 };
@@ -360,6 +361,7 @@ var addCarouselItems = function(popupIDstring) {
     $(popupIDstring).find(".editorCarouselWrapper").append(addNewAnnoHTML);
     $(popupIDstring).find(".addNewItem").addClass("active");
     $(popupIDstring).find(".carousel-control").css("display", "none");
+    $(popupIDstring).find(".addNewBtn").css("display", "none");
   }
   else {
     var theExtras = canVoteAdd(popupIDstring, theVectorParent);
@@ -392,6 +394,12 @@ var addEditorsOpen = function(popupIDstring) {
     "tTypeSelected": textTypeSelected,
     "children": childrenArray
   });
+  vectorSelected = "";
+  textSelectedParent = "";
+  textSelectedID = "";
+  textSelectedHash = "";
+  textTypeSelected = "";
+  childrenArray = [];
   return editorsOpen;
 };
 
@@ -550,9 +558,7 @@ var checkEditorsOpen = function(fromType, textType) {
   else {
     var canOpen = true;
     editorsOpen.forEach(function(editorOpen){
-      alert("the vectorSelected is "+vectorSelected);
-      if ( ( (  !isUseless(editorOpen["vSelected"]) && (editorOpen["vSelected"] == vectorSelected)  )||(editorOpen["tSelectedParent"] == textSelectedParent)) && (editorOpen["tTypeSelected"] == textType)){
-        alert(editorOpen.editor);
+      if ( ( (  !isUseless(editorOpen["vSelected"]) && (editorOpen["vSelected"] == vectorSelected)  )||( !isUseless(editorOpen["tSelectedParent"]) && editorOpen["tSelectedParent"] == textSelectedParent)) && (editorOpen["tTypeSelected"] == textType)){
         $(editorOpen.editor).effect("shake");
         canOpen = false;
       };
@@ -704,7 +710,6 @@ map.on('draw:created', function(evt) {
 allDrawnItems.on('click', function(vec) {
 
   vectorSelected = vec.layer._leaflet_id;
-  alert(vectorSelected);
   if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
   else if (selectingVector != false) {  alert("make a new vector!");  }
   else {  vec.layer.openPopup();  };
@@ -977,7 +982,7 @@ $('#page_body').on("mouseover", ".textEditorBox", function(event){
 });
 
 $('#page_body').on("mouseout", ".textEditorBox", function(event){
-  var thisEditor = "#" + $(event.target).attr("id");
+  var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
   if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, "#03f");  };
 });
