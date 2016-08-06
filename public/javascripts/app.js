@@ -1033,6 +1033,8 @@ $('#page_body').on("click", ".textEditorBox", function(event){
 });
 */
 $('#page_body').on("mouseover", ".textEditorBox", function(event){
+  /////if it is within a span with class ".openTranscriptionChildrenPopup" or translation then highlight span otherwise the whole editor
+  //////keep highlighting if on the menu for the vector??
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
   $(thisEditor).find(".popupBoxHandlebar").css("background-color", "#FFFF00");
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
