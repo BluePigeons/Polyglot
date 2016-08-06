@@ -430,7 +430,7 @@ var createEditorPopupBox = function() {
 var openEditorMenu = function() {
 
   var popupIDstring = createEditorPopupBox();
-  $('.opentranscriptionChildrenPopup').popover({ 
+  /*$('.opentranscriptionChildrenPopup').popover({ 
     trigger: 'manual',
     placement: 'top',
     html : true,
@@ -438,7 +438,7 @@ var openEditorMenu = function() {
     content: function() {
       return $('#popupTranscriptionChildrenMenu').html();
     }
-  });
+  });*/
   updateEditor(popupIDstring); 
   addEditorsOpen(popupIDstring); 
 
@@ -474,7 +474,7 @@ var findNewTextData = function(editorString) {
     textData.target.push({id: vectorSelected, format: "image/SVG"});
   };
 
-  if (targetType.includes(textTypeSelected) == true) {
+  if (targetType.includes(textTypeSelected)) {
       textData.target.push({id: textSelectedHash, format: "text/html"});
       textData.parent = textSelectedParent;
   }
@@ -492,6 +492,7 @@ var addAnnotation = function(thisEditor){
 
   var editorString = "#" + thisEditor;
   var createdText;
+  var theData = findNewTextData(editorString);
 
   $.ajax({
     type: "POST",
@@ -762,6 +763,21 @@ map.on('popupopen', function() {
 
 ///////ANNOTATION EDITORS
 
+var settingEditorVars = function(thisEditor) {
+  if(!thisEditor.includes("#")) { thisEditor = "#" + thisEditor; };
+  editorsOpen.forEach(function(target){
+    if(target.editor == thisEditor) {
+      targetType = target.typesFor;
+      vectorSelected = target.vSelected;
+      textSelectedParent = target.tSelectedParent;
+      textSelectedID = target.tSelectedID;
+      textSelectedHash = target.tSelectedHash;
+      textTypeSelected = target.tTypeSelected;
+      childrenArray = target.children;
+    };
+  });
+};
+
 var newSpanClass = function(startParentClass) {
   if (startParentClass.includes('transcription-text')) {
     return "transcription-text opentranscriptionChildrenPopup";
@@ -791,11 +807,11 @@ $(document).ready(function() { ////necessary???
 
       textSelectedID = startParentID;
       if (  !isUseless($(outerElementTextIDstring).parent().attr('id')) ){
-        textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
+        textSelectedParent = transcriptionURL + $(outerElementTextIDstring).parent().attr('id'); 
       };
       textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
       checkEditorsOpen("text", "transcription");
-      $('.opentranscriptionChildrenPopup').popover('hide');
+      $(outerElementTextIDstring).popover('hide'); ////
 
     }   
 
@@ -817,9 +833,16 @@ $(document).ready(function() { ////necessary???
       outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
 
       if (classCheck.includes('opentranscriptionChildrenPopup')) { 
-        alert("you are trying to open an existing child");
-        $('.opentranscriptionChildrenPopup').popover();
-        $('.opentranscriptionChildrenPopup').popover('show');
+        $(outerElementTextIDstring).popover({ 
+          trigger: 'manual', //////
+          placement: 'top',
+          html : true,
+          title: "  ",
+          content: function() {
+            return $('#popupTranscriptionChildrenMenu').html();
+          }
+        });
+        $(outerElementTextIDstring).popover('show');
       }
       else if (classCheck.includes('opentranslationChildrenPopup')) { 
         $('.opentranslationChildrenPopup').popover('show');
@@ -959,22 +982,13 @@ $('#map').on("shown.bs.popover", function(event) {
     $('#map').popover("hide");
   });
 });
-
+/*
 $('#page_body').on("click", ".textEditorBox", function(event){
+  /////check if it is a popup or 
   var thisEditor = "#" + $(event.target).parent().attr("id");
-  editorsOpen.forEach(function(target){
-    if(target.editor == thisEditor) {
-      targetType = target.typesFor;
-      vectorSelected = target.vSelected;
-      textSelectedParent = target.tSelectedParent;
-      textSelectedID = target.tSelectedID;
-      textSelectedHash = target.tSelectedHash;
-      textTypeSelected = target.tTypeSelected;
-      childrenArray = target.children;
-    };
-  });
-});
 
+});
+*/
 $('#page_body').on("mouseover", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
@@ -988,24 +1002,20 @@ $('#page_body').on("mouseout", ".textEditorBox", function(event){
 });
 
 $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
-  var thisEditor = $(event.target).parent().parent().parent().parent().parent().parent().parent().attr("id"); /////change to search through closest????
+  var thisEditor = $(event.target).closest(".textEditorPopup").attr("id"); 
+  settingEditorVars(thisEditor);
+  ///
   addAnnotation(thisEditor);
 });
 
 $('#page_body').on("click", ".closePopupBtn", function(){
-  var thisEditor = $(event.target).parent().parent().parent().attr("id");
+  var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
   closeEditorMenu(thisEditor);
 });
 
 
 $('#page_body').on('slid.bs.carousel', '.editorCarousel', function(event) {
-  var baseURL;
-  if(textTypeSelected == "transcription") {
-    baseURL = transcriptionURL;
-  }
-  else if(textTypeSelected == "translation") {
-    baseURL = translationURL;
-  };
+
 /////change the textSelected to whatever slide of the carousel is selected...
 
 });
@@ -1015,24 +1025,27 @@ $('#page_body').on("click", ".addNewBtn", function(){
 });
 
 $('#page_body').on("click", ".linkBtn", function(){
+  var thisEditor = $(event.target).closest(".textEditorPopup").attr("id"); 
+  settingEditorVars(thisEditor);
   selectingVector = childrenArray;
   $("#imageViewer").effect("bounce");
   $("#map").popover( "show");
 });
 
 $('#page_body').on("click", '.votingUpButton', function(event) {
-  var votedID = $(event.target).parent().parent().parent().find("p").attr("id");
-  var currentTopText = $(event.target).parent().parent().parent().parent().parent().find(".currentTop").html();
-  var thisEditor = $(event.target).parent().parent().parent().parent().parent().parent().parent().parent().parent().attr("id"); 
+  var votedID = $(event.target).parent().parent().parent().find("p").attr("id");//////
+  var currentTopText = $(event.target).closest(".textEditorPopup").find(".currentTop").html();////
+  var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
+  settingEditorVars(thisEditor);
   votingFunction("up", votedID, currentTopText, thisEditor);
 });
 
 
 
 //////TRANSCRIPTIONS
-
+/*
 $('.opentranscriptionChildrenPopup').popover({ 
-  trigger: 'click',
+  trigger: 'manual', //////
   placement: 'top',
   html : true,
   title: "  ",
@@ -1056,6 +1069,7 @@ $('.opentranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
       textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
     };
     textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
+    alert("this is how we select");
     checkEditorsOpen("text", "transcription");
     $('.opentranscriptionChildrenPopup').popover('hide');
   });
@@ -1065,6 +1079,6 @@ $('.opentranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
   });
 
 });
-
+*/
 ///////TRANSLATIONS
 
