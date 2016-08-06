@@ -10,6 +10,7 @@ var translationURL = websiteAddress.concat("/api/translations/");
 
 var addNewAnnoHTML = "<div class='item addNewItem'> <div class='addNewContainer'> <h3>Add New</h3> <textarea class='newAnnotation' rows='5'></textarea><br><button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   </div>  </div>";
 var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='glyphicon glyphicon-thumbs-up' aria-hidden='true' ></span></button><button type='button' class='btn btn-default votesUpBadge'><span class='badge'></span></button></div>";
+var closeButtonHTML = "<span class='closePopoverMenuBtn glyphicon glyphicon-remove'></span>";
 //var metaHTML = ; ///////////
 
 var imageSelected; //info.json format URL
@@ -64,7 +65,6 @@ var getTargetJSON = function(target) {
         targetJSON = data;
       }
     });
-
     return targetJSON;
   };
 };
@@ -448,7 +448,9 @@ var removeEditorChild = function(thisEditor) {
   var theParent = document.getElementById("ViewerBox1");
   var toRemove = document.getElementById(thisEditor);
   theParent.removeChild(toRemove);
-  if(!isUseless(vectorSelected)){ highlightVectorChosen(vectorSelected, '#03f'); };
+  var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected; ////undefined???
+  alert(thisVector);
+  if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, '#03f'); };
   if (  isUseless(toRemove) != true ) {  return thisEditor;  };
 };
 
@@ -568,6 +570,58 @@ var checkEditorsOpen = function(fromType, textType) {
   };
 };
 
+var findVectorParent = function(coordinatesArray, parentCoordsArray) {
+  var xBounds = [ parentCoordsArray[0][0], parentCoordsArray[2][0] ];
+  var yBounds = [ parentCoordsArray[0][1], parentCoordsArray[2][1] ];
+  var counter = 0;
+  coordinatesArray.forEach(function(pair){
+    if (  (xBounds[0] <= pair[0]) && ( pair[0]<= xBounds[1]) && (yBounds[0] <= pair[1]) && (pair[1] <= yBounds[1])  ) {  counter += 1;  };
+  });
+  if (counter >= 3) {  return true;  }
+  else {  return false;  };
+};
+
+var searchForVectorParents = function(theDrawnItems, theCoordinates) {
+  var overlapping = false;
+  theDrawnItems.eachLayer(function(layer){
+    var drawnItem = layer.toGeoJSON();
+    if (findVectorParent(theCoordinates, drawnItem.geometry.coordinates[0])) {  
+      overlapping = layer._leaflet_id ;  
+    };
+  });
+  return overlapping;
+};
+
+var highlightVectorChosen = function(chosenVector, colourChange) {
+  allDrawnItems.eachLayer(function(layer){
+    if(layer._leaflet_id == chosenVector) {
+      layer.setStyle({color: colourChange});
+    };
+  });
+};
+
+var highlightEditorsChosen = function(chosenVector, colourChange) {
+  editorsOpen.forEach(function(thisEditor){
+    if (thisEditor.vSelected == chosenVector) {
+      $(thisEditor.editor).find(".popupBoxHandlebar").css("background-color", colourChange);
+    };
+  });
+};
+
+var highlightSpanChosen = function(chosenSpan, colourChange) {
+  $(chosenSpan).css("background-color", colourChange);
+};
+
+var popupVectorMenuHTML = function() {
+  var openHTML = "<div class='popupAnnoMenu'>";
+  var transcriptionOpenHTML = "<a class='openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline'>TRANSCRIPTION</a><br>";
+  var translationOpenHTML = "<a class='openTranslationMenu ui-btn ui-corner-all ui-shadow ui-btn-inline'>TRANSLATION</a>";
+  var endHTML = "</div>";
+  var totalHTML = openHTML + transcriptionOpenHTML + translationOpenHTML + endHTML;
+  /////this as a function instead of one line string allows for flexibility during development but may fix later 
+  return totalHTML;
+};
+
 ///////LEAFLET 
 
 loadImage(findingcookies);
@@ -584,16 +638,6 @@ var controlOptions = {
     edit: {
         featureGroup: allDrawnItems, //passes draw controlOptions to the FeatureGroup of editable layers
     }
-};
-
-var popupVectorMenuHTML = function() {
-  var openHTML = "<div class='popupAnnoMenu'>";
-  var transcriptionOpenHTML = "<a class='openTranscriptionMenu ui-btn ui-corner-all ui-shadow ui-btn-inline'>TRANSCRIPTION</a><br>";
-  var translationOpenHTML = "<a class='openTranslationMenu ui-btn ui-corner-all ui-shadow ui-btn-inline'>TRANSLATION</a>";
-  var endHTML = "</div>";
-  var totalHTML = openHTML + transcriptionOpenHTML + translationOpenHTML + endHTML;
-  /////this as a function instead of one line string allows for flexibility during development but may fix later 
-  return totalHTML;
 };
 
 var popupVectorMenu = L.popup()
@@ -638,39 +682,9 @@ if (existingVectors != false) {
           layer._leaflet_id = vector.body.id,
           allDrawnItems.addLayer(layer),
           layer.bindPopup(popupVectorMenu)
-          }
+        }
       }).addTo(map);
 
-  });
-};
-
-var findVectorParent = function(coordinatesArray, parentCoordsArray) {
-  var xBounds = [ parentCoordsArray[0][0], parentCoordsArray[2][0] ];
-  var yBounds = [ parentCoordsArray[0][1], parentCoordsArray[2][1] ];
-  var counter = 0;
-  coordinatesArray.forEach(function(pair){
-    if (  (xBounds[0] <= pair[0]) && ( pair[0]<= xBounds[1]) && (yBounds[0] <= pair[1]) && (pair[1] <= yBounds[1])  ) {  counter += 1;  };
-  });
-  if (counter >= 3) {  return true;  }
-  else {  return false;  };
-};
-
-var searchForVectorParents = function(theDrawnItems, theCoordinates) {
-  var overlapping = false;
-  theDrawnItems.eachLayer(function(layer){
-    var drawnItem = layer.toGeoJSON();
-    if (findVectorParent(theCoordinates, drawnItem.geometry.coordinates[0])) {  
-      overlapping = layer._leaflet_id ;  
-    };
-  });
-  return overlapping;
-};
-
-var highlightVectorChosen = function(chosenVector, colourChange) {
-  allDrawnItems.eachLayer(function(layer){
-    if(layer._leaflet_id == chosenVector) {
-      layer.setStyle({color: colourChange});
-    };
   });
 };
 
@@ -711,10 +725,19 @@ map.on('draw:created', function(evt) {
 allDrawnItems.on('click', function(vec) {
 
   vectorSelected = vec.layer._leaflet_id;
-  if ((currentlyEditing == true) || (currentlyDeleting == true)) {}
+  if (currentlyEditing || currentlyDeleting) {}
   else if (selectingVector != false) {  alert("make a new vector!");  }
   else {  vec.layer.openPopup();  };
 
+});
+
+allDrawnItems.on('mouseover', function(vec) {
+  vec.layer.setStyle({color: "#FFFF00"});
+  highlightEditorsChosen(vec.layer._leaflet_id, "#FFFF00");
+});
+allDrawnItems.on('mouseout', function(vec) {
+  vec.layer.setStyle({color: "#03f"});
+  highlightEditorsChosen(vec.layer._leaflet_id, "#03f");
 });
 
 map.on('draw:deletestart', function(){
@@ -797,147 +820,167 @@ var strangeTrimmingFunction = function(thetext) {
   }; 
 };
 
-$(document).ready(function() { ////necessary???
-  $('#page_body').on("mouseup", '.content-area', function(event) {
-
-    var selection = getSelected(); 
-    var classCheck = selection.anchorNode.parentElement.className;
-
-    if (classCheck.includes('openTranscriptionMenuOld')) { //if it is a popover within the selection rather than the text itself
-
-      textSelectedID = startParentID;
-      if (  !isUseless($(outerElementTextIDstring).parent().attr('id')) ){
-        textSelectedParent = transcriptionURL + $(outerElementTextIDstring).parent().attr('id'); 
-      };
-      textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
-      checkEditorsOpen("text", "transcription");
-      $(outerElementTextIDstring).popover('hide'); ////
-
-    }   
-
-    else {
-
-      var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
-      var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
-      var startNodeTextEndIndex = startNodeText.toString().length;
-      startParentID = startNode.parentElement.id;
-      var startParentClass = startNode.parentElement.className;
-
-      var nodeLocationStart = selection.anchorOffset; //index from within startNode text where selection starts
-      var nodeLocationEnd = selection.focusOffset; //index from within endNode text where selection ends
-
-      var endNode = selection.focusNode; //the text type Node that end of the selection was in 
-      var endNodeText = endNode.textContent;
-      var endParentID = endNode.parentElement.id; //the ID of the element type Node that the text ends in
-
-      outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
-
-      if (classCheck.includes('opentranscriptionChildrenPopup')) { 
-        $(outerElementTextIDstring).popover({ 
-          trigger: 'manual', //////
-          placement: 'top',
-          html : true,
-          title: "  ",
-          content: function() {
-            return $('#popupTranscriptionChildrenMenu').html();
-          }
-        });
-        $(outerElementTextIDstring).popover('show');
-      }
-      else if (classCheck.includes('opentranslationChildrenPopup')) { 
-        $('.opentranslationChildrenPopup').popover('show');
-      }
-      else if (startParentID != endParentID) {
-        alert("you can't select across existing fragments' borders sorry");
-      }
-      else {
-
-        newNodeInsertID = Math.random().toString().substring(2);
-
-        var newSpan = "<a class='" + newSpanClass(startParentClass) + "' id='" + newNodeInsertID + "' >" + selection + "</a>";
-        var currentTextString = strangeTrimmingFunction(selection);
-     
-        var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
-
-        ///CONTENT BEFORE HIGHLIGHT IN THE TEXT TYPE NODE
-        var previousSpanContent = startNodeText.slice(0, nodeLocationStart);
-
-        //CONTENT BEFORE HIGHLIGHT IN THE ELEMENT TYPE NODE
-        var previousSpan = startNode.previousElementSibling; //returns null if none i.e. this text node is first node in element node
-        var outerElementStartContent;
-        if (previousSpan == "null" || previousSpan == null) {outerElementStartContent = previousSpanContent}
-        else {
-          var previousSpanAll = previousSpan.outerHTML;
-          var StartIndex = outerElementHTML.indexOf(previousSpanAll) + previousSpanAll.length;
-          outerElementStartContent = outerElementHTML.slice(0, StartIndex).concat(previousSpanContent);
-        };
-
-        ///CONTENT AFTER HIGHLIGHT IN THE TEXT TYPE NODE
-        var nextSpanContent;
-        if (endNode == startNode) { nextSpanContent = startNodeText.slice(nodeLocationEnd, startNodeTextEndIndex)}
-        else {nextSpanContent = endNodeText.slice(0, nodeLocationEnd)};
-
-        ///CONTENT AFTER HIGHLIGHT IN ELEMENT TYPE NODE
-        var nextSpan = endNode.nextElementSibling; //returns null if none i.e. this text node is the last in the element node
-        var outerElementEndContent;
-        if (nextSpan == "null" || nextSpan == null) {outerElementEndContent = nextSpanContent}
-        else {
-          var nextSpanAll = nextSpan.outerHTML;
-          var EndIndex = outerElementHTML.indexOf(nextSpanAll);
-          outerElementEndContent = nextSpanContent.concat(outerElementHTML.substring(EndIndex));
-        };
-
-        newContent = outerElementStartContent + newSpan + outerElementEndContent;
-        textSelectedFragment = currentTextString;
-
-        $(outerElementTextIDstring).popover({ 
-          trigger: 'manual',
-          placement: 'top',
-          html : true,
-          container: 'body',
-          title: "  ",
-          content: function() {
-            return $('#popupTranscriptionNewMenu').html();
-          }
-        });
-
-        $(outerElementTextIDstring).popover('show');
-
-        $(outerElementTextIDstring).on("shown.bs.popover", function(event) {
-
-          $('#page_body').on("click", function(event) {
-            if ($(event.target).hasClass("popupAnnoMenu") == false) {
-              $(outerElementTextIDstring).popover("hide");
-            }
-          });
-
-          $('.openTranscriptionMenuNew').one("click", function(event) {
-            insertSpanDivs();
-            textSelectedParent = transcriptionURL.concat(startParentID);
-            newAnnotationFragment(transcriptionURL);
-            textTypeSelected = "transcription";
-            targetType = "transcription";
-            openEditorMenu();
-            $(outerElementTextIDstring).popover('hide');    
-          });
-
-          $('.closeThePopover').on("click", function(event){
-            $(outerElementTextIDstring).popover("hide");
-          });
-
-        });
-
-      };
-    };
+var newTextPopoverOpen = function(theTextIDstring, theParent) {
+  $('#page_body').on("click", function(event) {
+    if ($(event.target).hasClass("popupAnnoMenu") == false) {
+      $(theTextIDstring).popover("hide");
+    }
   });
+
+  $('.openTranscriptionMenuNew').one("click", function(event) {
+    insertSpanDivs();
+    textSelectedParent = transcriptionURL.concat(theParent);
+    newAnnotationFragment(transcriptionURL);
+    textTypeSelected = "transcription";
+    targetType = "transcription";
+    openEditorMenu();
+    $(theTextIDstring).popover('hide');    
+  });
+
+  $('.closeThePopover').on("click", function(event){
+    $(theTextIDstring).popover("hide");
+  });
+};
+
+var initialiseNewTextPopovers = function(theTextIDstring, theParent) {
+  $(theTextIDstring).popover({ 
+    trigger: 'manual',
+    placement: 'top',
+    html : true,
+    container: 'body',
+    title: closeButtonHTML,
+    content: function() {
+      return $('#popupTranscriptionNewMenu').html();
+    }
+  });
+  $(theTextIDstring).popover('show');
+  $(theTextIDstring).on("shown.bs.popover", function(ev) {
+    newTextPopoverOpen(theTextIDstring, theParent);
+  });
+};
+
+var initialiseOldTextPopovers = function(theTextIDstring) {
+  $(theTextIDstring).popover({ 
+    trigger: 'manual', //////
+    placement: 'top',
+    html : true,
+    title: closeButtonHTML,
+    content: function() {
+      return $('#popupTranscriptionChildrenMenu').html();
+    }
+  });
+  $(theTextIDstring).popover('show');
+};
+
+var setOESC = function(outerElementHTML, previousSpanContent, previousSpan) {
+  var outerElementStartContent;
+  if (previousSpan == "null" || previousSpan == null) {outerElementStartContent = previousSpanContent}
+  else {
+    var previousSpanAll = previousSpan.outerHTML;
+    var StartIndex = outerElementHTML.indexOf(previousSpanAll) + previousSpanAll.length;
+    outerElementStartContent = outerElementHTML.slice(0, StartIndex).concat(previousSpanContent);
+  };
+  return outerElementStartContent;
+};
+
+var setOEEC = function(outerElementHTML, nextSpanContent, nextSpan) {
+    var outerElementEndContent;
+    if (nextSpan == "null" || nextSpan == null) {outerElementEndContent = nextSpanContent}
+    else {
+      var EndIndex = outerElementHTML.indexOf(nextSpan.outerHTML);
+      outerElementEndContent = nextSpanContent.concat(outerElementHTML.substring(EndIndex));
+    };
+    return outerElementEndContent;
+};
+
+var setNewTextVariables = function(selection, classCheck) {
+
+  var startNode = selection.anchorNode; // the text type Node that the beginning of the selection was in
+  var startNodeText = startNode.textContent; // the actual textual body of the startNode - removes all html element tags contained
+  var startNodeTextEndIndex = startNodeText.toString().length;
+  startParentID = startNode.parentElement.id;
+  var startParentClass = startNode.parentElement.className;
+
+  var nodeLocationStart = selection.anchorOffset; //index from within startNode text where selection starts
+  var nodeLocationEnd = selection.focusOffset; //index from within endNode text where selection ends
+
+  var endNode = selection.focusNode; //the text type Node that end of the selection was in 
+  var endNodeText = endNode.textContent;
+  var endParentID = endNode.parentElement.id; //the ID of the element type Node that the text ends in
+
+  outerElementTextIDstring = "#" + startParentID; //will be encoded URI of API?
+
+  if (classCheck.includes('opentranscriptionChildrenPopup')) { 
+    initialiseOldTextPopovers(outerElementTextIDstring);
+  }
+  else if (classCheck.includes('opentranslationChildrenPopup')) { 
+    $('.opentranslationChildrenPopup').popover('show');
+  }     
+  else if (startParentID != endParentID) {
+    alert("you can't select across existing fragments' borders sorry");
+  }
+  else {
+
+    newNodeInsertID = Math.random().toString().substring(2);
+    var newSpan = "<a class='" + newSpanClass(startParentClass) + "' id='" + newNodeInsertID + "' >" + selection + "</a>";
+    var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
+
+    ///CONTENT BEFORE HIGHLIGHT IN THE TEXT TYPE NODE
+    var previousSpanContent = startNodeText.slice(0, nodeLocationStart);
+
+    //CONTENT BEFORE HIGHLIGHT IN THE ELEMENT TYPE NODE
+    var previousSpan = startNode.previousElementSibling; //returns null if none i.e. this text node is first node in element node
+    var outerElementStartContent = setOESC(outerElementHTML, previousSpanContent, previousSpan);
+
+    ///CONTENT AFTER HIGHLIGHT IN THE TEXT TYPE NODE
+    var nextSpanContent;
+    if (endNode == startNode) { nextSpanContent = startNodeText.slice(nodeLocationEnd, startNodeTextEndIndex)}
+    else {nextSpanContent = endNodeText.slice(0, nodeLocationEnd)};
+
+    ///CONTENT AFTER HIGHLIGHT IN ELEMENT TYPE NODE
+    var nextSpan = endNode.nextElementSibling; //returns null if none i.e. this text node is the last in the element node
+    var outerElementEndContent = setOEEC(outerElementHTML, nextSpanContent, nextSpan );
+
+    newContent = outerElementStartContent + newSpan + outerElementEndContent;
+    textSelectedFragment = strangeTrimmingFunction(selection);
+
+    initialiseNewTextPopovers(outerElementTextIDstring, startParentID);
+
+  };
+};
+
+///SELECTION PROCESS
+$('#page_body').on("mouseup", '.content-area', function(event) {
+
+  var selection = getSelected(); 
+  var classCheck = selection.anchorNode.parentElement.className;
+
+  if (classCheck.includes('openTranscriptionMenuOld')) { //if it is a popover within the selection rather than the text itself
+
+    textSelectedID = startParentID;
+    if (  !isUseless($(outerElementTextIDstring).parent().attr('id')) ){
+      textSelectedParent = transcriptionURL + $(outerElementTextIDstring).parent().attr('id'); 
+    };
+    textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
+    checkEditorsOpen("text", "transcription");
+    $(outerElementTextIDstring).popover('hide'); ////
+
+  }   
+  else if (classCheck.includes('popover-title')) { 
+    $(outerElementTextIDstring).popover('hide'); ///
+  } 
+  else {
+    setNewTextVariables(selection, classCheck);
+  };
 });
+
 
 /////maybe change to be more specific to the drawing?
 $('#imageViewer').popover({ 
   trigger: 'manual',
   placement: 'top',
   html : true,
-  title: " ",
+  title: closeButtonHTML,
   content: function() {
     return $('#popupLinkVectorMenu').html();
   }
@@ -958,7 +1001,7 @@ $('#map').popover({
   trigger: 'manual',
   placement: 'top',
   html : true,
-  title: "  ",
+  title: closeButtonHTML,
   content: function() {
     return $('#popupVectorParentMenu').html();
   }
@@ -991,14 +1034,20 @@ $('#page_body').on("click", ".textEditorBox", function(event){
 */
 $('#page_body').on("mouseover", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
+  $(thisEditor).find(".popupBoxHandlebar").css("background-color", "#FFFF00");
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
   if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, "#FFFF00");  };
+  var thisSpan = "#"+fieldMatching(editorsOpen, "editor", thisEditor).tSelectedID;
+  if (!isUseless(thisSpan)) {  highlightSpanChosen(thisSpan, "#FFFF00");  };
 });
 
 $('#page_body').on("mouseout", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
+  $(thisEditor).find(".popupBoxHandlebar").css("background-color", "#03f");
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
   if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, "#03f");  };
+  var thisSpan = "#"+fieldMatching(editorsOpen, "editor", thisEditor).tSelectedID;
+  if (!isUseless(thisSpan)) {  highlightSpanChosen(thisSpan, "transparent");  };
 });
 
 $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
@@ -1011,6 +1060,10 @@ $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
 $('#page_body').on("click", ".closePopupBtn", function(){
   var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
   closeEditorMenu(thisEditor);
+});
+
+$('#page_body').on("click", ".closePopoverMenuBtn", function(){
+  $(event.target).closest(".popover").popover("hide"); ///////
 });
 
 
@@ -1043,42 +1096,6 @@ $('#page_body').on("click", '.votingUpButton', function(event) {
 
 
 //////TRANSCRIPTIONS
-/*
-$('.opentranscriptionChildrenPopup').popover({ 
-  trigger: 'manual', //////
-  placement: 'top',
-  html : true,
-  title: "  ",
-  content: function() {
-    return $('#popupTranscriptionChildrenMenu').html();
-  }
-});
 
-$('.opentranscriptionChildrenPopup').on("shown.bs.popover", function(event) {
-
-  $('#page_body').on("click", function(event) {
-    if ($(event.target).hasClass("popupAnnoMenu") == false) {
-      $('.opentranscriptionChildrenPopup').popover("hide");
-    }
-  });
-
-  $('.openTranscriptionMenuOld').on("click", function(event) {
-
-    textSelectedID = startParentID;
-    if (  !isUseless($(outerElementTextIDstring).parent().attr('id')) ){
-      textSelectedParent = findBaseURL() + $(outerElementTextIDstring).parent().attr('id'); 
-    };
-    textSelectedHash = textSelectedParent.concat("#"+textSelectedID);
-    alert("this is how we select");
-    checkEditorsOpen("text", "transcription");
-    $('.opentranscriptionChildrenPopup').popover('hide');
-  });
-
-  $('.closeThePopover').on("click", function(event){
-    $('.opentranscriptionChildrenPopup').popover("hide"); /////is this working?
-  });
-
-});
-*/
 ///////TRANSLATIONS
 
