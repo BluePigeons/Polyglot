@@ -33,6 +33,10 @@ var targetSelected; //array
 var targetType = ""; 
 var childrenArray;
 
+///[editor, vector, span] colours
+var highlightColoursArray = ["#FFFF00","#FFFF00","#FFFF00"];
+var defaultColoursArray = ["#03f","#03f","transparent"]; 
+
 var editorsOpen = []; //those targets currently open in editors
 var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
 var findingcookies = document.cookie;
@@ -220,17 +224,16 @@ var lookupTargetChildren = function(target, baseURL) {
   return childTexts;
 };
 
-var updateVectorSelection = function(vectorURL, vectorParent) {
+var updateVectorSelection = function(vectorURL) {
 
-  var textData = {target: {id: vectorURL, format: "SVG"}};
-  var vectorData = {parent: vectorParent};
-  vectorData[textTypeSelected] = textSelected;
+  var textData = {target: [{id: vectorURL, format: "SVG"}]};
   selectingVector.forEach(function(child){
-    updateAnno(child.body.id, textData);
+    alert("the text to be updated is "+child[0].body.id);
+    updateAnno(child[0].body.id, textData);
   });
-  updateAnno(vectorURL, vectorData);
   selectingVector = false;
-  alert("trying to update vectors");
+
+  //////add to editors open
 
 };
 
@@ -444,13 +447,15 @@ var openEditorMenu = function() {
 
 };
 
+var resetVectorHighlight = function(thisEditor) {
+  var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected; 
+  if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, '#03f'); };
+};
+
 var removeEditorChild = function(thisEditor) {
   var theParent = document.getElementById("ViewerBox1");
   var toRemove = document.getElementById(thisEditor);
   theParent.removeChild(toRemove);
-  var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected; ////undefined???
-  alert(thisVector);
-  if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, '#03f'); };
   if (  isUseless(toRemove) != true ) {  return thisEditor;  };
 };
 
@@ -462,6 +467,7 @@ var removeEditorsOpen = function(popupIDstring) {
 
 var closeEditorMenu = function(thisEditor) {
   if (thisEditor.includes("#")) { thisEditor = thisEditor.split("#")[0] };
+  resetVectorHighlight("#"+thisEditor);
   removeEditorsOpen(thisEditor);
   return removeEditorChild(thisEditor);
 };
@@ -600,16 +606,28 @@ var highlightVectorChosen = function(chosenVector, colourChange) {
   });
 };
 
-var highlightEditorsChosen = function(chosenVector, colourChange) {
-  editorsOpen.forEach(function(thisEditor){
-    if (thisEditor.vSelected == chosenVector) {
-      $(thisEditor.editor).find(".popupBoxHandlebar").css("background-color", colourChange);
-    };
-  });
+var highlightEditorsChosen = function(chosenEditor, colourChange) {
+  if (!chosenEditor.includes("#")) {  chosenEditor = "#"+chosenEditor; }
+  $(chosenEditor).find(".popupBoxHandlebar").css("background-color", colourChange);
 };
 
 var highlightSpanChosen = function(chosenSpan, colourChange) {
+  if (!chosenSpan.includes("#")) {  chosenSpan = "#"+chosenSpan; }
   $(chosenSpan).css("background-color", colourChange);
+};
+
+var checkingItself = function(searchField, searchFieldValue, theType) {
+  if (theType == searchField) { return false }
+  else {  return fieldMatching(editorsOpen, searchField, searchFieldValue)[theType] };
+};
+
+var findAndHighlight = function(searchField, searchFieldValue, highlightColours) {
+  var thisEditor = checkingItself(searchField, searchFieldValue, "editor");
+  if (!isUseless(thisEditor)) {  highlightEditorsChosen(thisEditor, highlightColours[0]);  };
+  var thisVector = checkingItself(searchField, searchFieldValue, "vSelected");
+  if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, highlightColours[1]);  };
+  var thisSpan = checkingItself(searchField, searchFieldValue, "tSelectedID");
+  if (!isUseless(thisSpan)) {  highlightSpanChosen(thisSpan, highlightColours[2]);  };
 };
 
 var popupVectorMenuHTML = function() {
@@ -641,7 +659,7 @@ var controlOptions = {
 };
 
 var popupVectorMenu = L.popup()
-    .setContent(popupVectorMenuHTML());
+    .setContent(popupVectorMenuHTML()); /////
 //to track when editing
 var currentlyEditing = false;
 var currentlyDeleting = false;
@@ -702,6 +720,10 @@ map.on('draw:created', function(evt) {
   }
   else {
     var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata, parent: vectorOverlapping };
+    if (selectingVector != false) { 
+      alert("the text type is "+textTypeSelected+" and it is "+textSelected)
+      targetData[textTypeSelected] = textSelected;  
+    }
     $.ajax({
       type: "POST",
       url: vectorURL,
@@ -713,10 +735,8 @@ map.on('draw:created', function(evt) {
         }
     });
     layer._leaflet_id = vectorSelected;
-    layer.bindPopup(popupVectorMenu).openPopup();
-    if (selectingVector != false) {  
-      updateVectorSelection(vectorSelected, vectorOverlapping);  
-    };
+    if (selectingVector == false) { layer.bindPopup(popupVectorMenu).openPopup(); }
+    else {  updateVectorSelection(vectorSelected, vectorOverlapping); };
   };
 
 });
@@ -733,11 +753,11 @@ allDrawnItems.on('click', function(vec) {
 
 allDrawnItems.on('mouseover', function(vec) {
   vec.layer.setStyle({color: "#FFFF00"});
-  highlightEditorsChosen(vec.layer._leaflet_id, "#FFFF00");
+  findAndHighlight("vSelected", vec.layer._leaflet_id, ["#FFFF00","#FFFF00","#FFFF00"]);
 });
 allDrawnItems.on('mouseout', function(vec) {
   vec.layer.setStyle({color: "#03f"});
-  highlightEditorsChosen(vec.layer._leaflet_id, "#03f");
+  findAndHighlight("vSelected", vec.layer._leaflet_id, ["#03f","#03f","transparent"]);
 });
 
 map.on('draw:deletestart', function(){
@@ -1032,24 +1052,45 @@ $('#page_body').on("click", ".textEditorBox", function(event){
 
 });
 */
+
 $('#page_body').on("mouseover", ".textEditorBox", function(event){
-  /////if it is within a span with class ".openTranscriptionChildrenPopup" or translation then highlight span otherwise the whole editor
-  //////keep highlighting if on the menu for the vector??
+
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
-  $(thisEditor).find(".popupBoxHandlebar").css("background-color", "#FFFF00");
-  var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
-  if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, "#FFFF00");  };
-  var thisSpan = "#"+fieldMatching(editorsOpen, "editor", thisEditor).tSelectedID;
-  if (!isUseless(thisSpan)) {  highlightSpanChosen(thisSpan, "#FFFF00");  };
+  //////////
+  $(thisEditor).find(".popupBoxHandlebar").css("background-color", highlightColoursArray[0]);
+  findAndHighlight("editor", thisEditor, highlightColoursArray);
+  //////////
+  $(thisEditor).on("mouseenter", ".opentranscriptionChildrenPopup", function(event){
+    $(thisEditor).find(".popupBoxHandlebar").css("background-color", defaultColoursArray[0]);
+    findAndHighlight("editor", thisEditor, defaultColoursArray);
+
+    var thisSpan = $(event.target).attr("id");
+    $("#"+thisSpan).css("background-color", highlightColoursArray[2]);
+    findAndHighlight("tSelectedID", thisSpan, highlightColoursArray);
+  });
+
+  $(thisEditor).on("mouseleave", ".opentranscriptionChildrenPopup", function(event){
+    var thisSpan = $(event.target).attr("id");
+    $("#"+thisSpan).css("background-color", defaultColoursArray[2]);
+    findAndHighlight("tSelectedID", thisSpan, defaultColoursArray);
+  });  
+
 });
 
 $('#page_body').on("mouseout", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
-  $(thisEditor).find(".popupBoxHandlebar").css("background-color", "#03f");
-  var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected;
-  if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, "#03f");  };
-  var thisSpan = "#"+fieldMatching(editorsOpen, "editor", thisEditor).tSelectedID;
-  if (!isUseless(thisSpan)) {  highlightSpanChosen(thisSpan, "transparent");  };
+  $(thisEditor).find(".popupBoxHandlebar").css("background-color", defaultColoursArray[0]);
+  findAndHighlight("editor", thisEditor, defaultColoursArray);
+});
+
+$('#page_body').on("mouseover", ".leaflet-popup", function(event){
+  highlightVectorChosen(vectorSelected, highlightColoursArray[1]);
+  findAndHighlight("vSelected", vectorSelected, highlightColoursArray);
+});
+
+$('#page_body').on("mouseover", ".leaflet-popup", function(event){
+  highlightVectorChosen(vectorSelected, defaultColoursArray[1]);
+  findAndHighlight("vSelected", vectorSelected, defaultColoursArray);
 });
 
 $('#page_body').on("click", '.addAnnotationSubmit', function(event) {

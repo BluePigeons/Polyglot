@@ -333,7 +333,7 @@ exports.updateOne = function(req, res) {
         if (err) {res.send(err)};
 
         var jsonFieldPush = function(bodyDoc, theField) {
-            if (isUseless(bodyDoc[theField]) == false ) {
+            if (!isUseless(bodyDoc[theField])) {
                 bodyDoc[theField].forEach(function(subdoc){
                     transcription[theField].addToSet(subdoc);
                 });
