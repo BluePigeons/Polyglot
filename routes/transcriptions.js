@@ -279,9 +279,7 @@ exports.addNew = function(req, res) {
 
     var jsonFieldPush = function(bodyDoc, theField) {
         if ( isUseless(bodyDoc[theField]) == false ) {
-            bodyDoc[theField].forEach(function(subdoc){
-                transcription[theField].addToSet(subdoc);
-            });
+            bodyDoc[theField].forEach(function(subdoc){    transcription[theField].addToSet(subdoc);    });
         };
     };
 

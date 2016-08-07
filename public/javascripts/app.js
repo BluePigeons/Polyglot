@@ -228,12 +228,13 @@ var updateVectorSelection = function(vectorURL) {
 
   var textData = {target: [{id: vectorURL, format: "SVG"}]};
   selectingVector.forEach(function(child){
-    alert("the text to be updated is "+child[0].body.id);
     updateAnno(child[0].body.id, textData);
   });
+  var editorID = fieldMatching(editorsOpen, "tSelectedParent", selectingVector[0][0].parent).editor;
   selectingVector = false;
 
-  //////add to editors open
+  closeEditorMenu(editorID);
+  openEditorMenu(); 
 
 };
 
@@ -331,7 +332,7 @@ var buildCarousel = function(existingChildren, popupIDstring, extraHTML) {
 
 var highlightTopVoted = function() {
   var theTextString = "#" + textSelected.slice(findBaseURL().length, textSelected.length);
-  $(theTextString).parent().parent().parent().addClass("active"); //ensures it is the first slide people see
+  $(theTextString).closest(".item").addClass("active"); //ensures it is the first slide people see
   $(theTextString).addClass("currentTop");
 ///////////choose better styling later!!!!!///////
   $(theTextString).css("color", "grey");
@@ -466,7 +467,7 @@ var removeEditorsOpen = function(popupIDstring) {
 };
 
 var closeEditorMenu = function(thisEditor) {
-  if (thisEditor.includes("#")) { thisEditor = thisEditor.split("#")[0] };
+  if (thisEditor.includes("#")) { thisEditor = thisEditor.split("#")[1]; };
   resetVectorHighlight("#"+thisEditor);
   removeEditorsOpen(thisEditor);
   return removeEditorChild(thisEditor);
@@ -550,6 +551,7 @@ var openNewEditor = function(fromType) {
 
   if (fromType == "vector") {
     textSelected = checkFor(vectorSelected, textTypeSelected); //return the api url NOT json file
+    alert("we have found the text selected to be "+textSelected);
     textSelectedParent = checkFor(textSelected, "parent");
     if ( textSelected != false ) { setTextSelectedID(textSelected) };
   }
@@ -721,9 +723,10 @@ map.on('draw:created', function(evt) {
   else {
     var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata, parent: vectorOverlapping };
     if (selectingVector != false) { 
-      alert("the text type is "+textTypeSelected+" and it is "+textSelected)
-      targetData[textTypeSelected] = textSelected;  
-    }
+      var theTopText = findHighestRankingChild(textSelectedParent, textSelectedID);
+      targetData[textTypeSelected] = theTopText;  
+    };
+    alert(targetData.transcription);
     $.ajax({
       type: "POST",
       url: vectorURL,
@@ -736,7 +739,7 @@ map.on('draw:created', function(evt) {
     });
     layer._leaflet_id = vectorSelected;
     if (selectingVector == false) { layer.bindPopup(popupVectorMenu).openPopup(); }
-    else {  updateVectorSelection(vectorSelected, vectorOverlapping); };
+    else {  updateVectorSelection(vectorSelected); };
   };
 
 });

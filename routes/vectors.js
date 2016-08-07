@@ -13,6 +13,44 @@ var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
+var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
+
+var isUseless = function(something) {
+  if (rejectionOptions.has(something) || rejectionOptions.has(typeof something)) {  return true;  }
+  else {  return false;  };
+};
+
+var asyncPush = function(addArray, oldArray) {
+    var theArray = oldArray;
+    var mergedArray = function() {
+        addArray.forEach(function(addDoc){
+            theArray.push(addDoc);
+        });
+        if (theArray.length = (oldArray.length + addArray.length)) {
+            return theArray;
+        };
+    };
+    return mergedArray();
+};
+
+var fieldMatching = function(searchArray, field, fieldValue) {
+  if (isUseless(searchArray) || isUseless(field) || isUseless(fieldValue)) {  return false  }
+  else {
+    var theMatch = false; 
+    searchArray.forEach(function(childDoc){
+      if (childDoc[field] == fieldValue) {
+          theMatch = childDoc;
+      };
+    });
+    return theMatch;
+  };
+};
+
+var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
+    if (isUseless(bodyDoc[bodyField]) == false ) {    return bodyDoc[bodyField];    }
+    else {    return docField;    };
+};
+
 //////IMAGE HANDLING
 
 var generateIIIFregion = function(coordinates) {
@@ -126,6 +164,13 @@ exports.addNew = function(req, res) {
     
     var vector = new newVector(); 
 
+    var jsonFieldPush = function(bodyDoc, theField) {
+        if ( !isUseless(bodyDoc[theField])) {
+            bodyDoc[theField].forEach(function(subdoc){    vector[theField].addToSet(subdoc);    });
+        };
+    };
+
+    ////Coordinates
     ATCarray = 0;
     req.body.geometry.coordinates[0].forEach(function(coordinatesPair){
         vector.notFeature.notGeometry.notCoordinates.push([]);
@@ -154,21 +199,17 @@ exports.addNew = function(req, res) {
     vector.target.push({
         "id": IIIFsection,
         "language": req.body.target.language,
-
 //need to find official format name for IIIF region
-
         "format": "jpg"
     });
 
     var newVectorID = vector.id;
     var newVectorURL = vectorURL.concat(newVectorID);
-
     vector.body.id = newVectorURL;
-//    vector.'@id' = newVectorURL;
-
-    if (typeof req.body.metadata != 'undefined' || req.body.metadata != null) {
-        vector.metadata.push(req.body.metadata);
-    };
+    jsonFieldPush(req.body, "metadata");
+    vector.parent = jsonFieldEqual(vector.parent, req.body, "parent");
+    vector.translation = jsonFieldEqual(vector.translation, req.body, "translation");
+    vector.transcription = jsonFieldEqual(vector.transcription, req.body, "transcription");
 
     vector.save(function(err, vector) {
         if (err) {
