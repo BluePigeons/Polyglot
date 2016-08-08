@@ -1,0 +1,153 @@
+<!doctype html>
+
+<html>
+
+<head>
+
+<!-- Meta data -->
+
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<!-- Stylesheets -->
+
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+
+    <link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.css" />
+
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+
+	<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+
+<!-- Javascript libraries -->
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+    <script src="javascripts/leaflet-iiif.js"></script>
+
+	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
+
+
+</head>
+
+
+
+<body>
+
+<!--The Page Content-->
+<div data-role="main" class="ui-content">
+<div id="main page" class="container">
+
+<div class="row">
+	<div id="websiteInfo" class="col-md-12">
+		<a href="/" data-ajax="false" ><h1>THE POLYGLOT PROJECT</h1></a>
+		<p>Building some awesomeness in the form of crowd sourcing transcription and translation</p><br>
+	</div>
+
+</div>
+
+<div class="row" id="page_body">
+	<div class="col-md-12">
+
+		<div class="displayCarousel carousel slide" data-interval="false">
+
+			<div class="displayCarouselWrapper carousel-inner" role="listbox">
+
+				<!--Intro-->
+			    <div class="item active ">
+			    	<p>Welcome to the start of your annotating adventure! Wooooo!</p>
+			    </div>
+
+			    <!--Find Text-->
+			    <div class="item ">
+			    	<div id="findTextMap"></div>
+			    </div>
+
+			    <!--Add New Transcription-->
+			    <div class="item ">
+			    	<div id="addNewMap"></div>
+			    	<!--test if within coordinates and alert too large or too small or nowhere near-->
+			    </div>
+
+				<!--Open Existing Transcription and Edit a Selection-->
+			    <div class="item ">
+			    	<div id="changeSelectionMap"></div>
+			    	<!--Select any bit you disagree with-->
+			    	<!--If they select translation, link vector, or voting then display message to hold up and stick with transcription-->
+			    	<!--Open and submit alternative transcription-->
+			    </div>
+
+				<!--Voting-->
+			    <div class="item ">
+			    	<div id="votingMap"></div>
+			    	<!--Explain that it hasn't replaced it and explain that's because they both have no votes-->
+			    	<!--Open the existing selection and open to view the two different versions and upvote yours-->
+			    	<!--If they select new fragment, translation, link vector, or vote the existing one then display message to hold up -->
+			    </div>
+
+				<!--Link Marker-->
+			    <div class="item ">
+			    	<div id="linkMarkerMap"></div>
+			    	<!--Notice that it has now replaced in the parent text but where on the image is this section?-->
+			    	<!--preopen the section and link marker-->
+			    	<!--If they select new fragment, translation, or voting then display message to hold up -->
+			    </div>
+
+				<!--An unknown document-->
+			    <div class="item ">
+			    	<div id="crazyTextMap"></div>
+			    	<!--Come across and image you cannot make heads or tails of? No worries!!-->
+			    	<!--You can skip the image of a cave painting-->
+			    	<!--If they do anything but skip then alert-->
+			    </div>
+
+				<!--Filters-->
+			    <div class="item ">
+			    	<div id="filtersMap"></div>
+			    	<!--You can help yourself avoid difficult images by using the filters at the top and on your profile so that the selection coming up is what you want-->
+			    	<!--Cannot always get it right though!-->
+			    	<!--Select some filters and click next-->
+			    </div>
+
+				<!--The End-->
+			    <div class="item ">
+			    	<!--Well done! All finished!-->
+			    	<!--Exit Tutorial-->
+			    </div>
+			</div>
+
+			<!-- Left and right controls -->
+			<a class="left carousel-control" href=".displayCarousel" role="button" data-slide="prev">
+			    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+			    <span class="sr-only">Previous</span>
+			</a>
+			<a class="right carousel-control" href=".displayCarousel" role="button" data-slide="next">
+			    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+			    <span class="sr-only">Next</span>
+			</a>
+
+		</div>
+	</div>
+
+</div>
+
+</div>
+
+<div id="popupBoxes">
+
+<!--- popovers here -->
+
+</div>
+</div>
+
+<script src="javascripts/scrolling.js"></script>
+
+</body>
+
+</html>

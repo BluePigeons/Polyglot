@@ -40,6 +40,7 @@ var defaultColoursArray = ["#03f","#03f","transparent"];
 var editorsOpen = []; //those targets currently open in editors
 var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
 var findingcookies = document.cookie;
+alert(JSON.stringify(findingcookies));
 
 ///// TEXT SELECTION
 
@@ -233,6 +234,8 @@ var updateVectorSelection = function(vectorURL) {
   var editorID = fieldMatching(editorsOpen, "tSelectedParent", selectingVector[0][0].parent).editor;
   selectingVector = false;
 
+  /////remove linkVector button
+
   closeEditorMenu(editorID);
   openEditorMenu(); 
 
@@ -296,6 +299,7 @@ var findHighestRankingChild = function(parent, locationID) {
 
 var loadImage = function() {
   imageSelected = searchCookie("imageviewing=");
+  alert(imageSelected);
   var theImage = getTargetJSON(imageSelected);
   imageSelectedFormats = theImage.formats;
   imageSelectedMetadata = theImage.metadata;
@@ -551,7 +555,6 @@ var openNewEditor = function(fromType) {
 
   if (fromType == "vector") {
     textSelected = checkFor(vectorSelected, textTypeSelected); //return the api url NOT json file
-    alert("we have found the text selected to be "+textSelected);
     textSelectedParent = checkFor(textSelected, "parent");
     if ( textSelected != false ) { setTextSelectedID(textSelected) };
   }
@@ -726,7 +729,6 @@ map.on('draw:created', function(evt) {
       var theTopText = findHighestRankingChild(textSelectedParent, textSelectedID);
       targetData[textTypeSelected] = theTopText;  
     };
-    alert(targetData.transcription);
     $.ajax({
       type: "POST",
       url: vectorURL,

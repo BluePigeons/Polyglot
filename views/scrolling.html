@@ -1,0 +1,95 @@
+<!doctype html>
+
+<html>
+
+<head>
+
+<!-- Meta data -->
+
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<!-- Stylesheets -->
+
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+
+    <link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.css" />
+
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+
+	<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+
+<!-- Javascript libraries -->
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+    <script src="javascripts/leaflet-iiif.js"></script>
+
+	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
+
+
+</head>
+
+
+
+<body>
+
+<!--The Page Content-->
+<div data-role="main" class="ui-content">
+<div id="main page" class="container">
+
+<div class="row">
+	<div id="websiteInfo" class="col-md-12">
+		<a href="/" data-ajax="false" ><h1>THE POLYGLOT PROJECT</h1></a>
+		<p>Building some awesomeness in the form of crowd sourcing transcription and translation</p><br>
+	</div>
+
+</div>
+
+<div class="row" id="page_body">
+
+	<div class="displayCarousel carousel slide" data-interval="false">
+
+		<!-- Wrapper for slides -->
+		<div class="displayCarouselWrapper carousel-inner" role="listbox">
+
+		    <!--appended slides go here-->
+		    <div class="item iframe-slide active"><p>EXPERIMENT!!</p></div>
+		    <div class='item iframe-slide'><iframe src='/theimage'></iframe></div>
+
+		</div>
+
+		  <!-- Left and right controls -->
+		<a class="left carousel-control" href=".displayCarousel" role="button" data-slide="prev">
+		    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+		    <span class="sr-only">Previous</span>
+		</a>
+		<a class="right carousel-control" href=".displayCarousel" role="button" data-slide="next">
+		    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+		    <span class="sr-only">Next</span>
+		</a>
+
+	</div>
+
+</div>
+
+</div>
+
+<div id="popupBoxes">
+
+<!--- popovers here -->
+
+</div>
+</div>
+
+<script src="javascripts/scrolling.js"></script>
+
+</body>
+
+</html>

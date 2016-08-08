@@ -88,6 +88,14 @@ app.get('/theimage', function(req, res) {
     res.redirect("/theimage.html"); 
 });
 
+app.get('/scrolling', function(req, res) {
+    res.redirect("/scrolling.html"); 
+});
+
+app.get('/beginnertutorial', function(req, res) {
+    res.redirect("/beginnertutorial.html"); 
+});
+
 /////////////////API ROUTES
 
 //PARAMETERS

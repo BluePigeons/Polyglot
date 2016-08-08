@@ -20,6 +20,17 @@
 	
 
 }
+.iframe-slide {
+	width: 90%;
+	height: 1000px;
+	margin: 50px;
+}
+
+iframe {
+	width: 90%;
+	height: 80%;
+	margin: 20px;
+}
 
 .textEditorPopup {
 	height: 500px;
@@ -46,6 +57,10 @@
 
 .pTextDisplay{
 	margin: 50px;
+}
+
+.editorTitle{
+	
 }
 
 .carousel-control.left, .carousel-control.right {
