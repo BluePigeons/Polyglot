@@ -9,19 +9,23 @@ var popupVectorMenuHTML = function() {
   return totalHTML;
 };
 
+var preLoadVector = {
+  ////some coordinates etc here
+};
+
 ///the maps
-var findTextMap;
-var addNewMap;
-var changeSelectionMap;
-var votingMap;
-var linkMarkerMap;
-var crazyTextMap;
-var filtersMap;
+var findTextMap = "findTextMap";
+var addNewMap = "addNewMap";
+var changeSelectionMap = "changeSelectionMap";
+var votingMap = "votingMap";
+var linkMarkerMap = "linkMarkerMap";
+var crazyTextMap = "crazyTextMap";
+var filtersMap = "filtersMap";
 
 var mapArray = [findTextMap,addNewMap,changeSelectionMap,votingMap,linkMarkerMap,crazyTextMap,filtersMap];
 
 ///the images
-var genericBaseLayer;/////////////FIND GOOD EXAMPLE IMAGES!!!
+var genericBaseLayer = "https://stacks.stanford.edu/image/iiif/cv770rd9515%2F0767_23A_SM/info.json";/////////////FIND GOOD EXAMPLE IMAGES!!!
 var crazyTextBaseLayer;/////////////
 
 var allDrawnItems = new L.FeatureGroup();
@@ -39,7 +43,7 @@ var popupVectorMenu = L.popup()
     .setContent(popupVectorMenuHTML()); 
 
 var setMapSettings = function(themap, theImage) {
-  var mapID = themap.toString();
+  var mapID = themap;
   themap = L.map(mapID);
   var baseLayer;
   themap.options.crs = L.CRS.Simple;

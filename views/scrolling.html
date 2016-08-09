@@ -51,6 +51,51 @@
 	</div>
 
 </div>
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Filters
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li>
+		<div class="form-group filter-form">
+			<div class="row filter">
+				<div class="col-md-4"><span>Languages  </span> <span> <input type="text"></span></div>
+				<div class="col-md-8"><span>Dates</span><span>From  </span><input type="number"><span> To </span><input type="number" max="2016" ></div>
+			</div>
+
+			<div class="row filter difficulties">
+
+				<div class="col-md-4">
+					<span>Transcription Difficulty  </span>
+					<span><div class="form-group">
+					  <select class="form-control" id="sel1">
+					    <option>Easy</option>
+					    <option>Medium</option>
+					    <option>Difficult</option>
+					  </select>
+					</div></span>
+				</div>
+
+				<div class="col-md-4">
+					<span>Translation Difficulty</span>
+					<span><div class="form-group">
+					  <select class="form-control" id="sel1">
+					    <option>Easy</option>
+					    <option>Medium</option>
+					    <option>Difficult</option>
+					  </select>
+					</div></span>
+				</div>
+
+				<div class="col-md-4"><span>Search  </span><input type="search"><button class=""><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></div>
+
+			</div>
+		</div>	
+
+    </li>
+  </ul>
+</div>
 
 <div class="row" id="page_body">
 
@@ -66,7 +111,7 @@
 		</div>
 
 		  <!-- Left and right controls -->
-		<a class="left carousel-control" href=".displayCarousel" role="button" data-slide="prev">
+		<a class="left carousel-control openImage" href=".displayCarousel" role="button" data-slide="prev">
 		    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
 		    <span class="sr-only">Previous</span>
 		</a>
@@ -88,6 +133,7 @@
 </div>
 </div>
 
+<!-- exported app functions here-->
 <script src="javascripts/scrolling.js"></script>
 
 </body>

@@ -67,12 +67,13 @@
 			    <!--Find Text-->
 			    <div class="item ">
 			    	<div id="findTextMap"></div>
+			    	<!--test if within coordinates and alert too large or too small or nowhere near-->
 			    </div>
 
 			    <!--Add New Transcription-->
 			    <div class="item ">
 			    	<div id="addNewMap"></div>
-			    	<!--test if within coordinates and alert too large or too small or nowhere near-->
+			    	<!--add new transcription-->
 			    </div>
 
 				<!--Open Existing Transcription and Edit a Selection-->
@@ -142,6 +143,136 @@
 <div id="popupBoxes">
 
 <!--- popovers here -->
+
+	<!-- ADD NEW EDITOR BOX -->
+	<div id="addnewEditor" class="textEditorBox">
+		<div class="popupBoxHandlebar"><span class="closePopupBtn glyphicon glyphicon-remove"></span></div>
+		<div data-role="main" class="textEditorMainBox ui-content">
+		  	<h2 class="editorTitle"></h2>
+			<div class="addneweditorCarousel carousel slide" data-interval="false">
+				<!-- Wrapper for slides -->
+				<div class="addneweditorCarouselWrapper carousel-inner" role="listbox">
+				    <div class='item addNewItem'> 
+				    	<div class='selectfrgContainer'> 
+				    		<h3>Add New</h3> 
+				    		<textarea class='newAnnotation' rows='5'></textarea><br>
+				    		<button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   
+				    	</div>  
+				    </div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- SELECT FRAG EDITOR BOX -->
+	<div id="selectfragEditor" class="textEditorBox">
+		<div class="popupBoxHandlebar"><span class="closePopupBtn glyphicon glyphicon-remove"></span></div>
+		<div data-role="main" class="textEditorMainBox ui-content">
+		  	<h2 class="editorTitle"></h2>
+			<div class="selectfrageditorCarousel carousel slide" data-interval="false">
+				<div class="selectfrageditorCarouselWrapper carousel-inner" role="listbox">
+					<div class='item active pTextDisplayItem' > 
+						<div class='pTextDisplay'> 
+							<div class='well well-lg'> 
+								<p class='content-area' title=' '>
+									Neutra iPhone heirloom flannel fixie. Godard disrupt umami lo-fi, migas artisan skateboard cardigan gastropub retro mixtape echo park authentic. Hella trust fund gastropub, everyday carry meditation typewriter bicycle rights neutra mumblecore thundercats hashtag biodiesel.
+								</p>
+							</div>
+						</div>
+					</div>
+				    <div class='item addNewItem'> 
+				    	<div class='addNewContainer'> 
+				    		<h3>Add New</h3> 
+				    		<textarea class='newAnnotation' rows='5'></textarea><br>
+				    		<button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   
+				    	</div>  
+				    </div>
+				</div>
+				<a class="left carousel-control" role="button" data-slide="prev">
+				    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+				    <span class="sr-only">Previous</span>
+				</a>
+				<a class="right carousel-control" role="button" data-slide="next">
+				    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+				    <span class="sr-only">Next</span>
+				</a>
+			</div>
+			<button type="button" class="btn btn-success addNewBtn">ADD NEW</button>
+		</div>
+	</div>
+
+	<!-- ADD ALTERNATIVE EDITOR BOX -->
+	<div id="addalternativeEditor" class="textEditorBox">
+		<div class="popupBoxHandlebar"><span class="closePopupBtn glyphicon glyphicon-remove"></span></div>
+		<div data-role="main" class="textEditorMainBox ui-content">
+		  	<h2 class="editorTitle"></h2>
+			<div class="addalternativeeditorCarousel carousel slide" data-interval="false">
+				<div class="addalternativeeditorCarouselWrapper carousel-inner" role="listbox">
+					<div class='item active pTextDisplayItem' > 
+						<div class='pTextDisplay'> 
+							<div class='well well-lg'> 
+								<p class='content-area' title=' '>gastropub</p>
+							</div>
+						</div>
+					</div>
+				    <div class='item addNewItem'> 
+				    	<div class='addNewContainer'> 
+				    		<h3>Add New</h3> 
+				    		<textarea class='newAnnotation' rows='5'></textarea><br>
+				    		<button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   
+				    	</div>  
+				    </div>
+				</div>
+				<a class="left carousel-control" role="button" data-slide="prev">
+				    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+				    <span class="sr-only">Previous</span>
+				</a>
+				<a class="right carousel-control" role="button" data-slide="next">
+				    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+				    <span class="sr-only">Next</span>
+				</a>
+			</div>
+			<button type="button" class="btn btn-success addNewBtn">ADD NEW</button>
+		</div>
+	</div>
+
+	<!-- UPDATED FRAG EDITOR BOX -->
+	<div id="updatedfragEditor" class="textEditorBox">
+		<div class="popupBoxHandlebar"><span class="closePopupBtn glyphicon glyphicon-remove"></span></div>
+		<div data-role="main" class="textEditorMainBox ui-content">
+		  	<h2 class="editorTitle"></h2>
+			<div class="updatedfrageditorCarousel carousel slide" data-interval="false">
+				<div class="updatedfrageditorCarouselWrapper carousel-inner" role="listbox">
+					<div class='item active pTextDisplayItem' > 
+						<div class='pTextDisplay'> 
+							<div class='well well-lg'> 
+								<p class='content-area' title=' '>
+									Neutra iPhone heirloom flannel fixie. Godard disrupt umami lo-fi, migas artisan skateboard cardigan gastropub retro mixtape echo park authentic. Hella trust fund winning, everyday carry meditation typewriter bicycle rights neutra mumblecore thundercats hashtag biodiesel.
+								</p>
+							</div>
+						</div>
+					</div>
+				    <div class='item addNewItem'> 
+				    	<div class='addNewContainer'> 
+				    		<h3>Add New</h3> 
+				    		<textarea class='newAnnotation' rows='5'></textarea><br>
+				    		<button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   
+				    	</div>  
+				    </div>
+				</div>
+				<a class="left carousel-control" role="button" data-slide="prev">
+				    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+				    <span class="sr-only">Previous</span>
+				</a>
+				<a class="right carousel-control" role="button" data-slide="next">
+				    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+				    <span class="sr-only">Next</span>
+				</a>
+			</div>
+			<button type="button" class="btn btn-success addNewBtn">ADD NEW</button>
+		</div>
+	</div>
 
 </div>
 </div>

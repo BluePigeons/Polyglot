@@ -40,7 +40,6 @@ var defaultColoursArray = ["#03f","#03f","transparent"];
 var editorsOpen = []; //those targets currently open in editors
 var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
 var findingcookies = document.cookie;
-alert(JSON.stringify(findingcookies));
 
 ///// TEXT SELECTION
 
