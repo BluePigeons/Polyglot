@@ -41,42 +41,16 @@
 	</div>
 
 	<div class="row">
-
-		<div class="col-md-4">
-			<div></div>
-			<a href="/theimage" data-ajax="false" class="openImage" id="http://ids.lib.harvard.edu/ids/iiif/25286610/info.json" >Open to annotate an image</a>
-
+		<div class="col-md-12">
+			<p>About Us</p>
 		</div>
-
-
-		<div  class="col-md-4">
-			<div></div>
-			<a href="/theimage"  data-ajax="false" class="openImage" id='https://stacks.stanford.edu/image/iiif/zf275jj8939%2FMartellus_300ppi_natural_color_panorama_WIP2/info.json' >Or another one</a>
-
-
-		</div>
-
-
-		<div class="col-md-4">
-			<a href="/theimage"  data-ajax="false" class="openImage" id='https://stacks.stanford.edu/image/iiif/cv770rd9515%2F0767_23A_SM/info.json' >Or this one</a>
-		</div>
-
-
 	</div>
 
 	<div class="row">
 		<div class="col-md-12">
-			<a href="/beginnertutorial" data-ajax="false" >Tutorial</a>
-		</div>
-	</div>
-	<div class="row">
-		<div  class="col-md-12">
-			<a href="/scrolling"  data-ajax="false" >Start Game</a>
-		</div>
-	</div>
-	<div class="row">
-		<div  class="col-md-12">
-			<a href="/aboutus"  data-ajax="false" >About Us</a>
+			<p>Edinburgh yaaaay!!</p>
+			<p>GitHub</p>
+			<p>Twitter</p>
 		</div>
 	</div>
 
@@ -86,18 +60,7 @@
 
 <script>
 
-	var currentImage;
-	var currentSite = window.location.href;
 
-	var openImage = function(image) {
-		document.cookie = "imageviewing="+image+"; path=/theimage";
-	};
-
-	$('.openImage').on("click", function(event) {
-	  	event.stopPropagation();
-	  	currentImage = event.target.id;
-	  	openImage(currentImage);
-	});
 
 </script>
 
