@@ -20,9 +20,8 @@ var changeSelectionMap = "changeSelectionMap";
 var votingMap = "votingMap";
 var linkMarkerMap = "linkMarkerMap";
 var crazyTextMap = "crazyTextMap";
-var filtersMap = "filtersMap";
 
-var mapArray = [findTextMap,addNewMap,changeSelectionMap,votingMap,linkMarkerMap,crazyTextMap,filtersMap];
+var mapArray = [findTextMap,addNewMap,changeSelectionMap,votingMap,linkMarkerMap,crazyTextMap];
 
 ///the images
 var genericBaseLayer = "https://stacks.stanford.edu/image/iiif/cv770rd9515%2F0767_23A_SM/info.json";/////////////FIND GOOD EXAMPLE IMAGES!!!
@@ -55,7 +54,7 @@ var setMapSettings = function(themap, theImage) {
   baseLayer = L.tileLayer.iiif(theImage);
   themap.addLayer(baseLayer);
   themap.addLayer(allDrawnItems);
-  new L.Control.Draw(controlOptions).addTo(map);
+  new L.Control.Draw(controlOptions).addTo(themap);
 
   themap.whenReady(function(){
     mapset = true;
@@ -70,54 +69,6 @@ mapArray.forEach(function(mapItem){
 
 ////selection function but only for the one slide area otherwise alerts
 
-var createEditorPopupBox = function() {
-
-  //CREATE POPUP BOX
-  var popupBoxDiv = document.createElement("div");
-  popupBoxDiv.classList.add("textEditorPopup");
-  popupBoxDiv.classList.add("col-md-6");
-  popupBoxDiv.id = "DivTarget-" + Math.random().toString().substring(2);
-  var popupIDstring = "#" + popupBoxDiv.id;
-//need to eventually save HTML as string in JS file but for now cloning
-  var popupTranscriptionTemplate = document.getElementById("theEditor");
-  var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
-  popupBoxDiv.appendChild(newPopupClone);
-
-  var pageBody = document.getElementById("ViewerBox1");
-  pageBody.insertBefore(popupBoxDiv, pageBody.childNodes[0]); 
-
-  var newCarouselID = "Carousel" + Math.random().toString().substring(2);
-  $(popupIDstring).find(".editorCarousel").attr("id", newCarouselID);
-  $(popupIDstring).find(".carousel-control").attr("href", "#" + newCarouselID);
-
-  return popupIDstring;
-
-};
-
-var buildCarousel = function(existingChildren, popupIDstring, extraHTML) {
-
-  var openingHTML = "<div class='item pTextDisplayItem ";
-  var openingHTML2 = "'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
-  var middleHTML = "' class='content-area' title=' '>";
-  var endTextHTML = "</p></div>";
-  var endDivHTML = "</div></div>";
-  var closingHTML = endTextHTML + extraHTML + endDivHTML;
-
-  existingChildren.forEach(function(subarray) {
-
-    var itemText = subarray[0].body.text;
-    var itemID = subarray[0]._id;
-    var itemHTML = openingHTML + itemID + openingHTML2 + itemID + middleHTML + itemText + closingHTML;
-    $(popupIDstring).find(".editorCarouselWrapper").append(itemHTML);
-
-    if ( !isUseless(subarray[1]) )  {
-      var votesUp = subarray[1].votesUp;
-      $("."+itemID).find(".votesUpBadge").find(".badge").html(votesUp); 
-    }; 
-/////////update metadata options with defaults and placeholders???    
-  });
-
-};
 
 ///SELECTION PROCESS
 

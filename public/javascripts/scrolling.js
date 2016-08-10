@@ -1,8 +1,17 @@
 
 var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
-var collectionDocArray = []; //////
+
+//////imported from elsewhere??? Use external search functions??? 
+//////needs to remove all docs already visited by user
+var collectionDocArray = []; 
+
 var filterCheck = {}; 
 
+var upcomingDocs = [];
+var previousDocs = [];
+var currentImage;
+
+/////////problems with bootstrap in iframe???
 
 var isUseless = function(something) {
   if (rejectionOptions.has(something) || rejectionOptions.has(typeof something)) {  return true;  }
@@ -29,11 +38,6 @@ var getTargetJSON = function(target) {
   };
 };
 
-var setNextCookies = function (image) {
-	////before slide is opened the cookie for imageSelected needs to be reset
-	document.cookie = "imageviewing="+image+"; path=/theimage";
-};
-
 var nextPossible = function() {
 	collectionDocArray[Math.floor((Math.random() * 100))]; //////need to be number between 0 and length of collectionDocArray
 };
@@ -45,7 +49,7 @@ var languageCheck = function(doc, annoType, languagesArray) {
 		languagesArray.forEach(function(language){
 			if (annoDocLanguages.includes(language)) {	return true	 }
 			else {	return false	};
-		})
+		});
 	};
 };
 
@@ -63,45 +67,72 @@ var searchTerms = function(doc, keywords) {
 	else {	return false	};
 };
 
+var filterImagesSearch = function(theDetails, filters) {
+	if (searchTerms(theDetails, filters.keywords)) {	return true;	}
+	else {	return false;	};
+};
+
+var filterImagesTranscription = function(theDetails, filters) {
+
+	var theVectors = lookupTargetChildren(imageSelected, vectorURL);
+	theVectors.forEach(function(vectorTarget) {
+		if (languagesArray(vectorTarget, "transcription", filters.transcription.languages)) {
+
+		};
+	});
+	if (languagesArray(theDetails, "transcription", filters.transcription.languages)) {	 filterImagesSearch(theDetails, filters);	}
+	else {	return false;	};
+};
+
+var filterImagesDate = function(theDetails, filters) {
+	if (dateCheck(theDetails, filters.dates.startYear, filters.dates.endYear)) {	filterImagesTranscription(theDetails, filters);	}
+	else {	return false	};
+};
+
 var filterImages = function (filters) {
 	var nextOne;
 	for ( var theNext = " "; isUseless(theNext); theNext = nextPossible() ) {
 		nextOne = theNext;
 	};
 	var theDetails = getTargetJSON(nextOne);
-	if (!dateCheck(theDetails, filters.dates.startYear, filters.dates.endYear)) {	filterImages(filters)	};
-	if (!languagesArray(theDetails, "transcription", filters.transcription.languages)) {	filterImages(filters)	};
-	if (!languagesArray(theDetails, "translation", filters.translation.languages)) {	filterImages(filters)	};
-	if (!searchTerms(theDetails, filters.keywords));
-
+	if(filterImagesDate(theDetails, filters)) {  return nextOne;	}
+	else {	filterImages(filters);	};
 };
 
-var addToQueue = function () {
-	var itemHTML = "<div class='item iframe-slide'>"+"<iframe src='/theimage'></iframe>"+"</div>"
-	$(".displayCarouselWrapper").append(itemHTML);
+var removeFromQueue = function (thisImage) {
+//////remove from upcomingDocs
+ 	previousDocs.pop(thisImage);
+ 	addToQueue(filterCheck);
 };
 
-var removeFromQueue = function () {
- /////
+var addToQueue = function (filters) {
+	upcomingDocs.push(filterImages(filters));
+ /////remove from collectionDocArray so it cannot be added again
 };
 
-/////postmessage/cookies to iframe window for image to be loaded
-
-$('.displayCarousel').on('slid.bs.carousel', function(event) {
-
-
-
-});
-
-var currentImage;
-
-var openImage = function(image) {
+var setNextCookies = function (image) {
 	document.cookie = "imageviewing="+image+"; path=/theimage";
+	return image;
 };
 
-$('.openImage').on("click", function(event) {
-  	event.stopPropagation(); ///
-  	currentImage = 
-  	openImage(currentImage);
+var setNext = function(queue) {
+	var theNewImage = queue[0];
+	currentImage = theNewImage;
+	setNextCookies(theNewImage);
+};
+
+/////postmessage/cookies to iframe window for image to be loaded???
+
+////when document ready or form for filters submitted then update filterCheck
+
+$('.displayCarousel').on('slide.bs.carousel', function(event) {
+
+	////if next then
+	removeFromQueue(setNext(upcomingDocs));
+	/////if back then
+	setNext(previousDocs);
+
 });
+
+
 

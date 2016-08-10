@@ -148,6 +148,29 @@ annoRouter.delete('/transcriptions/:transcription_id', transcriptions.deleteOne)
 
 annoRouter.delete('/transcriptions', transcriptions.deleteAll);
 
+//TRANSLATION API
+
+//route /api/transcriptions GET -> get all transcriptions JSONs
+annoRouter.get('/translations', translations.findAll);
+
+//route /api/transcriptions POST -> add a single new transcription JSON
+annoRouter.post('/translations', translations.addNew);
+
+//route /api/transcriptions/:transcriptions_id GET -> get specific transcription JSON
+annoRouter.get('/translations/:transcription_id', translations.getByID);
+
+annoRouter.get('/translations/targets/:target', translations.getByTarget);
+
+//route /api/transcriptions/:transcriptions_id PUT -> update transcription JSON with new info
+annoRouter.put('/translations/:transcription_id', translations.updateOne);
+
+annoRouter.put('/translations/voting/:voteType', translations.voting);
+
+//route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
+annoRouter.delete('/translations/:transcription_id', translations.deleteOne);
+
+annoRouter.delete('/translations', translations.deleteAll);
+
 /////////////////GAME ROUTES
 /*
 

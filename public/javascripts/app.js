@@ -298,7 +298,7 @@ var findHighestRankingChild = function(parent, locationID) {
 
 var loadImage = function() {
   imageSelected = searchCookie("imageviewing=");
-  alert(imageSelected);
+//  alert(imageSelected);
   var theImage = getTargetJSON(imageSelected);
   imageSelectedFormats = theImage.formats;
   imageSelectedMetadata = theImage.metadata;

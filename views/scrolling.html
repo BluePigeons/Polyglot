@@ -51,6 +51,8 @@
 	</div>
 
 </div>
+<div class="row">
+<div class="col-md-12">
 <div class="dropdown">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     Filters
@@ -61,7 +63,7 @@
 		<div class="form-group filter-form">
 			<div class="row filter">
 				<div class="col-md-4"><span>Languages  </span> <span> <input type="text"></span></div>
-				<div class="col-md-8"><span>Dates</span><span>From  </span><input type="number"><span> To </span><input type="number" max="2016" ></div>
+				<div class="col-md-8"><p>Dates</p><span>From  </span><input type="number"><span> To </span><input type="number" max="2016" ></div>
 			</div>
 
 			<div class="row filter difficulties">
@@ -91,10 +93,21 @@
 				<div class="col-md-4"><span>Search  </span><input type="search"><button class=""><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></div>
 
 			</div>
+
+			<div class="row filter difficulties">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+					<button type="button" class="btn filterBtn">Filter Me</button>
+				</div>
+				<div class="col-md-3"></div>
+			</div>
+
 		</div>	
 
     </li>
   </ul>
+</div>
+</div>
 </div>
 
 <div class="row" id="page_body">
@@ -104,8 +117,10 @@
 		<!-- Wrapper for slides -->
 		<div class="displayCarouselWrapper carousel-inner" role="listbox">
 
-		    <!--appended slides go here-->
-		    <div class="item iframe-slide active"><p>EXPERIMENT!!</p></div>
+		    <div class='item active iframe-slide'><iframe src='/theimage'></iframe></div>
+		    <div class='item iframe-slide'><iframe src='/theimage'></iframe></div>
+		    <div class='item iframe-slide'><iframe src='/theimage'></iframe></div>
+		    <div class='item iframe-slide'><iframe src='/theimage'></iframe></div>
 		    <div class='item iframe-slide'><iframe src='/theimage'></iframe></div>
 
 		</div>
