@@ -8,7 +8,7 @@ var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
-var addNewAnnoHTML = "<div class='item addNewItem'> <div class='addNewContainer'> <h3>Add New</h3> <textarea class='newAnnotation' rows='5'></textarea><br><button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   </div>  </div>";
+var addNewAnnoHTML = "<div class='item addNewItem'> <div class='addNewContainer'> <h3>Add New</h3> <textarea id='testingKeys' class='newAnnotation' rows='5'></textarea><br><button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   </div>  </div>";
 var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='glyphicon glyphicon-thumbs-up' aria-hidden='true' ></span></button><button type='button' class='btn btn-default votesUpBadge'><span class='badge'></span></button></div>";
 var closeButtonHTML = "<span class='closePopoverMenuBtn glyphicon glyphicon-remove'></span>";
 //var metaHTML = ; ///////////
@@ -40,6 +40,49 @@ var defaultColoursArray = ["#03f","#03f","transparent"];
 var editorsOpen = []; //those targets currently open in editors
 var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
 var findingcookies = document.cookie;
+
+///// KEYBOARD THINGS
+
+
+// Load the Google Transliterate API
+/*
+google.load("elements", "1", {
+      packages: "transliteration"
+    });
+
+google.load("elements", "1", {
+  packages: "keyboard"
+  });
+
+function onLoad() {
+  var options = {
+      sourceLanguage:
+          google.elements.transliteration.LanguageCode.ENGLISH,
+      destinationLanguage:
+          [google.elements.transliteration.LanguageCode.HINDI],
+      shortcutKey: 'ctrl+g',
+      transliterationEnabled: true
+  };
+
+  // Create an instance on TransliterationControl with the required
+  // options.
+  var control =
+      new google.elements.transliteration.TransliterationControl(options);
+
+  // Enable transliteration in the textbox with id
+  // 'transliterateTextarea'.
+  control.makeTransliteratable(['newAnnotation']);
+}
+google.setOnLoadCallback(onLoad);
+
+function onLoad() {
+        var kbd = new google.elements.keyboard.Keyboard(
+          [google.elements.keyboard.LayoutCode.RUSSIAN],
+          ['testingKeys']);
+      }
+
+google.setOnLoadCallback(onLoad);
+*/
 
 ///// TEXT SELECTION
 
@@ -297,11 +340,13 @@ var findHighestRankingChild = function(parent, locationID) {
 };
 
 var loadImage = function() {
+  
   imageSelected = searchCookie("imageviewing=");
 //  alert(imageSelected);
   var theImage = getTargetJSON(imageSelected);
   imageSelectedFormats = theImage.formats;
   imageSelectedMetadata = theImage.metadata;
+
 };
 
 ///// VIEWER WINDOWS
@@ -353,6 +398,7 @@ var canVoteAdd = function(popupIDstring, theVectorParent) {
   //if it is targeting it's own type OR it is targeting a vector with parents THEN you can vote and add
   if ( targetType.includes(textTypeSelected) || ( ( targetType.includes("vector") ) && ( !isUseless(theVectorParent) ) ) ) { 
     $(popupIDstring).find(".editorCarouselWrapper").append(addNewAnnoHTML);
+    //$(popupIDstring).find(".newAnnotation").attr("id", popupIDstring+"AddNew");
     return voteButtonsHTML; ///////metadata stuff too!!!!!!!
   }
   else {
