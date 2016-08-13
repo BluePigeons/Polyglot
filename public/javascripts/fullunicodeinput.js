@@ -1,9 +1,21 @@
 
-//////read the udata file properly
-var udata = document.getElementById("udata").text;
+////based on code from https://www.cs.tut.fi/~jkorpela/fui.html8
 
-alert(udata);
+var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
 
+var isUseless = function(something) {
+  if (rejectionOptions.has(something) || rejectionOptions.has(typeof something)) {  return true;  }
+  else {  return false;  };
+};
+
+$(".keyboardPopup").draggable();
+$(".keyboardPopup").draggable({
+  handle: ".keyboardHandlebar"
+});
+
+//////SETUP/////
+
+var udata = String.raw({raw: udataArray});
 var uD = [];
 var lines = udata.split('\n');
 for(var i=0; i < lines.length; i++) {
@@ -63,11 +75,18 @@ var cgName = {
 };
 
 var hexMax = 0x10FFFF;
-var theData = document.getElementById('testingKeys');
+var theData;
+$('#page_body').on("click", ".newAnnotation", function(){
+  var theID = $(event.target).attr("id");
+  theData = document.getElementById(theID);
+});
+
 var instr = document.getElementById('instr');
 
+//////TYPING///////
+
 function addstr(addition) {
-  theData.value += addition;
+  if (!isUseless(theData)) {  theData.value += addition;  };
 }
 
 function add(code) {
@@ -85,6 +104,14 @@ function fixedFromCharCode (codePt) {
     }
 }
 
+function clicked(elem, code) {
+  //elem.style.borderStyle = 'inset';
+  add(code);
+  //setTimeout(function() { elem.style.borderStyle = 'outset';}, 300); ///set indeneted effect later??
+}
+
+//////// UNICODE SEARCHING ///////
+
 function addByCode() {
   var val = parseInt(document.getElementById('hexcode').value, 16);
   if(!isNaN(val) && val >= 0 && val <= 0x10FFFF) {
@@ -99,12 +126,6 @@ var key = e.keyCode || e.which;
 if (key == 13){
   func();
   }
-}
-
-function clicked(elem, code) {
-  elem.style.borderStyle = 'inset';
-  add(code);
-  setTimeout(function() { elem.style.borderStyle = 'outset';}, 300);
 }
 
 function addnewline() {
@@ -151,7 +172,8 @@ function htmlChar(num) {
 }
 
 function buildTheMap() {
-  buildMap(document.getElementById('ucode').value);
+  buildMap(document.getElementById('ucode').value); //$0??
+  alert(document.getElementById('ucode').value);
   document.getElementById('blockMenu').selectedIndex = 0;
 }
 
@@ -163,9 +185,10 @@ if(endPos) {
   }
 
 startPosition = parseInt(startPos, 16);
+/*
 document.getElementById('next').disabled = startPosition > 0x10FF00;
 document.getElementById('prev').disabled = startPosition <= 0x000F;
-
+*/
 var startRow = startPos.substr(0, startPos.length - 1);
 var basePos = parseInt(startRow, 16);
 if(isNaN(basePos) || basePos < 0 || basePos > 0x10FFF) {
@@ -174,31 +197,40 @@ if(isNaN(basePos) || basePos < 0 || basePos > 0x10FFF) {
 }
 
 var categ, categ1, annotation, chClass;
+
+////
 var rows = document.getElementById('mapPopupBody').children;
 
 for(row=0; row < nRows; row++) {
   var rowno = row.toString(16);
   rowno = rowno.toUpperCase();
   var start = basePos + row;
-  rows[row].children[0].innerHTML = pad(start.toString(16).toUpperCase(), 3) + '.';
+  ///
+  ///rows[row].children[0].innerHTML = pad(start.toString(16).toUpperCase(), 3) + '.'; ///
+  ///
   for(col = 0; col < 0x10; col++) {
+
     thisPos = (basePos-0)*16 + (row*16-0) + (col-0);
-    alert("the pos is "+thisPos);
+
     categ = uD[thisPos] ? uD[thisPos].gc : 'Cn';
     categ1 = categ.charAt(0);
     annotation = (categ1 !== 'C') ? '' : ' (' + cgName[categ] + ')';
     chClass =
       thisPos > 0x10FFFF ? 'outside' :
       categ === 'Cn' ? 'unassigned' : categ1 === 'C' ? 'control' : 'normal';
-    rows[row].children[col+1].innerHTML =
-thisPos > 0x10FFFF ? 
-  '<div class=outside> </div>'  
-:
-  '<div class="c ' + chClass + '"' +
-  'data-info="' + uName(thisPos) + annotation + '" ' +
-  'onclick="clicked(this,' + thisPos + ')"' +
-  '>' +
-  htmlChar(thisPos) + '</div>';
+
+    //alert(JSON(rows[row].children));
+
+    rows[row].children[col].innerHTML = ///originally +1 for the th
+
+      thisPos > 0x10FFFF ? 
+        '<div class=outside> </div>'  :
+
+        '<div class="c ' + chClass + '"' +
+        'data-info="' + uName(thisPos) + annotation + '" ' +
+        'onclick="clicked(this,' + thisPos + ')"' +
+        '>' +
+        htmlChar(thisPos) + '</div>';
     }
   }
 }     

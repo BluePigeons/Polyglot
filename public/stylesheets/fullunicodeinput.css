@@ -1,127 +1,49 @@
-#codeArea {
-  display: none;
-  border: solid #66f 0.2em;
+
+th {
+  color: grey;
+  font-weight: lighter;
+  padding: 2px;
 }
-#theCode {
-  max-height: 4em;
-  overflow: auto;
+
+td {
+
 }
-body {
-  font-family: Calibri, sans-serif;
+
+#fullunicodesupportkeyboard {
+
 }
-h1 {
-  font-size: 120%;
-  margin: 0;
+
+.keyRow {
+  
 }
-* { 
-  line-height: 1.3;
+
+.sameWidth {
+  width: 6.25%;
+  height: 100%;
+  display: inline-block;
+  border: 1px solid grey;
+  border-radius: 5px;
 }
-p {
-  margin: 0;
-}
-p + p {
-  text-indent: 1.2em;
-}
-.controls {
-  line-height: 1.7;
-}
-#instr { 
- display: none; 
- max-width: 35em;
-}
-table.chars td { 
-  font-size : 120%; 
-  padding: 0;
- }
+
 .c {
-  border-color: #777;
-  border-width: 3px;
-  border-style: outset;
-  background : #fff;
-  padding: 0.2em 0;
-  position: relative;
-  width: 1.2em;
-  height: 1.2em;
   text-align: center;
-  vertical-align: middle;
- }
-.normal {
-  background: white;
-}
-.control {
-  background: rgb(213, 213, 255);
-}
-.unassigned {
-  background: rgb(205, 205, 205);
-}
-.outside {
-  background: black;
-}
-.c:hover {
-  background: #ff0;
-  cursor: hand;
-  cursor: pointer;
-}
-.c:hover:after {
-  content: attr(data-info);
-  position: absolute;
-  text-align: left;
-  z-index: 900;
-  font-size: 80%;
-  top: 2.3em;
-  left: 0;
-  border: solid #080 0.25em;
-  background: #efe;
-  color: black;
-  padding: 0.1em 0.15em 0.1em 1.2em;
-  width: 20em;
-}
-table.chars { background : #eee; }
-table.chars td {
-  font-family:
-  Arial Unicode MS, Symbola, Titus Cyberbit Basic,
-  Lucida Sans Unicode, Junicode, DejaVu Sans, FreeSans,
-  Cambria Math, Cambria, Quivira,
-  Alphabetum Unicode, Andron Mega,
-  Charis SIL, DejaVu Serif, Doulos SIL,
-  Gentium,
-  Code2000, Code2001, Code2002,
-  FreeSerif, STIX, XITS,
-  Everson Mono Unicode, Unifont,
-  LastResort;
- }
-textarea#testingKeys {
-  font-size: 120%;
-  resize: both;
-  font-family: 
-  Cambria, Cambria Math, Quivira,
-  Alphabetum Unicode, Andron Mega,
-  Charis SIL, DejaVu Serif, Doulos SIL,
-  Gentium,
-  Code2000, Code2001, Code2002,
-  FreeSerif, STIX, XITS,
-  Arial Unicode MS, Symbola, Titus Cyberbit Basic,
-  Lucida Sans Unicode, Junicode, DejaVu Sans, FreeSans,
-  Everson Mono Unicode, Unifont,
-  LastResort;
-}
-table.chars th {
-  font-size : 80%;
-  font-weight : normal;
-  font-family :  Consolas, monospace;
-  padding: 0 0.1em;
- }
-
-#map-with-controls {
-  margin-right: 0.6em;
-}
-select, #selectU {
-  margin: 0.3em 0;
-}
-#instrCtrlDiv {
-  margin-top: 0.8em;
-}
-#next {
-  margin-left: 2em;
 }
 
+.languageChoice {
+  margin: 10px;
+}
+
+.keyboardHandlebar {
+  height: 20px;
+  width: 100%;
+  background-color: grey;
+}
+
+.chars {
+  
+}
+
+.theKeys {
+  border: 1px solid black;
+  border-radius: 10px;
+}
