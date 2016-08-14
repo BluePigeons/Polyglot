@@ -35,22 +35,27 @@ iframe {
 	height: 80%;
 	margin: 20px;
 }
-.dropdown-menu {
-	
-}
+
 .textEditorPopup {
 	height: 500px;
 	background-color: white;
 	z-index: 1000;
 }
 .popupBoxHandlebar {
-	height: 20px;
-	width: 100%;
-	background-color: grey;
+  background-color: buttonface;
+  border-radius: 5px;
 }
+
+.polyanno-options-row {
+  background-color: grey;
+  padding: 5px;
+  font-size: 0.875em;
+  width: 100%;
+  display: none;
+}
+
 .textEditorMainBox {
 	height: 480px;
-	width: 100%;
 }
 .addNewContainer {
 	margin: 40px;
@@ -65,8 +70,8 @@ iframe {
 	margin: 50px;
 }
 
-.editorTitle{
-	margin-left: 10px;
+.polyanno-editor-title-row {
+	padding: 5%;
 }
 
 .carousel-control.left, .carousel-control.right {

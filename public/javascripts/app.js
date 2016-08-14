@@ -35,7 +35,9 @@ var childrenArray;
 
 ///[editor, vector, span] colours
 var highlightColoursArray = ["#FFFF00","#FFFF00","#FFFF00"];
-var defaultColoursArray = ["#03f","#03f","transparent"]; 
+var defaultColoursArray = ["buttonface","03f","transparent"]; 
+
+///"# 0.3.f "
 
 var editorsOpen = []; //those targets currently open in editors
 var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
@@ -193,6 +195,24 @@ var insertSpanDivs = function() {
 var findBaseURL = function() {
   if (textTypeSelected == "transcription") {  return transcriptionURL;  }
   else if (textTypeSelected == "translation") {  return translationURL;  };
+};
+
+var addPopup = function(popupClass, popupClone) {
+  //CREATE POPUP BOX
+  var popupBoxDiv = document.createElement("div");
+  popupBoxDiv.classList.add(popupClass);
+  popupBoxDiv.classList.add("col-md-6");
+  
+  ////resizeable and draggable??????
+
+  popupBoxDiv.id = "DivTarget-" + Math.random().toString().substring(2);
+  var popupIDstring = "#" + popupBoxDiv.id;
+  popupBoxDiv.appendChild(popupClone);
+
+  var pageBody = document.getElementById("ViewerBox1");
+  pageBody.insertBefore(popupBoxDiv, pageBody.childNodes[0]); 
+
+  return popupIDstring;
 };
 
 var newAnnotationFragment = function(baseURL) {
@@ -459,20 +479,9 @@ var addEditorsOpen = function(popupIDstring) {
 
 var createEditorPopupBox = function() {
 
-  //CREATE POPUP BOX
-  var popupBoxDiv = document.createElement("div");
-  popupBoxDiv.classList.add("textEditorPopup");
-  popupBoxDiv.classList.add("col-md-6");
-  popupBoxDiv.id = "DivTarget-" + Math.random().toString().substring(2);
-  var popupIDstring = "#" + popupBoxDiv.id;
-//need to eventually save HTML as string in JS file but for now cloning
   var popupTranscriptionTemplate = document.getElementById("theEditor");
   var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
-  popupBoxDiv.appendChild(newPopupClone);
-
-  var pageBody = document.getElementById("ViewerBox1");
-  pageBody.insertBefore(popupBoxDiv, pageBody.childNodes[0]); 
-
+  var popupIDstring = addPopup("textEditorPopup", newPopupClone);
   var newCarouselID = "Carousel" + Math.random().toString().substring(2);
   $(popupIDstring).find(".editorCarousel").attr("id", newCarouselID);
   $(popupIDstring).find(".carousel-control").attr("href", "#" + newCarouselID);
@@ -500,7 +509,7 @@ var openEditorMenu = function() {
 
 var resetVectorHighlight = function(thisEditor) {
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected; 
-  if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, '#03f'); };
+  if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, 'buttonface'); };
 };
 
 var removeEditorChild = function(thisEditor) {
@@ -659,7 +668,7 @@ var highlightVectorChosen = function(chosenVector, colourChange) {
 
 var highlightEditorsChosen = function(chosenEditor, colourChange) {
   if (!chosenEditor.includes("#")) {  chosenEditor = "#"+chosenEditor; }
-  $(chosenEditor).find(".popupBoxHandlebar").css("background-color", colourChange);
+  $(chosenEditor).find(".polyanno-colour-change").css("background-color", colourChange);
 };
 
 var highlightSpanChosen = function(chosenSpan, colourChange) {
@@ -807,8 +816,8 @@ allDrawnItems.on('mouseover', function(vec) {
   findAndHighlight("vSelected", vec.layer._leaflet_id, ["#FFFF00","#FFFF00","#FFFF00"]);
 });
 allDrawnItems.on('mouseout', function(vec) {
-  vec.layer.setStyle({color: "#03f"});
-  findAndHighlight("vSelected", vec.layer._leaflet_id, ["#03f","#03f","transparent"]);
+  vec.layer.setStyle({color: "buttonface"});
+  findAndHighlight("vSelected", vec.layer._leaflet_id, ["buttonface","buttonface","transparent"]);
 });
 
 map.on('draw:deletestart', function(){
@@ -1020,6 +1029,23 @@ var setNewTextVariables = function(selection, classCheck) {
   };
 };
 
+////BUILD KEYBOARD
+var addKeyboard = function() {
+
+//need to eventually save HTML as string in JS file but for now cloning
+  var popupTranscriptionTemplate = document.getElementById("fullunicodesupportkeyboard");
+  var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
+  ///////not cloning properly
+
+  var newKeyboardID = addPopup("keyboardPopup", newPopupClone);
+  $(newKeyboardID).addClass("ui-draggable");
+
+};
+
+$("#page_body").on("click", ".polyanno-add-keyboard", function(event){
+  addKeyboard();
+});
+
 ///SELECTION PROCESS
 $('#page_body').on("mouseup", '.content-area', function(event) {
 
@@ -1108,11 +1134,11 @@ $('#page_body').on("mouseover", ".textEditorBox", function(event){
 
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
   //////////
-  $(thisEditor).find(".popupBoxHandlebar").css("background-color", highlightColoursArray[0]);
+  $(thisEditor).find(".polyanno-colour-change").css("background-color", highlightColoursArray[0]);
   findAndHighlight("editor", thisEditor, highlightColoursArray);
   //////////
   $(thisEditor).on("mouseenter", ".opentranscriptionChildrenPopup", function(event){
-    $(thisEditor).find(".popupBoxHandlebar").css("background-color", defaultColoursArray[0]);
+    $(thisEditor).find(".polyanno-colour-change").css("background-color", defaultColoursArray[0]);
     findAndHighlight("editor", thisEditor, defaultColoursArray);
 
     var thisSpan = $(event.target).attr("id");
@@ -1130,7 +1156,7 @@ $('#page_body').on("mouseover", ".textEditorBox", function(event){
 
 $('#page_body').on("mouseout", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
-  $(thisEditor).find(".popupBoxHandlebar").css("background-color", defaultColoursArray[0]);
+  $(thisEditor).find(".polyanno-colour-change").css("background-color", defaultColoursArray[0]);
   findAndHighlight("editor", thisEditor, defaultColoursArray);
 });
 
@@ -1187,7 +1213,18 @@ $('#page_body').on("click", '.votingUpButton', function(event) {
   votingFunction("up", votedID, currentTopText, thisEditor);
 });
 
-
+$("#page_body").on("click", ".polyanno-options-dropdown-toggle", function(event){
+    var theOptionRows = $(this).closest(".textEditorPopup").find(".polyanno-options-row");
+    var theHandlebar = $(this).closest(".textEditorPopup").find(".popupBoxHandlebar");
+    if (theOptionRows.css("display") == "none") {
+      theOptionRows.css("display", "block");
+      theHandlebar.css("border-radius", "5px 5px 0px 0px");
+    }
+    else {
+      theOptionRows.css("display", "none");
+      theHandlebar.css("border-radius", "5px");
+    };
+});
 
 //////TRANSCRIPTIONS
 

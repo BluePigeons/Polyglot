@@ -1,6 +1,10 @@
 
 
-#blockMenu {
+.atu-blockMenu {
+  width: 100%;
+}
+
+.optionsDropdown {
   width: 100%;
 }
 
@@ -16,17 +20,19 @@
   text-align: center;
 }
 
-.languageChoice {
-  margin: 10px;
-}
-
 .keyboardHandlebar {
-  background-color: grey;
+  background-color: buttonface;
   border-radius: 5px 5px 0px 0px;
 }
 
-.languageRow {
+.optionRows {
   background-color: grey;
+  padding: 5px;
+  font-size: 0.875em;
+}
+
+.bottomOptionRow {
+  border-radius: 0px 0px 5px 5px;
 }
 
 .theKeys {
