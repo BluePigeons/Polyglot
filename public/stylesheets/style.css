@@ -20,10 +20,6 @@
 	margin: 20px;
 }
 
-.popupAnnoMenu {
-	
-
-}
 .iframe-slide {
 	width: 90%;
 	height: 1000px;
@@ -36,14 +32,23 @@ iframe {
 	margin: 20px;
 }
 
+.annoPopup {
+  	border: 1px solid grey;
+	border-radius: 5px;
+}
+
 .textEditorPopup {
-	height: 500px;
 	background-color: white;
 	z-index: 1000;
 }
 .popupBoxHandlebar {
   background-color: buttonface;
-  border-radius: 5px;
+  border-radius: 5px 5px 0px 0px;
+}
+
+.polyanno-image {
+  background-color: buttonface;
+  border-radius: 5px;	
 }
 
 .polyanno-options-row {
@@ -54,27 +59,36 @@ iframe {
   display: none;
 }
 
-.textEditorMainBox {
-	height: 480px;
-}
 .addNewContainer {
-	margin: 40px;
+	padding: 5%;
 }
+
+.newAnnotation {
+	width: 100%;
+}
+
+.pTextDisplay{
+	padding: 5%;
+}
+
+.polyanno-anno-well {
+	text-align: center;
+}
+
 .openTranscriptionChildrenPopup {
 	background-color:yellow;
 	font-weight: normal;
 	color: black;
 }
 
-.pTextDisplay{
-	margin: 50px;
+.editorTitle {
+	font-size: 1.5em;
+	color: white;
+	text-align: center;
 }
 
-.polyanno-editor-title-row {
-	padding: 5%;
+.polyanno-carousel-controls {
+	padding: 2%;
 }
 
-.carousel-control.left, .carousel-control.right {
-   background-image:none !important;
-   filter:none !important;
-}
+

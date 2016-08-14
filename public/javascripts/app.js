@@ -8,10 +8,29 @@ var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
-var addNewAnnoHTML = "<div class='item addNewItem'> <div class='addNewContainer'> <h3>Add New</h3> <textarea id='testingKeys' class='newAnnotation' rows='5'></textarea><br><button type='button' class='btn addAnnotationSubmit'>SUBMIT</button><br>   </div>  </div>";
-var voteButtonsHTML = "<div  ><button type='button' class='btn btn-default voteBtn votingUpButton'><span class='glyphicon glyphicon-thumbs-up' aria-hidden='true' ></span></button><button type='button' class='btn btn-default votesUpBadge'><span class='badge'></span></button></div>";
-var closeButtonHTML = "<span class='closePopoverMenuBtn glyphicon glyphicon-remove'></span>";
-//var metaHTML = ; ///////////
+var addNewAnnoHTML = `<div class='item addNewItem row'> 
+                        <div class='addNewContainer col-md-12'> 
+                          <textarea id='testingKeys' class='newAnnotation row' placeholder='Add new annotation text here'></textarea><br>
+                          <button type='button' class='btn addAnnotationSubmit row'>Submit <span class='glyphicon glyphicon-ok'></span></button>  
+                        </div> 
+                      </div>`;
+var voteButtonsHTML = `<div class='row polyanno-below-anno-well' >
+                        <button type='button' class='btn btn-default voteBtn votingUpButton'>
+                          <span class='glyphicon glyphicon-thumbs-up' aria-hidden='true' ></span>
+                        </button>
+                        <button type='button' class='btn btn-default votesUpBadge'>
+                          <span class='badge'></span>
+                        </button>
+                      </div>`;
+var closeButtonHTML = `<span class='closePopoverMenuBtn glyphicon glyphicon-remove'></span>`;
+var linkButtonHTML = `<button type='button' class='btn linkBtn'>
+                        <span class="glyphicon glyphicon-picture"></span>
+                      </button>`;
+
+var transcriptionIconHTML = `<span class='glyphicon glyphicon-edit'></span>
+                            <span>Transcription</span>`;
+var translationIconHTML = `<span class='glyphicon glyphicon-globe'></span>
+                            <span>Translation</span>`;
 
 var imageSelected; //info.json format URL
 var imageSelectedFormats;
@@ -35,56 +54,11 @@ var childrenArray;
 
 ///[editor, vector, span] colours
 var highlightColoursArray = ["#FFFF00","#FFFF00","#FFFF00"];
-var defaultColoursArray = ["buttonface","03f","transparent"]; 
-
-///"# 0.3.f "
+var defaultColoursArray = ["buttonface","#03f","transparent"]; 
 
 var editorsOpen = []; //those targets currently open in editors
 var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
 var findingcookies = document.cookie;
-
-///// KEYBOARD THINGS
-
-
-// Load the Google Transliterate API
-/*
-google.load("elements", "1", {
-      packages: "transliteration"
-    });
-
-google.load("elements", "1", {
-  packages: "keyboard"
-  });
-
-function onLoad() {
-  var options = {
-      sourceLanguage:
-          google.elements.transliteration.LanguageCode.ENGLISH,
-      destinationLanguage:
-          [google.elements.transliteration.LanguageCode.HINDI],
-      shortcutKey: 'ctrl+g',
-      transliterationEnabled: true
-  };
-
-  // Create an instance on TransliterationControl with the required
-  // options.
-  var control =
-      new google.elements.transliteration.TransliterationControl(options);
-
-  // Enable transliteration in the textbox with id
-  // 'transliterateTextarea'.
-  control.makeTransliteratable(['newAnnotation']);
-}
-google.setOnLoadCallback(onLoad);
-
-function onLoad() {
-        var kbd = new google.elements.keyboard.Keyboard(
-          [google.elements.keyboard.LayoutCode.RUSSIAN],
-          ['testingKeys']);
-      }
-
-google.setOnLoadCallback(onLoad);
-*/
 
 ///// TEXT SELECTION
 
@@ -201,7 +175,8 @@ var addPopup = function(popupClass, popupClone) {
   //CREATE POPUP BOX
   var popupBoxDiv = document.createElement("div");
   popupBoxDiv.classList.add(popupClass);
-  popupBoxDiv.classList.add("col-md-6");
+  popupBoxDiv.classList.add("annoPopup");
+  popupBoxDiv.classList.add("col-md-4");
   
   ////resizeable and draggable??????
 
@@ -211,6 +186,14 @@ var addPopup = function(popupClass, popupClone) {
 
   var pageBody = document.getElementById("ViewerBox1");
   pageBody.insertBefore(popupBoxDiv, pageBody.childNodes[0]); 
+
+  $("."+popupClass).draggable();
+  $("."+popupClass).draggable({
+    handle: ".ui-draggable-handle"
+  });
+
+  $( "."+popupClass ).resizable();
+  $( "."+popupClass ).resizable( "enable" );
 
   return popupIDstring;
 };
@@ -375,8 +358,8 @@ var setChildrenArray = function() {  return childrenArray = lookupTargetChildren
 
 var buildCarousel = function(existingChildren, popupIDstring, extraHTML) {
 
-  var openingHTML = "<div class='item pTextDisplayItem ";
-  var openingHTML2 = "'> <div class='pTextDisplay'> <div class='well well-lg'> <p id='";
+  var openingHTML = "<div class='item row pTextDisplayItem ";
+  var openingHTML2 = "'> <div class='pTextDisplay col-md-12'> <div class='row well well-sm polyanno-anno-well'> <p id='";
   var middleHTML = "' class='content-area' title=' '>";
   var endTextHTML = "</p></div>";
   var endDivHTML = "</div></div>";
@@ -404,13 +387,12 @@ var highlightTopVoted = function() {
   $(theTextString).addClass("currentTop");
 ///////////choose better styling later!!!!!///////
   $(theTextString).css("color", "grey");
-  $(theTextString).parent().parent().append("<h4>Most Popular</h4>");
+  $(theTextString).find(".polyanno-below-anno-well").append("<span='glyphicon glyphicon-star'></span><span='glyphicon glyphicon-star'></span><span='glyphicon glyphicon-star'></span><span='glyphicon glyphicon-star'></span>");
 };
 
 var canLink = function(popupIDstring) {
   if (targetType.includes("vector") == false){ 
-    var linkButtonHTML = "<button type='button' class='btn linkBtn'>Link Vector</button><br>";
-    $(popupIDstring).find(".textEditorMainBox").append(linkButtonHTML);
+    $(popupIDstring).find(".polyanno-options-buttons").append(linkButtonHTML);
   };
 };
 
@@ -422,7 +404,7 @@ var canVoteAdd = function(popupIDstring, theVectorParent) {
     return voteButtonsHTML; ///////metadata stuff too!!!!!!!
   }
   else {
-    $(popupIDstring).find(".carousel-control").css("display", "none");
+    $(popupIDstring).find(".polyanno-carousel-controls").css("display", "none");
     $(popupIDstring).find(".addNewBtn").css("display", "none");
     return "";
   };
@@ -434,7 +416,7 @@ var addCarouselItems = function(popupIDstring) {
     $(popupIDstring).find(".editorCarouselWrapper").append(addNewAnnoHTML);
     $(popupIDstring).find(".newAnnotation").attr("id", "addBox"+popupIDstring);
     $(popupIDstring).find(".addNewItem").addClass("active");
-    $(popupIDstring).find(".carousel-control").css("display", "none");
+    $(popupIDstring).find(".polyanno-carousel-controls").css("display", "none");
     $(popupIDstring).find(".addNewBtn").css("display", "none");
   }
   else {
@@ -444,13 +426,18 @@ var addCarouselItems = function(popupIDstring) {
   };
 };
 
+var returnTextIcon = function(textTypeSelected){
+  if(textTypeSelected == "transcription") {
+    return transcriptionIconHTML;
+  }
+  else if (textTypeSelected == "translation"){
+    return translationIconHTML;
+  };
+};
+
 var updateEditor = function(popupIDstring) {
   $(popupIDstring).find("#theEditor").attr("id", "newEditor");
-  $(popupIDstring).find(".editorTitle").html(textTypeSelected.toUpperCase());
-  $(".textEditorPopup").draggable();
-  $(".textEditorPopup").draggable({
-    handle: ".popupBoxHandlebar"
-  });
+  $(popupIDstring).find(".editorTitle").html(returnTextIcon(textTypeSelected));
   canLink(popupIDstring);
   setChildrenArray();
   addCarouselItems(popupIDstring);
@@ -484,7 +471,7 @@ var createEditorPopupBox = function() {
   var popupIDstring = addPopup("textEditorPopup", newPopupClone);
   var newCarouselID = "Carousel" + Math.random().toString().substring(2);
   $(popupIDstring).find(".editorCarousel").attr("id", newCarouselID);
-  $(popupIDstring).find(".carousel-control").attr("href", "#" + newCarouselID);
+  $(popupIDstring).find(".polyanno-carousel-controls").attr("href", "#" + newCarouselID);
 
   return popupIDstring;
 
@@ -509,7 +496,7 @@ var openEditorMenu = function() {
 
 var resetVectorHighlight = function(thisEditor) {
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected; 
-  if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, 'buttonface'); };
+  if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, defaultColoursArray[1]); };
 };
 
 var removeEditorChild = function(thisEditor) {
@@ -672,7 +659,6 @@ var highlightEditorsChosen = function(chosenEditor, colourChange) {
 };
 
 var highlightSpanChosen = function(chosenSpan, colourChange) {
-  if (!chosenSpan.includes("#")) {  chosenSpan = "#"+chosenSpan; }
   $(chosenSpan).css("background-color", colourChange);
 };
 
@@ -687,7 +673,10 @@ var findAndHighlight = function(searchField, searchFieldValue, highlightColours)
   var thisVector = checkingItself(searchField, searchFieldValue, "vSelected");
   if (!isUseless(thisVector)) {  highlightVectorChosen(thisVector, highlightColours[1]);  };
   var thisSpan = checkingItself(searchField, searchFieldValue, "tSelectedID");
-  if (!isUseless(thisSpan)) {  highlightSpanChosen(thisSpan, highlightColours[2]);  };
+  if (!isUseless(thisSpan)) {  
+    if (!thisSpan.includes("#")) {  thisSpan = "#"+thisSpan; };
+    if (!isUseless($(thisSpan))) {  highlightSpanChosen(thisSpan, highlightColours[2]);  };
+  };
 };
 
 var popupVectorMenuHTML = function() {
@@ -812,12 +801,12 @@ allDrawnItems.on('click', function(vec) {
 });
 
 allDrawnItems.on('mouseover', function(vec) {
-  vec.layer.setStyle({color: "#FFFF00"});
-  findAndHighlight("vSelected", vec.layer._leaflet_id, ["#FFFF00","#FFFF00","#FFFF00"]);
+  vec.layer.setStyle({color: highlightColoursArray[1]});
+  findAndHighlight("vSelected", vec.layer._leaflet_id, highlightColoursArray);
 });
 allDrawnItems.on('mouseout', function(vec) {
-  vec.layer.setStyle({color: "buttonface"});
-  findAndHighlight("vSelected", vec.layer._leaflet_id, ["buttonface","buttonface","transparent"]);
+  vec.layer.setStyle({color: defaultColoursArray[1]});
+  findAndHighlight("vSelected", vec.layer._leaflet_id, defaultColoursArray);
 });
 
 map.on('draw:deletestart', function(){
@@ -1042,6 +1031,31 @@ var addKeyboard = function() {
 
 };
 
+var updateGridCols = function(newcol, popupDOM) {
+  var newName = "col-md-"+newcol;
+  var theClasses = popupDOM.attr("class").toString();
+  var theStartIndex = theClasses.indexOf("col-md-");
+  var theEndIndex;
+  var spaceIndex = theClasses.indexOf(" ", theStartIndex);
+  var finishingIndex = theClasses.length;
+  if (spaceIndex == -1) {  theEndIndex = finishingIndex;  }
+  else {  theEndIndex = spaceIndex;  };
+  var theClassName = theClasses.substring(theStartIndex, theEndIndex);
+  if ((theStartIndex != -1) && (theClassName != newName)) {
+    popupDOM.removeClass(theClassName).addClass(newName+" ");
+    $("#testingOldCol").html(newcol);
+    return newcol;
+  }
+  else {  return 0  };
+};
+
+var adjustPopupBootstrapGrid = function(parentDOM, popupDOM, theUI) {
+  var gridwidth = Math.round(parentDOM.width() / 12 );
+  var newWidth = theUI.size.width;
+  var colwidth = Math.round(newWidth/gridwidth);
+  return updateGridCols(colwidth, popupDOM);
+};
+
 $("#page_body").on("click", ".polyanno-add-keyboard", function(event){
   addKeyboard();
 });
@@ -1105,6 +1119,7 @@ $('#map').popover({
 });
 
 $('#map').on("shown.bs.popover", function(event) {
+
   $('#page_body').one("click", '.openTranscriptionMenuParent', function(event) {
     checkEditorsOpen("vector", "transcription");
     $('#map').popover('hide');
@@ -1113,22 +1128,18 @@ $('#map').on("shown.bs.popover", function(event) {
     checkEditorsOpen("vector", "translation");
     $('#map').popover('hide');
   });
-/*  $('#page_body').on("click", function(event) {
-    if ($(event.target).hasClass("popupAnnoMenu") == false) {
-      $('#map').popover("hide");
-    }
-  });*/
+
   $('.closeThePopover').on("click", function(event){
     $('#map').popover("hide");
   });
 });
-/*
-$('#page_body').on("click", ".textEditorBox", function(event){
-  /////check if it is a popup or 
-  var thisEditor = "#" + $(event.target).parent().attr("id");
 
+$(".polyanno-image-box").draggable();
+$(".polyanno-image-box").draggable({
+  handle: ".imageHandlebar"
 });
-*/
+$( ".polyanno-image-box" ).resizable();
+$( ".polyanno-image-box" ).resizable( "enable" );
 
 $('#page_body').on("mouseover", ".textEditorBox", function(event){
 
@@ -1171,7 +1182,7 @@ $('#page_body').on("mouseover", ".leaflet-popup", function(event){
 });
 
 $('#page_body').on("click", '.addAnnotationSubmit', function(event) {
-  var thisEditor = $(event.target).closest(".textEditorPopup").attr("id"); 
+  var thisEditor = $(event.target).closest(".annoPopup").attr("id"); 
   settingEditorVars(thisEditor);
   ///
   addAnnotation(thisEditor);
@@ -1189,12 +1200,23 @@ $('#page_body').on("click", ".closePopoverMenuBtn", function(){
 
 $('#page_body').on('slid.bs.carousel', '.editorCarousel', function(event) {
 
-/////change the textSelected to whatever slide of the carousel is selected...
+  var currentSlideID = $(event.target).find(".active").find(".content-area").attr("id");
+  var thisEditor = $(event.target).closest(".annoPopup").attr("id"); 
+  settingEditorVars(thisEditor);
+  if (!isUseless(currentSlideID))  {  textSelected = findBaseURL() + currentSlideID;  };
 
 });
 
-$('#page_body').on("click", ".addNewBtn", function(){
-  $(event.target).siblings(".editorCarousel").carousel(0);
+$('#page_body').on("click", ".addNewBtn", function(event){
+  $(event.target).closest(".textEditorPopup").find(".editorCarousel").carousel(0);
+});
+
+$('#page_body').on("click", ".polyanno-carousel-next", function(event){
+  $(event.target).closest(".textEditorPopup").find(".editorCarousel").carousel("next");
+});
+
+$('#page_body').on("click", ".polyanno-carousel-prev", function(event){
+  $(event.target).closest(".textEditorPopup").find(".editorCarousel").carousel("prev");
 });
 
 $('#page_body').on("click", ".linkBtn", function(){
@@ -1206,8 +1228,8 @@ $('#page_body').on("click", ".linkBtn", function(){
 });
 
 $('#page_body').on("click", '.votingUpButton', function(event) {
-  var votedID = $(event.target).parent().parent().parent().find("p").attr("id");//////
-  var currentTopText = $(event.target).closest(".textEditorPopup").find(".currentTop").html();////
+  var votedID = $(event.target).closest(".pTextDisplay").find("p").attr("id");
+  var currentTopText = $(event.target).closest(".textEditorPopup").find(".currentTop").html();
   var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
   settingEditorVars(thisEditor);
   votingFunction("up", votedID, currentTopText, thisEditor);
@@ -1225,6 +1247,26 @@ $("#page_body").on("click", ".polyanno-options-dropdown-toggle", function(event)
       theHandlebar.css("border-radius", "5px");
     };
 });
+
+$( "#page_body" ).on( "resizestop", ".annoPopup", function( event, ui ) {
+  adjustPopupBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
+} );
+
+$( "#page_body" ).on( "resizestop", "#imageViewer", function( event, ui ) {
+  adjustPopupBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
+//  if (colDiff != 0) { updateGridCols(12-colDiff,$(".viewerBox")); };
+} );
+
+$( "#page_body" ).on( "dragstop", ".annoPopup", function( event, ui ) {
+  ////////
+  var endLeft = ui.position.left;
+  var endRight = endLeft + $(event.target).width();
+  ////////
+} );
+
+$( "#page_body" ).on( "dragstop", "#imageViewer", function( event, ui ) {
+
+} );
 
 //////TRANSCRIPTIONS
 

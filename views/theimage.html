@@ -44,26 +44,74 @@
 <div data-role="main" class="ui-content">
 <div id="main page" class="container">
 
-<div class="row">
-	<div id="websiteInfo" class="col-md-12">
-		<a href="/" data-ajax="false" ><h1>THE POLYGLOT PROJECT</h1></a>
-		<p>Building some awesomeness in the form of crowd sourcing transcription and translation</p><br>
-	</div>
+<div class="row ed-poly-header">
+
+	<nav class="navbar navbar-default col-md-12">
+	  <div class="row">
+	    <!-- Brand and toggle get grouped for better mobile display -->
+	    <div class="navbar-header">
+	      <a class="navbar-brand" href="/" data-ajax="false">Polyanno</a>
+	    </div>
+
+	    <!-- Collect the nav links, forms, and other content for toggling -->
+	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+	      <ul class="nav navbar-left">
+	        <li>
+	        	<a href="/aboutus">About Us</a>
+	        </li>
+	      </ul>
+
+	      <ul class="nav navbar-left">
+	        <li>
+	        	<a href="/beginnertutorial">Tutorial</a>
+	        </li>
+	      </ul>
+
+	      <ul class="nav navbar-left">
+	        <li>
+	        	<span id="testingOldCol"></span>
+	        	<span>Testing</span>
+	        </li>
+	      </ul>
+
+	      <form class="navbar-form navbar-right">
+	        <div class="form-group">
+	          <input type="text" class="form-control ed-poly-search-docs" placeholder="Search images">
+	        </div>
+	        <button type="submit" class="btn btn-default ed-poly-search-docs-submit">Submit</button>
+	      </form>
+
+	    </div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
 
 </div>
 
 <div class="row" id="page_body">
 
-<!-- Image Viewer Panel -->
-
-	<div id="imageViewer" class="col-md-4">
-		<div id='map'></div>
-	</div>
-
 <!-- Viewer Box -->
 
-	<div class="viewerBox col-md-8">
+	<div class="viewerBox col-md-12">
 		<div id="ViewerBox1" class="row">
+
+<!-- Image Viewer Panel -->
+
+			<div id="imageViewer" class="col-md-4 ui-draggable ui-resizeable polyanno-image-box">
+
+				<div class="row imageHandlebar polyanno-image ui-draggable-handle">
+					<button class="btn polyanno-image-options-dropdown-toggle polyanno-image col-md-2" type="button" >
+					    <span class="glyphicon glyphicon-cog"></span>
+					    <span class="caret"></span>
+					</button>
+					<div class="col-md-9"></div>
+				</div>
+
+				<div id='map' class="row"></div>
+
+			</div>
+
+
 
 		</div>
 	</div>
@@ -76,19 +124,17 @@
 
 <!-- ALTERNATIVE KEYBOARDS -->
 
-	<div id="fullunicodesupportkeyboard" class="keyboardPopup ui-draggable col-md-6">
-
-		<div class="row">
+	<div id="fullunicodesupportkeyboard" class="row">
 		<div class="col-md-12">
 
 			<div class="row keyboardHandlebar ui-draggable-handle">
+				<button class="btn col-md-1">
+					<span class="closePopupBtn glyphicon glyphicon-remove"></span>
+				</button>
+				<div class="col-md-9"></div>
 				<button class="btn  atu-options-dropdown-toggle col-md-2" type="button" >
 				    <span class="glyphicon glyphicon-cog"></span>
 				    <span class="caret"></span>
-				</button>
-				<div class="col-md-9"></div>
-				<button class="btn col-md-1">
-					<span class="closePopupBtn glyphicon glyphicon-remove"></span>
 				</button>
 			</div>
 
@@ -181,7 +227,6 @@
 	        	</div>
 	       	</div>
 		</div>
-		</div>
 	</div>
 
 	<!-- EDITOR BOX -->
@@ -189,13 +234,15 @@
 	<div class="col-md-12">
 
 		<div class="row popupBoxHandlebar polyanno-colour-change ui-draggable-handle">
+			<button class="btn col-md-1 polyanno-colour-change">
+				<span class="closePopupBtn glyphicon glyphicon-remove"></span>
+			</button>
+			<div class="col-md-9">
+				<div class="editorTitle"></div>
+			</div>
 			<button class="btn polyanno-options-dropdown-toggle polyanno-colour-change col-md-2" type="button" >
 			    <span class="glyphicon glyphicon-cog"></span>
 			    <span class="caret"></span>
-			</button>
-			<div class="col-md-9"></div>
-			<button class="btn col-md-1 polyanno-colour-change">
-				<span class="closePopupBtn glyphicon glyphicon-remove"></span>
 			</button>
 		</div>
 
@@ -204,38 +251,38 @@
 		<div class="col-md-12">
 
 			<div class="row polyanno-options-row">
-				<div class="btn-group" role="group" aria-label="...">
+				<div class="btn-group polyanno-options-buttons" role="group" aria-label="...">
+					<button type="button" class="btn btn-success addNewBtn">
+						<span class="glyphicon glyphicon-pencil" ></span> NEW
+					</button>
 					<button class="btn btn-default polyanno-add-keyboard" type="button"><span class="glyphicon glyphicon-th"></span><span class="glyphicon glyphicon-th"></span></button> <!--add keyboard characters-->
+					<button class="btn btn-default polyanno-metadata-btn"><span class="glyphicon glyphicon-tags"></span></button>
 					<button class="btn btn-default polyanno-export-text" type="button"><span class="glyphicon glyphicon-save"></span></button> <!--export as txt or PDF??-->
 					<button class="btn btn-default polyanno-social" type="button"><span class="glyphicon glyphicon-share"></span></button> <!-- social media sharing-->
 					<button class="btn btn-default polyanno-report" type="button"><span class="glyphicon glyphicon-exclamation-sign"></span><!--report inappropriate content--></button>
 				</div>
 			</div>
 
-		  	<div class="row polyanno-editor-title-row">
-		  		<h2 class="editorTitle"></h2>
+		  	<div class="row polyanno-carousel-controls">
+				<button class="polyanno-carousel-prev col-md-3" role="button" >
+				    <span class="glyphicon glyphicon-chevron-left"></span>
+				</button>
+				<div class="col-md-6 polyanno-mid-carousel-controls"></div>
+				<button class="polyanno-carousel-next col-md-3" role="button">
+				    <span class="glyphicon glyphicon-chevron-right"></span>
+				</button>
 		  	</div>
 
 			<div class="row editorCarousel carousel slide" data-interval="false">
-
-				<a class="left carousel-control col-md-1" role="button" data-slide="prev">
-				    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-				    <span class="sr-only">Previous</span>
-				</a>
 				<!-- Wrapper for slides -->
-				<div class="editorCarouselWrapper col-md-10 carousel-inner" role="listbox">
-
+				<div class="editorCarouselWrapper col-md-12 carousel-inner" role="listbox">
 				    <!--appended slides go here-->
-
 				</div>
-				<a class="right carousel-control col-md-1" role="button" data-slide="next">
-				    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-				    <span class="sr-only">Next</span>
-				</a>
-
 			</div>
 
-			<button type="button" class="btn btn-success addNewBtn">ADD NEW</button>
+			<div class="row polyanno-below-anno-display">
+
+			</div>
 
 		</div>
 		</div>

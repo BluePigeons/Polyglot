@@ -8,16 +8,17 @@ var isUseless = function(something) {
   else {  return false;  };
 };
 
+//////UX SETUP
+
+///only useful for any already on the page when it loads
 $(".keyboardPopup").draggable();
 $(".keyboardPopup").draggable({
   handle: ".keyboardHandlebar"
 });
-
 $( ".keyboardPopup" ).resizable();
 $( ".keyboardPopup" ).resizable( "enable" );
 
-//$( ".keyboardPopup" ).resizable( "option", "grid", [ gridwidth, 0 ] );
-$( ".keyboardPopup" ).on( "resizestop", function( event, ui ) {
+$( "#page_body" ).on( "resizestop", ".keyboardPopup", function( event, ui ) {
   var gridwidth = Math.round($("#ViewerBox1").width() / 12 );
   var newWidth = ui.size.width;
   var colwidth = Math.round(newWidth/gridwidth);
@@ -31,7 +32,6 @@ $( ".keyboardPopup" ).on( "resizestop", function( event, ui ) {
   else {  theEndIndex = spaceIndex;  };
   var theClassName = theClasses.substring(theStartIndex, theEndIndex);
   if ((theStartIndex != -1) && (theClassName != newName)) {
-    ////////is not always working....
     $(".keyboardPopup").removeClass(theClassName).addClass(newName+" ");
   };
 
@@ -616,7 +616,7 @@ setSelect(initialBlocks);
 document.getElementsByClassName('atu-blockMenu').selectedIndex = 1;
 //////
 
-$(".atu-options-dropdown-toggle").on("click", function(event){
+$("#page_body").on("click", ".atu-options-dropdown-toggle", function(event){
     var theOptionRows = $(this).closest(".keyboardPopup").find(".optionRows");
     var theHandlebar = $(this).closest(".keyboardPopup").find(".keyboardHandlebar");
     if (theOptionRows.css("display") == "none") {
@@ -629,26 +629,26 @@ $(".atu-options-dropdown-toggle").on("click", function(event){
     };
 });
 
-$(".atu-blockMenu").on("change", function(event) {
+$("#page_body").on("change", ".atu-blockMenu", function(event) {
   buildMap(findMapID(this), this.options[this.selectedIndex].value);
 });
 
-$(".atu-ucode").on("keypress", function(event) {
+$("#page_body").on("keypress", ".atu-ucode", function(event) {
   handleKeyPress(event, buildTheMap);
 });
 
-$(".atu-ucode-search-btn").on("click", function(event){
+$("#page_body").on("click", ".atu-ucode-search-btn", function(event){
   var ucodeVal = $(this).closest(".searchUnicodeRow").find(".atu-ucode").val();
   var theBlockID = $(this).closest(".keyboardPopup").find(".atu-blockMenu").attr("id");
   var blockDOM = document.getElementById(theBlockID);
   buildTheMap(ucodeVal, blockDOM, findMapID(this));
 });
 
-$(".atu-prev-btn").on("click", function(event){
+$("#page_body").on("click", ".atu-prev-btn", function(event){
   buildMap(findMapID(this), toHex4(startPosition - 256));
 });
 
-$(".atu-next-btn").on("click", function(event){
+$("#page_body").on("click", ".atu-next-btn", function(event){
   buildMap(findMapID(this), toHex4(startPosition + 256));
 });
 
