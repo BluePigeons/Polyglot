@@ -13,6 +13,25 @@ $(".keyboardPopup").draggable({
   handle: ".keyboardHandlebar"
 });
 
+$( ".keyboardPopup" ).resizable();
+$( ".keyboardPopup" ).resizable( "enable" );
+
+//$( ".keyboardPopup" ).resizable( "option", "grid", [ gridwidth, 0 ] );
+$( ".keyboardPopup" ).on( "resizestop", function( event, ui ) {
+  var gridwidth = Math.round($("#ViewerBox1").width() / 12 );
+  var newWidth = ui.size.width;
+  var colwidth = Math.round(newWidth/gridwidth);
+  var newName = "col-md-"+colwidth;
+  var theClasses = $(".keyboardPopup").attr("class").toString();
+  var theStartIndex = theClasses.indexOf("col-md-");
+  var theEndIndex = theClasses.indexOf(" ", theStartIndex);
+  var theClassName = theClasses.substring(theStartIndex, theEndIndex);
+  if ((theStartIndex != -1) && (theClassName != newName)) {
+    $(".keyboardPopup").removeClass(theClassName).addClass(newName+" ");
+  };
+
+} );
+
 //////SETUP/////
 
 var udata = String.raw({raw: udataArray});

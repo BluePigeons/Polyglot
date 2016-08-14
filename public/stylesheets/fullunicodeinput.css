@@ -1,20 +1,7 @@
 
-th {
-  color: grey;
-  font-weight: lighter;
-  padding: 2px;
-}
 
-td {
-
-}
-
-#fullunicodesupportkeyboard {
-
-}
-
-.keyRow {
-  
+#blockMenu {
+  width: 100%;
 }
 
 .sameWidth {
@@ -34,16 +21,16 @@ td {
 }
 
 .keyboardHandlebar {
-  height: 20px;
-  width: 100%;
   background-color: grey;
+  border-radius: 5px 5px 0px 0px;
 }
 
-.chars {
-  
+.languageRow {
+  background-color: grey;
 }
 
 .theKeys {
   border: 1px solid black;
   border-radius: 10px;
+  background-color: white;
 }
