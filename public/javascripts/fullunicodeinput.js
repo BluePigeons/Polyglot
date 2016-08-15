@@ -18,7 +18,7 @@ $(".keyboardPopup").draggable({
 $( ".keyboardPopup" ).resizable();
 $( ".keyboardPopup" ).resizable( "enable" );
 
-$( "#page_body" ).on( "resizestop", ".keyboardPopup", function( event, ui ) {
+$( "#polyanno-page-body" ).on( "resizestop", ".keyboardPopup", function( event, ui ) {
   var gridwidth = Math.round($("#ViewerBox1").width() / 12 );
   var newWidth = ui.size.width;
   var colwidth = Math.round(newWidth/gridwidth);
@@ -102,7 +102,7 @@ var cgName = {
 
 var hexMax = 0x10FFFF;
 var theData;
-$('#page_body').on("click", ".newAnnotation", function(){
+$('#polyanno-page-body').on("click", ".newAnnotation", function(){
   var theID = $(event.target).attr("id");
   theData = document.getElementById(theID);
 });
@@ -616,7 +616,7 @@ setSelect(initialBlocks);
 document.getElementsByClassName('atu-blockMenu').selectedIndex = 1;
 //////
 
-$("#page_body").on("click", ".atu-options-dropdown-toggle", function(event){
+$("#polyanno-page-body").on("click", ".atu-options-dropdown-toggle", function(event){
     var theOptionRows = $(this).closest(".keyboardPopup").find(".optionRows");
     var theHandlebar = $(this).closest(".keyboardPopup").find(".keyboardHandlebar");
     if (theOptionRows.css("display") == "none") {
@@ -629,26 +629,26 @@ $("#page_body").on("click", ".atu-options-dropdown-toggle", function(event){
     };
 });
 
-$("#page_body").on("change", ".atu-blockMenu", function(event) {
+$("#polyanno-page-body").on("change", ".atu-blockMenu", function(event) {
   buildMap(findMapID(this), this.options[this.selectedIndex].value);
 });
 
-$("#page_body").on("keypress", ".atu-ucode", function(event) {
+$("#polyanno-page-body").on("keypress", ".atu-ucode", function(event) {
   handleKeyPress(event, buildTheMap);
 });
 
-$("#page_body").on("click", ".atu-ucode-search-btn", function(event){
+$("#polyanno-page-body").on("click", ".atu-ucode-search-btn", function(event){
   var ucodeVal = $(this).closest(".searchUnicodeRow").find(".atu-ucode").val();
   var theBlockID = $(this).closest(".keyboardPopup").find(".atu-blockMenu").attr("id");
   var blockDOM = document.getElementById(theBlockID);
   buildTheMap(ucodeVal, blockDOM, findMapID(this));
 });
 
-$("#page_body").on("click", ".atu-prev-btn", function(event){
+$("#polyanno-page-body").on("click", ".atu-prev-btn", function(event){
   buildMap(findMapID(this), toHex4(startPosition - 256));
 });
 
-$("#page_body").on("click", ".atu-next-btn", function(event){
+$("#polyanno-page-body").on("click", ".atu-next-btn", function(event){
   buildMap(findMapID(this), toHex4(startPosition + 256));
 });
 

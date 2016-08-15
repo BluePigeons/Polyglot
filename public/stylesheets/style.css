@@ -16,6 +16,12 @@
 	height: 500px;
 }
 
+#polyanno-top-bar {
+	height: 5%;
+	background-color: grey;
+	border-radius: 5px;
+}
+
 .filter {
 	margin: 20px;
 }
@@ -30,6 +36,22 @@ iframe {
 	width: 90%;
 	height: 80%;
 	margin: 20px;
+}
+
+.polyanno-language-buttons {
+	display: inline-block;
+}
+
+.polyanno-other-button {
+	display: inline-block;
+}
+
+#polyanno-bar-other-buttons {
+	background-color: grey;
+}
+
+.polyanno-add-keyboard {
+	background-color: grey;
 }
 
 .annoPopup {
@@ -55,7 +77,6 @@ iframe {
   background-color: grey;
   padding: 5px;
   font-size: 0.875em;
-  width: 100%;
   display: none;
 }
 
@@ -91,4 +112,6 @@ iframe {
 	padding: 2%;
 }
 
-
+.navbar {
+	margin-bottom: 0px;
+}

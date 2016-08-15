@@ -890,7 +890,7 @@ var strangeTrimmingFunction = function(thetext) {
 };
 
 var newTextPopoverOpen = function(theTextIDstring, theParent) {
-  $('#page_body').on("click", function(event) {
+  $('#polyanno-page-body').on("click", function(event) {
     if ($(event.target).hasClass("popupAnnoMenu") == false) {
       $(theTextIDstring).popover("hide");
     }
@@ -1024,7 +1024,8 @@ var addKeyboard = function() {
 //need to eventually save HTML as string in JS file but for now cloning
   var popupTranscriptionTemplate = document.getElementById("fullunicodesupportkeyboard");
   var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
-  ///////not cloning properly
+
+  var htmlstring = atu_main_HTML;
 
   var newKeyboardID = addPopup("keyboardPopup", newPopupClone);
   $(newKeyboardID).addClass("ui-draggable");
@@ -1056,12 +1057,8 @@ var adjustPopupBootstrapGrid = function(parentDOM, popupDOM, theUI) {
   return updateGridCols(colwidth, popupDOM);
 };
 
-$("#page_body").on("click", ".polyanno-add-keyboard", function(event){
-  addKeyboard();
-});
-
 ///SELECTION PROCESS
-$('#page_body').on("mouseup", '.content-area', function(event) {
+$('#polyanno-page-body').on("mouseup", '.content-area', function(event) {
 
   var selection = getSelected(); 
   var classCheck = selection.anchorNode.parentElement.className;
@@ -1098,7 +1095,7 @@ $('#imageViewer').popover({
 });
 
 $('#imageViewer').on("shown.bs.popover", function(event) {
-    $('#page_body').on("click", function(event) {
+    $('#polyanno-page-body').on("click", function(event) {
       if ($(event.target).hasClass("popupAnnoMenu") == false) {
         $('#map').popover("hide");
       }
@@ -1120,11 +1117,11 @@ $('#map').popover({
 
 $('#map').on("shown.bs.popover", function(event) {
 
-  $('#page_body').one("click", '.openTranscriptionMenuParent', function(event) {
+  $('#polyanno-page-body').one("click", '.openTranscriptionMenuParent', function(event) {
     checkEditorsOpen("vector", "transcription");
     $('#map').popover('hide');
   });
-  $('#page_body').one("click", '.openTranslationMenuParent', function(event) {
+  $('#polyanno-page-body').one("click", '.openTranslationMenuParent', function(event) {
     checkEditorsOpen("vector", "translation");
     $('#map').popover('hide');
   });
@@ -1141,7 +1138,7 @@ $(".polyanno-image-box").draggable({
 $( ".polyanno-image-box" ).resizable();
 $( ".polyanno-image-box" ).resizable( "enable" );
 
-$('#page_body').on("mouseover", ".textEditorBox", function(event){
+$('#polyanno-page-body').on("mouseover", ".textEditorBox", function(event){
 
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
   //////////
@@ -1165,40 +1162,40 @@ $('#page_body').on("mouseover", ".textEditorBox", function(event){
 
 });
 
-$('#page_body').on("mouseout", ".textEditorBox", function(event){
+$('#polyanno-page-body').on("mouseout", ".textEditorBox", function(event){
   var thisEditor = "#" + $(event.target).closest(".textEditorPopup").attr("id");
   $(thisEditor).find(".polyanno-colour-change").css("background-color", defaultColoursArray[0]);
   findAndHighlight("editor", thisEditor, defaultColoursArray);
 });
 
-$('#page_body').on("mouseover", ".leaflet-popup", function(event){
+$('#polyanno-page-body').on("mouseover", ".leaflet-popup", function(event){
   highlightVectorChosen(vectorSelected, highlightColoursArray[1]);
   findAndHighlight("vSelected", vectorSelected, highlightColoursArray);
 });
 
-$('#page_body').on("mouseover", ".leaflet-popup", function(event){
+$('#polyanno-page-body').on("mouseover", ".leaflet-popup", function(event){
   highlightVectorChosen(vectorSelected, defaultColoursArray[1]);
   findAndHighlight("vSelected", vectorSelected, defaultColoursArray);
 });
 
-$('#page_body').on("click", '.addAnnotationSubmit', function(event) {
+$('#polyanno-page-body').on("click", '.addAnnotationSubmit', function(event) {
   var thisEditor = $(event.target).closest(".annoPopup").attr("id"); 
   settingEditorVars(thisEditor);
   ///
   addAnnotation(thisEditor);
 });
 
-$('#page_body').on("click", ".closePopupBtn", function(){
+$('#polyanno-page-body').on("click", ".closePopupBtn", function(){
   var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
   closeEditorMenu(thisEditor);
 });
 
-$('#page_body').on("click", ".closePopoverMenuBtn", function(){
+$('#polyanno-page-body').on("click", ".closePopoverMenuBtn", function(){
   $(event.target).closest(".popover").popover("hide"); ///////
 });
 
 
-$('#page_body').on('slid.bs.carousel', '.editorCarousel', function(event) {
+$('#polyanno-page-body').on('slid.bs.carousel', '.editorCarousel', function(event) {
 
   var currentSlideID = $(event.target).find(".active").find(".content-area").attr("id");
   var thisEditor = $(event.target).closest(".annoPopup").attr("id"); 
@@ -1207,19 +1204,19 @@ $('#page_body').on('slid.bs.carousel', '.editorCarousel', function(event) {
 
 });
 
-$('#page_body').on("click", ".addNewBtn", function(event){
+$('#polyanno-page-body').on("click", ".addNewBtn", function(event){
   $(event.target).closest(".textEditorPopup").find(".editorCarousel").carousel(0);
 });
 
-$('#page_body').on("click", ".polyanno-carousel-next", function(event){
+$('#polyanno-page-body').on("click", ".polyanno-carousel-next", function(event){
   $(event.target).closest(".textEditorPopup").find(".editorCarousel").carousel("next");
 });
 
-$('#page_body').on("click", ".polyanno-carousel-prev", function(event){
+$('#polyanno-page-body').on("click", ".polyanno-carousel-prev", function(event){
   $(event.target).closest(".textEditorPopup").find(".editorCarousel").carousel("prev");
 });
 
-$('#page_body').on("click", ".linkBtn", function(){
+$('#polyanno-page-body').on("click", ".linkBtn", function(){
   var thisEditor = $(event.target).closest(".textEditorPopup").attr("id"); 
   settingEditorVars(thisEditor);
   selectingVector = childrenArray;
@@ -1227,7 +1224,7 @@ $('#page_body').on("click", ".linkBtn", function(){
   $("#map").popover( "show");
 });
 
-$('#page_body').on("click", '.votingUpButton', function(event) {
+$('#polyanno-page-body').on("click", '.votingUpButton', function(event) {
   var votedID = $(event.target).closest(".pTextDisplay").find("p").attr("id");
   var currentTopText = $(event.target).closest(".textEditorPopup").find(".currentTop").html();
   var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
@@ -1235,7 +1232,7 @@ $('#page_body').on("click", '.votingUpButton', function(event) {
   votingFunction("up", votedID, currentTopText, thisEditor);
 });
 
-$("#page_body").on("click", ".polyanno-options-dropdown-toggle", function(event){
+$("#polyanno-page-body").on("click", ".polyanno-options-dropdown-toggle", function(event){
     var theOptionRows = $(this).closest(".textEditorPopup").find(".polyanno-options-row");
     var theHandlebar = $(this).closest(".textEditorPopup").find(".popupBoxHandlebar");
     if (theOptionRows.css("display") == "none") {
@@ -1248,25 +1245,42 @@ $("#page_body").on("click", ".polyanno-options-dropdown-toggle", function(event)
     };
 });
 
-$( "#page_body" ).on( "resizestop", ".annoPopup", function( event, ui ) {
+$("#polyanno-page-body").on("click", ".polyanno-favourite", function(event) {
+  if ($(event.target).find(".glyphicon").hasClass("glyphicon-star-empty")) {
+    //////// add to favourites
+    $(event.target).removeClass("glyphicon-star-empty").addClass("glyphicon-star");
+  }
+  else {
+    ///////remove from favourites
+    $(event.target).removeClass("glyphicon-star").addClass("glyphicon-star-empty");
+  };
+});
+
+$( "#polyanno-page-body" ).on( "resizestop", ".annoPopup", function( event, ui ) {
   adjustPopupBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
 } );
 
-$( "#page_body" ).on( "resizestop", "#imageViewer", function( event, ui ) {
+$( "#polyanno-page-body" ).on( "resizestop", "#imageViewer", function( event, ui ) {
   adjustPopupBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
 //  if (colDiff != 0) { updateGridCols(12-colDiff,$(".viewerBox")); };
 } );
 
-$( "#page_body" ).on( "dragstop", ".annoPopup", function( event, ui ) {
+$( "#polyanno-page-body" ).on( "dragstop", ".annoPopup", function( event, ui ) {
   ////////
   var endLeft = ui.position.left;
   var endRight = endLeft + $(event.target).width();
   ////////
 } );
 
-$( "#page_body" ).on( "dragstop", "#imageViewer", function( event, ui ) {
+$( "#polyanno-page-body" ).on( "dragstop", "#imageViewer", function( event, ui ) {
 
 } );
+
+//////HEADER BODY
+
+$("#polyanno-top-bar").on("click", ".polyanno-add-keyboard", function(event){
+  addKeyboard();
+});
 
 //////TRANSCRIPTIONS
 
