@@ -96,6 +96,10 @@ app.get('/beginnertutorial', function(req, res) {
     res.redirect("/beginnertutorial.html"); 
 });
 
+app.get('/aboutus', function(req, res) {
+    res.redirect("/aboutus.html"); 
+});
+
 /////////////////API ROUTES
 
 //PARAMETERS

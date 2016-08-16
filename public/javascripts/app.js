@@ -32,6 +32,11 @@ var transcriptionIconHTML = `<span class='glyphicon glyphicon-edit'></span>
 var translationIconHTML = `<span class='glyphicon glyphicon-globe'></span>
                             <span>Translation</span>`;
 
+var polyannoMinBarHTML = `<button type="button" class="btn polyannoMinEditor"> 
+                          <span> _ </span>
+                          <span class="polyannoMinTitle"></span> 
+                          </button>`;
+
 var imageSelected; //info.json format URL
 var imageSelectedFormats;
 var imageSelectedMetadata = [];
@@ -177,8 +182,6 @@ var addPopup = function(popupClass, popupClone) {
   popupBoxDiv.classList.add(popupClass);
   popupBoxDiv.classList.add("annoPopup");
   popupBoxDiv.classList.add("col-md-4");
-  
-  ////resizeable and draggable??????
 
   popupBoxDiv.id = "DivTarget-" + Math.random().toString().substring(2);
   var popupIDstring = "#" + popupBoxDiv.id;
@@ -187,13 +190,21 @@ var addPopup = function(popupClass, popupClone) {
   var pageBody = document.getElementById("ViewerBox1");
   pageBody.insertBefore(popupBoxDiv, pageBody.childNodes[0]); 
 
-  $("."+popupClass).draggable();
-  $("."+popupClass).draggable({
-    handle: ".ui-draggable-handle"
+///
+  $(popupIDstring).draggable();
+  $(popupIDstring).draggable({
+    addClasses: false,
+    handle: ".ui-draggable-handle",
+    revert: function(theObject) {
+      return adjustDragBootstrapGrid($(this));
+    },
+    revertDuration: 0,
+    snap: ".annoPopup",
+    snapMode: "outer"  
   });
 
-  $( "."+popupClass ).resizable();
-  $( "."+popupClass ).resizable( "enable" );
+  $(popupIDstring).resizable();
+  $(popupIDstring).resizable( "enable" );
 
   return popupIDstring;
 };
@@ -1050,11 +1061,159 @@ var updateGridCols = function(newcol, popupDOM) {
   else {  return 0  };
 };
 
-var adjustPopupBootstrapGrid = function(parentDOM, popupDOM, theUI) {
+var adjustResizeBootstrapGrid = function(parentDOM, popupDOM, theUI) {
   var gridwidth = Math.round(parentDOM.width() / 12 );
   var newWidth = theUI.size.width;
   var colwidth = Math.round(newWidth/gridwidth);
   return updateGridCols(colwidth, popupDOM);
+};
+
+var findCornerArray = function(theDOM) {
+    ///position or offset?
+  var theLeft = theDOM.position().left;
+  var theRight = theLeft + theDOM.width();
+  var theTop = theDOM.position().top;
+  var theBottom = theTop + theDOM.height(); 
+  return [theLeft, theRight, theTop, theBottom];
+};
+
+var isBetween = function(theNum, theFirst, theLast) {
+  if ((theNum > theFirst) && (theNum < theLast)) { 
+    return theNum - theFirst;
+  }
+  else { return 0 };
+};
+
+var formJumpArray = function(theChecks, popupDOM, nDOM) {
+  if ( ((theChecks[2] != 0) && (theChecks[3] != 0)) || ((theChecks[2] == 0) && (theChecks[3] == 0)) ){
+    if (theChecks[0] != 0) {    }
+    else if (theChecks[1] != 0) {   };
+  }
+  else if ( ((theChecks[0] != 0) && (theChecks[1] != 0)) || ((theChecks[0] == 0) && (theChecks[1] == 0)) ){
+    if (theChecks[2] != 0) {    }
+    else if (theChecks[3] != 0) {   };
+  }
+  else if (theChecks[0] != 0) {    }
+  else if (theChecks[1] != 0) {   };
+
+};
+
+var loopBetweenSides = function(popupCorners, otherCorners){
+  return [
+    isBetween(popupCorners[0], otherCorners[0], otherCorners[1]), ///needs to add to left this far to clear left side
+    isBetween(popupCorners[1], otherCorners[0], otherCorners[1]), ///needs to remove from left this far to clear right side
+    isBetween(popupCorners[2], otherCorners[2], otherCorners[3]),
+    isBetween(popupCorners[3], otherCorners[2], otherCorners[3])
+  ];
+};
+
+var hasCornerInside = function(popupCorners, otherCorners) {
+  var theChecks = loopBetweenSides(popupCorners, otherCorners);
+  if (((theChecks[0] != 0) || (theChecks[1] != 0)) && ((theChecks[2] != 0)|| (theChecks[3] != 0))) { 
+    return theChecks;
+  }
+  else {  return false  };
+};
+
+var isReverting = false;
+
+var isEditorOverlap = function(popupDOM, popupCorners, nDOM) {
+  var otherCorners = findCornerArray(nDOM);
+  var theChecks = hasCornerInside(popupCorners, otherCorners);
+  var outsideChecks = hasCornerInside(otherCorners, popupCorners);
+
+  if ( (theChecks == false) && (outsideChecks == false) ) {
+    return false;
+  }
+  else {
+    formJumpArray(theChecks, popupDOM, nDOM);
+    return true;
+  };
+  
+};
+
+var getDist = function(thisSide, thatSide) {
+  return thisSide[0] - thatSide[1];
+}
+
+var checkSiblingSides = function(mainSides, checkSides, theNearestSiblings, nDOM) {
+  var checkLeft = getDist(mainSides, checkSides);
+  var checkRight = getDist(checkSides, mainSides);
+  if ( ((theNearestSiblings[0] == -1)&&( checkLeft >= 0)) || ( (theNearestSiblings[0] != -1) && (checkLeft < getDist(mainSides, findCornerArray(theNearestSiblings[0]) ) )) ) {
+    theNearestSiblings[0] = nDOM;
+    theNearestSiblings[2] = checkLeft;
+    return theNearestSiblings;
+  }
+  else if ( ((theNearestSiblings[1] == -1)&&( checkRight >= 0)) || ( (theNearestSiblings[1] != -1) && (checkRight < getDist(findCornerArray(theNearestSiblings[1]), mainSides) )) ) {
+    theNearestSiblings[1] = nDOM;
+    theNearestSiblings[2] = checkRight;
+    return theNearestSiblings;
+  }
+  else { return theNearestSiblings; };
+};
+
+var nearestSiblings = function(popupCorners, nDOM, theNearestSiblings) {
+  var otherCorners = findCornerArray(nDOM);
+  if ((popupCorners[2] < otherCorners[3]) && (popupCorners[3] > otherCorners[2])) { ///higher value for top means lower down hence operators' directions
+    return checkSiblingSides(popupCorners, otherCorners, theNearestSiblings, nDOM);
+  }
+  else {
+    return theNearestSiblings;
+  };
+};
+
+var isReverting = false;
+
+var adjustDragBootstrapGrid = function(popupDOM) {
+
+  var popupCorners = findCornerArray(popupDOM);
+  var theNearestSiblings = [-1, -1];
+  if (!isUseless(popupDOM.prev())) { theNearestSiblings == popupDOM.prev(); };
+  if (!isUseless(popupDOM.next())) { theNearestSiblings == popupDOM.next(); };
+
+  popupDOM.siblings().each(function(i) {
+    isEditorOverlap(popupDOM, popupCorners, $(this));
+    theNearestSiblings = nearestSiblings(popupCorners, $(this), theNearestSiblings);
+  });
+
+  if ((theNearestSiblings[0] != -1) && (theNearestSiblings[0] != popupDOM.prev())) {
+    isReverting = ["insertAfter", theNearestSiblings[0]];
+    popupDOM.addClass("polyanno-was-reverted");
+  //  popupDOM.insertAfter(theNearestSiblings[0]);
+    return true;
+
+  }
+  else if ((theNearestSiblings[1] != -1) && (theNearestSiblings[1] != popupDOM.next())) {
+    isReverting = ["insertBefore", theNearestSiblings[1] ];
+    popupDOM.addClass("polyanno-was-reverted");
+  //  popupDOM.insertBefore(theNearestSiblings[1]);
+    return true;
+  }
+  else {
+    return false;
+  }
+  
+};
+
+var polyannoAddToFavourite = function() {
+
+};
+
+var polyannoRemoveFavourite = function() {
+
+};
+
+var polyannoMinimiseEditor = function (thisEditorWithoutHash) {
+  var newHTML = $(".polyanno-min-bar").html() + polyannoMinBarHTML;
+  $(".polyanno-min-bar").html(newHTML);
+  $(".polyanno-min-bar").last().find(".polyannoMinTitle").html(thisEditorWithoutHash);
+  $(".polyanno-min-bar").last().find(".polyannoMinTitle").addClass(thisEditorWithoutHash);
+  $("#"+thisEditorWithoutHash).css("display", "none");
+};
+
+var polyannoReopenMin = function (thisEditorWithoutHash) {
+  $("#"+thisEditorWithoutHash).css("display", "block");
+  $(".polyanno-min-bar").last().find("."+thisEditorWithoutHash).closest(".polyannoMinEditor").remove();
 };
 
 ///SELECTION PROCESS
@@ -1133,7 +1292,14 @@ $('#map').on("shown.bs.popover", function(event) {
 
 $(".polyanno-image-box").draggable();
 $(".polyanno-image-box").draggable({
-  handle: ".imageHandlebar"
+  addClasses: false,
+  handle: ".imageHandlebar",
+  revert: function(theObject) {
+    return adjustDragBootstrapGrid($(this));
+  },
+  revertDuration: 0,
+  snap: ".annoPopup",
+  snapMode: "outer"
 });
 $( ".polyanno-image-box" ).resizable();
 $( ".polyanno-image-box" ).resizable( "enable" );
@@ -1185,9 +1351,16 @@ $('#polyanno-page-body').on("click", '.addAnnotationSubmit', function(event) {
   addAnnotation(thisEditor);
 });
 
+////anno header bars
+
 $('#polyanno-page-body').on("click", ".closePopupBtn", function(){
   var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
   closeEditorMenu(thisEditor);
+});
+
+$( "#polyanno-page-body").on( "click", ".polyanno-popup-min", function(event) {
+  var thisEditor = $(event.target).closest(".annoPopup").attr("id");
+  polyannoMinimiseEditor(thisEditor);
 });
 
 $('#polyanno-page-body').on("click", ".closePopoverMenuBtn", function(){
@@ -1246,40 +1419,45 @@ $("#polyanno-page-body").on("click", ".polyanno-options-dropdown-toggle", functi
 });
 
 $("#polyanno-page-body").on("click", ".polyanno-favourite", function(event) {
-  if ($(event.target).find(".glyphicon").hasClass("glyphicon-star-empty")) {
-    //////// add to favourites
-    $(event.target).removeClass("glyphicon-star-empty").addClass("glyphicon-star");
+  var theSpan = $(this).find(".glyphicon");
+  var thisEditorInfo =  fieldMatching(editorsOpen, "editor", $(this).closest(".textEditorPopup").attr("id"));
+  if (theSpan.hasClass("glyphicon-star-empty")) {
+    polyannoAddToFavourite( thisEditorInfo);
+    theSpan.removeClass("glyphicon-star-empty").addClass("glyphicon-star");
   }
   else {
-    ///////remove from favourites
-    $(event.target).removeClass("glyphicon-star").addClass("glyphicon-star-empty");
+    polyannoRemoveFavourite( thisEditorInfo );
+    theSpan.removeClass("glyphicon-star").addClass("glyphicon-star-empty");
   };
 });
 
 $( "#polyanno-page-body" ).on( "resizestop", ".annoPopup", function( event, ui ) {
-  adjustPopupBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
-} );
-
-$( "#polyanno-page-body" ).on( "resizestop", "#imageViewer", function( event, ui ) {
-  adjustPopupBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
-//  if (colDiff != 0) { updateGridCols(12-colDiff,$(".viewerBox")); };
+  adjustResizeBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
 } );
 
 $( "#polyanno-page-body" ).on( "dragstop", ".annoPopup", function( event, ui ) {
-  ////////
-  var endLeft = ui.position.left;
-  var endRight = endLeft + $(event.target).width();
-  ////////
-} );
-
-$( "#polyanno-page-body" ).on( "dragstop", "#imageViewer", function( event, ui ) {
-
+  if ($(event.target).hasClass("polyanno-was-reverted") && (isReverting[0] == "insertAfter") ) {
+    $(event.target).insertAfter(isReverting[1]);
+    ///not moving neighbours along??
+    $(event.target).removeClass("polyanno-was-reverted");
+    isReverting = false;
+  }
+  else if ($(event.target).hasClass("polyanno-was-reverted") && (isReverting[0] == "insertBefore") ) {
+    $(event.target).insertBefore(isReverting[1]);
+    $(event.target).removeClass("polyanno-was-reverted");
+    isReverting = false;
+  };
 } );
 
 //////HEADER BODY
 
 $("#polyanno-top-bar").on("click", ".polyanno-add-keyboard", function(event){
   addKeyboard();
+});
+
+$("#polyanno-top-bar").on("click", ".polyannoMinEditor", function(event) {
+  var thisEditor = $(this).find(".polyannoMinTitle").html();
+  polyannoReopenMin(thisEditor);
 });
 
 //////TRANSCRIPTIONS

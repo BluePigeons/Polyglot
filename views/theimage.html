@@ -92,8 +92,8 @@
 		          <ul class="dropdown-menu">
 
 		          	<li class="media">
-		          		<div class="media-body">
-		          			<img class="media-object" src="..." alt="...">
+		          		<div class="media-body polyanno-user-icon">
+		          			<!--<img class="media-object" src="..." alt="...">-->
 		          		</div>
 		          	</li>
 
@@ -174,14 +174,14 @@
 
 <!-- Image Viewer Panel -->
 
-			<div id="imageViewer" class="col-md-4 ui-draggable ui-resizeable polyanno-image-box">
+			<div id="imageViewer" class="col-md-4 annoPopup ui-draggable ui-resizeable annoPopup polyanno-image-box">
 
 				<div class="row imageHandlebar polyanno-image ui-draggable-handle">
-					<button class="btn polyanno-image-options-dropdown-toggle polyanno-image col-md-2" type="button" >
-					    <span class="glyphicon glyphicon-cog"></span>
-					    <span class="caret"></span>
+				<div class="col-md-1"></div>
+					<button class="btn col-md-1 polyanno-colour-change polyanno-popup-min">
+						<span> _ </span>
 					</button>
-					<div class="col-md-9"></div>
+					<div class="col-md-10"></div>
 				</div>
 
 				<div id='map' class="row"></div>
@@ -208,7 +208,10 @@
 				<button class="btn col-md-1">
 					<span class="closePopupBtn glyphicon glyphicon-remove"></span>
 				</button>
-				<div class="col-md-9"></div>
+				<button class="btn col-md-1 polyanno-colour-change polyanno-popup-min">
+					<span> _ </span>
+				</button>
+				<div class="col-md-8"></div>
 				<button class="btn  atu-options-dropdown-toggle col-md-2" type="button" >
 				    <span class="glyphicon glyphicon-cog"></span>
 				    <span class="caret"></span>
@@ -314,12 +317,15 @@
 			<button class="btn col-md-1 polyanno-colour-change">
 				<span class="closePopupBtn glyphicon glyphicon-remove"></span>
 			</button>
+			<button class="btn col-md-1 polyanno-colour-change polyanno-popup-min">
+				<span> _ </span>
+			</button>
+			<div class="col-md-7">
+				<div class="editorTitle"></div>
+			</div>
 			<button class="btn col-md-1 polyanno-colour-change polyanno-favourite">
 				<span class="glyphicon glyphicon-star-empty"></span>
 			</button>
-			<div class="col-md-8">
-				<div class="editorTitle"></div>
-			</div>
 			<button class="btn polyanno-options-dropdown-toggle polyanno-colour-change col-md-2" type="button" >
 			    <span class="glyphicon glyphicon-cog"></span>
 			    <span class="caret"></span>
@@ -331,7 +337,7 @@
 		<div class="col-md-12">
 
 			<div class="row polyanno-options-row">
-				<div class="btn-group polyanno-options-buttons" role="group" aria-label="...">
+				<div class="btn-group polyanno-options-buttons" role="group" aria-label="options_buttons">
 					<button type="button" class="btn btn-success addNewBtn">
 						<span class="glyphicon glyphicon-pencil" ></span> NEW
 					</button>
