@@ -1084,17 +1084,17 @@ var isBetween = function(theNum, theFirst, theLast) {
   else { return 0 };
 };
 
-var formJumpArray = function(theChecks, popupDOM, nDOM) {
-  if ( ((theChecks[2] != 0) && (theChecks[3] != 0)) || ((theChecks[2] == 0) && (theChecks[3] == 0)) ){
-    if (theChecks[0] != 0) {    }
-    else if (theChecks[1] != 0) {   };
+var formJumpArray = function(theChecks, popupDOM, nDOM, theNSiblings) {
+  if ( ((theChecks[2] != 0) && (theChecks[3] != 0)) || ((theChecks[2] == 0) && (theChecks[3] == 0)) ){ ///if top and bottom are not overlapping or both are
+    if (theChecks[0] != 0) {  theNSiblings[0] = nDOM; return theNSiblings; }
+    else if (theChecks[1] != 0) {  theNSiblings[1] = nDOM; return theNSiblings; };
   }
-  else if ( ((theChecks[0] != 0) && (theChecks[1] != 0)) || ((theChecks[0] == 0) && (theChecks[1] == 0)) ){
-    if (theChecks[2] != 0) {    }
-    else if (theChecks[3] != 0) {   };
+  else if ( ((theChecks[0] != 0) && (theChecks[1] != 0)) || ((theChecks[0] == 0) && (theChecks[1] == 0)) ){ ///if left and right are inside neighbour and needs to jump above or below
+    if (theChecks[2] != 0) {  return theNSiblings;  }
+    else if (theChecks[3] != 0) { return theNSiblings;  };
   }
-  else if (theChecks[0] != 0) {    }
-  else if (theChecks[1] != 0) {   };
+  else if (theChecks[0] != 0) {  theNSiblings[0] = nDOM; return theNSiblings;  }
+  else if (theChecks[1] != 0) {  theNSiblings[1] = nDOM; return theNSiblings; };
 
 };
 
@@ -1117,17 +1117,16 @@ var hasCornerInside = function(popupCorners, otherCorners) {
 
 var isReverting = false;
 
-var isEditorOverlap = function(popupDOM, popupCorners, nDOM) {
+var isEditorOverlap = function(popupDOM, popupCorners, nDOM, theNSiblings) {
   var otherCorners = findCornerArray(nDOM);
   var theChecks = hasCornerInside(popupCorners, otherCorners);
   var outsideChecks = hasCornerInside(otherCorners, popupCorners);
 
   if ( (theChecks == false) && (outsideChecks == false) ) {
-    return false;
+    return theNSiblings;
   }
   else {
-    formJumpArray(theChecks, popupDOM, nDOM);
-    return true;
+    return formJumpArray(theChecks, popupDOM, nDOM, theNSiblings);
   };
   
 };
@@ -1164,6 +1163,22 @@ var nearestSiblings = function(popupCorners, nDOM, theNearestSiblings) {
 
 var isReverting = false;
 
+var updateIsReverting = function(theNearestSiblings, popupDOM) {
+  if ((theNearestSiblings[0] != -1) && (theNearestSiblings[0] != popupDOM.prev())) {
+    isReverting = ["insertAfter", theNearestSiblings[0]];
+    popupDOM.addClass("polyanno-was-reverted");
+    return true;
+  }
+  else if ((theNearestSiblings[1] != -1) && (theNearestSiblings[1] != popupDOM.next())) {
+    isReverting = ["insertBefore", theNearestSiblings[1] ];
+    popupDOM.addClass("polyanno-was-reverted");
+    return true;
+  }
+  else {
+    return false;
+  };
+};
+
 var adjustDragBootstrapGrid = function(popupDOM) {
 
   var popupCorners = findCornerArray(popupDOM);
@@ -1172,26 +1187,18 @@ var adjustDragBootstrapGrid = function(popupDOM) {
   if (!isUseless(popupDOM.next())) { theNearestSiblings == popupDOM.next(); };
 
   popupDOM.siblings().each(function(i) {
-    isEditorOverlap(popupDOM, popupCorners, $(this));
-    theNearestSiblings = nearestSiblings(popupCorners, $(this), theNearestSiblings);
+    theNearestSiblings = isEditorOverlap(popupDOM, popupCorners, $(this), theNearestSiblings);
   });
 
-  if ((theNearestSiblings[0] != -1) && (theNearestSiblings[0] != popupDOM.prev())) {
-    isReverting = ["insertAfter", theNearestSiblings[0]];
-    popupDOM.addClass("polyanno-was-reverted");
-  //  popupDOM.insertAfter(theNearestSiblings[0]);
-    return true;
-
-  }
-  else if ((theNearestSiblings[1] != -1) && (theNearestSiblings[1] != popupDOM.next())) {
-    isReverting = ["insertBefore", theNearestSiblings[1] ];
-    popupDOM.addClass("polyanno-was-reverted");
-  //  popupDOM.insertBefore(theNearestSiblings[1]);
-    return true;
+  if ( ((theNearestSiblings[0] == -1) || (theNearestSiblings[0] == popupDOM.prev())) && ((theNearestSiblings[0] == -1) || (theNearestSiblings[0] == popupDOM.prev()))  ) {
+    popupDOM.siblings().each(function(i) {
+      theNearestSiblings = nearestSiblings(popupCorners, $(this), theNearestSiblings);
+    });
+    return updateIsReverting(theNearestSiblings, popupDOM);
   }
   else {
-    return false;
-  }
+    return updateIsReverting(theNearestSiblings, popupDOM);
+  };
   
 };
 
@@ -1437,12 +1444,19 @@ $( "#polyanno-page-body" ).on( "resizestop", ".annoPopup", function( event, ui )
 
 $( "#polyanno-page-body" ).on( "dragstop", ".annoPopup", function( event, ui ) {
   if ($(event.target).hasClass("polyanno-was-reverted") && (isReverting[0] == "insertAfter") ) {
+    var theRest = isReverting[1].nextAll();
+    if( !isUseless(theRest) ) { 
+      theRest.insertAfter($(event.target));
+    };
     $(event.target).insertAfter(isReverting[1]);
-    ///not moving neighbours along??
     $(event.target).removeClass("polyanno-was-reverted");
     isReverting = false;
   }
   else if ($(event.target).hasClass("polyanno-was-reverted") && (isReverting[0] == "insertBefore") ) {
+    var theRest = isReverting[1].prevAll();
+    if( !isUseless(theRest) ) { 
+      theRest.insertBefore($(event.target));
+    };
     $(event.target).insertBefore(isReverting[1]);
     $(event.target).removeClass("polyanno-was-reverted");
     isReverting = false;
