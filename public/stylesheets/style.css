@@ -77,6 +77,13 @@ iframe {
   border-radius: 5px 5px 0px 0px;
 }
 
+.polyanno-enable-IME {
+	display: none;
+}
+.polyanno-enable-IME-opt {
+	display: inline-block;
+}
+
 .polyanno-image {
   background-color: buttonface;
   border-radius: 5px;	
@@ -109,6 +116,10 @@ iframe {
 	background-color:yellow;
 	font-weight: normal;
 	color: black;
+}
+
+.enable-multiple-IMEs-select {
+	margin: 5px;
 }
 
 .editorTitle {

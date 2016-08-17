@@ -101,7 +101,13 @@ app.get('/aboutus', function(req, res) {
 });
 
 /////////////////API ROUTES
+/*
+app.get('/rules/:langFolder', function(req, res) {
 
+    res.sendFile(__dirname + '/public/javascripts/rules/'+langFolder); 
+
+});
+*/
 //PARAMETERS
 
 //app.param('parent', annotations.parentParams);

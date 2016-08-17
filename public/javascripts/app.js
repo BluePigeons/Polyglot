@@ -32,9 +32,10 @@ var transcriptionIconHTML = `<span class='glyphicon glyphicon-edit'></span>
 var translationIconHTML = `<span class='glyphicon glyphicon-globe'></span>
                             <span>Translation</span>`;
 
-var polyannoMinBarHTML = `<button type="button" class="btn polyannoMinEditor"> 
+var polyannoMinBarHTML1 = `<button type="button" class="btn polyannoMinEditor"> 
                           <span> _ </span>
-                          <span class="polyannoMinTitle"></span> 
+                          <span class="polyannoMinTitle">`
+var polyannoMinBarHTML2 =  `</span> 
                           </button>`;
 
 var imageSelected; //info.json format URL
@@ -71,6 +72,8 @@ var outerElementTextIDstring;
 var newContent;
 var newNodeInsertID;
 var startParentID;
+var $langSelector = false;
+var $imeSelector = false;
 
 var isUseless = function(something) {
   if (rejectionOptions.has(something) || rejectionOptions.has(typeof something)) {  return true;  }
@@ -411,7 +414,6 @@ var canVoteAdd = function(popupIDstring, theVectorParent) {
   //if it is targeting it's own type OR it is targeting a vector with parents THEN you can vote and add
   if ( targetType.includes(textTypeSelected) || ( ( targetType.includes("vector") ) && ( !isUseless(theVectorParent) ) ) ) { 
     $(popupIDstring).find(".editorCarouselWrapper").append(addNewAnnoHTML);
-    //$(popupIDstring).find(".newAnnotation").attr("id", popupIDstring+"AddNew");
     return voteButtonsHTML; ///////metadata stuff too!!!!!!!
   }
   else {
@@ -534,7 +536,7 @@ var findNewTextData = function(editorString) {
 
   var newText = $(editorString).find(".newAnnotation").val();
   textSelected = newText; ////////
-  var textData = {body: {text: newText, format: "text"}, target: []};
+  var textData = {body: {text: newText, format: "text"}, target: []}; ////
 
   if (targetType.includes("vector") == true) {
     textData.target.push({id: vectorSelected, format: "image/SVG"});
@@ -1002,6 +1004,7 @@ var setNewTextVariables = function(selection, classCheck) {
   else {
 
     newNodeInsertID = Math.random().toString().substring(2);
+
     var newSpan = "<a class='" + newSpanClass(startParentClass) + "' id='" + newNodeInsertID + "' >" + selection + "</a>";
     var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
 
@@ -1029,7 +1032,7 @@ var setNewTextVariables = function(selection, classCheck) {
   };
 };
 
-////BUILD KEYBOARD
+////BUILD KEYBOARDS AND IMES
 var addKeyboard = function() {
 
 //need to eventually save HTML as string in JS file but for now cloning
@@ -1040,8 +1043,48 @@ var addKeyboard = function() {
 
   var newKeyboardID = addPopup("keyboardPopup", newPopupClone);
   $(newKeyboardID).addClass("ui-draggable");
+};
+
+var addIMEoptions = function(thisArea) {
+
+  thisArea.ime({
+    showSelector: false
+  });
+  var theCurrentIME = thisArea.data( 'ime' );
+  theCurrentIME.enable();
+  theCurrentIME.getLanguageCodes().forEach( function ( lang ) {
+    $langSelector.append(
+      $( '<option/>' ).attr( 'value', lang ).text( theCurrentIME.getAutonym( lang ) )
+    );
+  } );
+  $langSelector.on( 'change', function () {
+    var lang = $langSelector.find( 'option:selected' ).val() || null;
+    theCurrentIME.setLanguage( lang );
+  } );
+  thisArea.on( 'imeLanguageChange', function () {
+    listInputMethods( theCurrentIME.getLanguage() );
+  } );
+
+  function listInputMethods( lang ) {
+    $imeSelector.empty();
+    theCurrentIME.getInputMethods( lang ).forEach( function ( inputMethod ) {
+      $imeSelector.append(
+        $( '<option/>' ).attr( 'value', inputMethod.id ).text( inputMethod.name )
+      );
+    } );
+    $imeSelector.trigger( 'change' );
+  }
+
+  $imeSelector.on( 'change', function () {
+    var inputMethodId = $imeSelector.find( 'option:selected' ).val();
+    theCurrentIME.load( inputMethodId ).done( function () {
+      theCurrentIME.setIM( inputMethodId );
+    } );
+  } );
 
 };
+
+////UPDATE EDITORS DISPLAY
 
 var updateGridCols = function(newcol, popupDOM) {
   var newName = "col-md-"+newcol;
@@ -1211,16 +1254,15 @@ var polyannoRemoveFavourite = function() {
 };
 
 var polyannoMinimiseEditor = function (thisEditorWithoutHash) {
-  var newHTML = $(".polyanno-min-bar").html() + polyannoMinBarHTML;
-  $(".polyanno-min-bar").html(newHTML);
-  $(".polyanno-min-bar").last().find(".polyannoMinTitle").html(thisEditorWithoutHash);
-  $(".polyanno-min-bar").last().find(".polyannoMinTitle").addClass(thisEditorWithoutHash);
+  var polyannoMinBarHTML = polyannoMinBarHTML1 + thisEditorWithoutHash + polyannoMinBarHTML2;
+  $(".polyanno-min-bar").append(polyannoMinBarHTML);
+  $(".polyanno-min-bar").find("span:contains("+thisEditorWithoutHash+")").addClass(thisEditorWithoutHash);
   $("#"+thisEditorWithoutHash).css("display", "none");
 };
 
 var polyannoReopenMin = function (thisEditorWithoutHash) {
   $("#"+thisEditorWithoutHash).css("display", "block");
-  $(".polyanno-min-bar").last().find("."+thisEditorWithoutHash).closest(".polyannoMinEditor").remove();
+  $(".polyanno-min-bar").find("."+thisEditorWithoutHash).closest(".polyannoMinEditor").remove(); ///
 };
 
 ///SELECTION PROCESS
@@ -1351,6 +1393,14 @@ $('#polyanno-page-body').on("mouseover", ".leaflet-popup", function(event){
   findAndHighlight("vSelected", vectorSelected, defaultColoursArray);
 });
 
+$('#polyanno-page-body').on("click", '.newAnnotation', function(event) {
+
+  if ($langSelector != false) {
+    addIMEoptions($(this));
+  };
+
+});
+
 $('#polyanno-page-body').on("click", '.addAnnotationSubmit', function(event) {
   var thisEditor = $(event.target).closest(".annoPopup").attr("id"); 
   settingEditorVars(thisEditor);
@@ -1358,10 +1408,10 @@ $('#polyanno-page-body').on("click", '.addAnnotationSubmit', function(event) {
   addAnnotation(thisEditor);
 });
 
-////anno header bars
+////ANNO HEADER BARS
 
 $('#polyanno-page-body').on("click", ".closePopupBtn", function(){
-  var thisEditor = $(event.target).closest(".textEditorPopup").attr("id");
+  var thisEditor = $(event.target).closest(".annoPopup").attr("id");
   closeEditorMenu(thisEditor);
 });
 
@@ -1469,12 +1519,31 @@ $("#polyanno-top-bar").on("click", ".polyanno-add-keyboard", function(event){
   addKeyboard();
 });
 
+$("#polyanno-top-bar").on("click", ".polyanno-add-ime", function(event){
+  if ($(this).hasClass("polyanno-IME-options-open")) {
+    $(".polyanno-add-ime").addClass("polyanno-IME-options-closed").removeClass("polyanno-IME-options-open");
+    $(".polyanno-enable-IME").css("display", "none");
+  }
+  else {
+    $(".polyanno-add-ime").addClass("polyanno-IME-options-open").removeClass("polyanno-IME-options-closed");
+    $(".polyanno-enable-IME").css("display", "inline-block");
+    // language and input method list box widgets
+    $langSelector = $( 'select#polyanno-lang-selector' );
+    $imeSelector = $( 'select#polyanno-ime-selector' );
+    addIMEoptions($(".ed-poly-search-docs"));
+
+  };
+
+});
+
 $("#polyanno-top-bar").on("click", ".polyannoMinEditor", function(event) {
   var thisEditor = $(this).find(".polyannoMinTitle").html();
   polyannoReopenMin(thisEditor);
 });
 
+
 //////TRANSCRIPTIONS
 
 ///////TRANSLATIONS
+
 

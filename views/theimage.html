@@ -20,6 +20,7 @@
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
 
 	<link rel="stylesheet" type="text/css" href="stylesheets/fullunicodeinput.css" />
+	<link rel="stylesheet" href="stylesheets/jquery.ime.css" />
 
 	<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
 
@@ -31,8 +32,12 @@
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <script src="javascripts/leaflet-iiif.js"></script>
 	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
-	<script type="text/javascript" src="https://www.google.com/jsapi">
-    </script>
+
+	<script src="javascripts/rangy-core.js"></script>
+	<script src="javascripts/jquery.ime.js"></script>
+	<script src="javascripts/jquery.ime.selector.js"></script>
+	<script src="javascripts/jquery.ime.preferences.js"></script>
+	<script src="javascripts/jquery.ime.inputmethods.js"></script>
 
 </head>
 
@@ -133,13 +138,26 @@
 </div>
 
 <div class="row" id="polyanno-top-bar">
-	<div class="col-md-2 polyanno-bar-buttons">
+	<div class="col-md-5 polyanno-bar-buttons">
 	<div class="row">
 		<div class="btn-group polyanno-language-buttons" role="group" aria-label="...">
 			<button class="btn btn-default polyanno-add-keyboard" type="button">
+				<span class="glyphicon glyphicon-plus"></span>
 				<span class="glyphicon glyphicon-th"></span><span class="glyphicon glyphicon-th"></span>
 			</button> <!--add keyboard characters-->
-
+			<button class="btn btn-default polyanno-add-ime polyanno-IME-options-closed" type="button">
+				<span class="glyphicon glyphicon-transfer"></span>
+				<span class="glyphicon glyphicon-th"></span><span class="glyphicon glyphicon-th"></span>
+			</button> <!--add IME options-->
+		</div>
+		<div class="polyanno-enable-IME">
+			<div class='polyanno-lang-selector polyanno-enable-IME-opt'>
+				<select name="language" id="polyanno-lang-selector">
+				</select>
+			</div>
+			<div class='polyanno-ime-selector polyanno-enable-IME-opt'>
+				<select id="polyanno-ime-selector"></select>
+			</div>
 		</div>
 		<div class="dropdown polyanno-other-button">
 			<button class="btn btn-default " type="button" id="polyanno-bar-other-buttons">
@@ -160,7 +178,8 @@
   	</div>
   	</div>
 
-  	<div class="col-md-10 polyanno-min-bar">
+  	<div class="col-md-7 polyanno-min-bar">
+
   	</div>
 
 </div>
@@ -198,6 +217,39 @@
 </div>
 
 <div id="popupBoxes">
+
+<!-- ENABLE BASIC IMEs -->
+
+	<div id="enable-multiple-IMEs" class="row">
+		<div class="col-md-12">
+
+			<div class="row enable-multiple-IME-handlebar ui-draggable-handle">
+				<button class="btn col-md-1">
+					<span class="closePopupBtn glyphicon glyphicon-remove"></span>
+				</button>
+				<button class="btn col-md-1 polyanno-colour-change polyanno-popup-min">
+					<span> _ </span>
+				</button>
+				<div class="col-md-10"></div>
+
+			</div>
+
+			<div class="row enable-multiple-IMEs-body">
+				<div class="enable-multiple-IMEs-choice">
+
+					<div class='langSelector'>
+						<select name="language" id="language">
+						</select>
+					</div>
+					<div class='imeSelector'>
+						<select id="imeSelector"></select>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
 
 <!-- ALTERNATIVE KEYBOARDS -->
 
