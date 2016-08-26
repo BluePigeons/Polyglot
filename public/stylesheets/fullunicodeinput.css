@@ -31,6 +31,7 @@
   background-color: grey;
   padding: 5px;
   font-size: 0.875em;
+  display: none;
 }
 
 .bottomOptionRow {
@@ -41,4 +42,7 @@
   border: 1px solid black;
   border-radius: 10px;
   background-color: white;
+}
+.atu-options-btn {
+  display: inline-block;
 }

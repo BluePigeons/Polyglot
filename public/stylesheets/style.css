@@ -1,4 +1,74 @@
 
+body {
+    background: url("http://collections.ed.ac.uk/iconics/record/51422/3/0009386c.jpg");
+
+}
+
+.polyanno-page-body {
+	width: 100%;
+	height: 500px;
+}
+
+.polyanno-logo-menu-icon {
+	width: 100%;
+}
+
+.polyanno-dropdown-menu {
+	width: 100%;
+	background-color: white;
+}
+
+.polyanno-user-menu-item-obj {
+	display: none;
+	width: 80%;
+	background-color: white;
+	margin-top: 2%;
+	margin-bottom: 2%;
+}
+
+.polyanno-user-menu-item {
+	float: center;
+}
+
+.polyanno-dropdown-menu-items-right-all {
+	margin-left: 20%;
+}
+.polyanno-dropdown-menu-items-left-all {
+	margin-left: 20%;
+}
+
+.polyanno-dropdown-menu-items-right {
+	border-radius: 30px 0px 0px 30px;
+}
+
+.polyanno-dropdown-menu-items-left {
+	border-radius: 0px 30px 30px 0px;
+
+}
+
+.polyanno-dropdown-menu-left {
+	border-radius: 0px 30px 30px 0px;
+}
+.polyanno-dropdown-menu-right {
+	border-radius: 30px 0px 0px 30px;
+}
+
+.polyanno-user-icon {
+	width: 50%;
+	margin-top: 10%;
+}
+
+.ed-poly-header-obj {
+	display: inline-block;
+	width: 100%;
+}
+
+.filter {
+	margin: 20px;
+}
+
+
+
 #websiteInfo{
 	height: 10%;
 }
@@ -12,36 +82,16 @@
 	display: none;
 }
 
-#ViewerBox1{
-	height: 500px;
-}
+
 
 #polyanno-top-bar {
-	height: 5%;
+	/*height: 5%;*/
 	background-color: grey;
 	border-radius: 5px;
 }
 
-.polyanno-user-icon {
-	width: 40px;
-	height: 40px;
-}
 
-.filter {
-	margin: 20px;
-}
 
-.iframe-slide {
-	width: 90%;
-	height: 1000px;
-	margin: 50px;
-}
-
-iframe {
-	width: 90%;
-	height: 80%;
-	margin: 20px;
-}
 
 .polyanno-language-buttons {
 	display: inline-block;
@@ -63,6 +113,7 @@ iframe {
 	display: inline-block;
 }
 
+
 .annoPopup {
   	border: 1px solid grey;
 	border-radius: 5px;
@@ -75,13 +126,6 @@ iframe {
 .popupBoxHandlebar {
   background-color: buttonface;
   border-radius: 5px 5px 0px 0px;
-}
-
-.polyanno-enable-IME {
-	display: none;
-}
-.polyanno-enable-IME-opt {
-	display: inline-block;
 }
 
 .polyanno-image {
@@ -112,26 +156,71 @@ iframe {
 	text-align: center;
 }
 
-.openTranscriptionChildrenPopup {
-	background-color:yellow;
-	font-weight: normal;
-	color: black;
-}
-
-.enable-multiple-IMEs-select {
-	margin: 5px;
-}
-
 .editorTitle {
 	font-size: 1.5em;
 	color: white;
 	text-align: center;
 }
 
+
+
+
+.openTranscriptionChildrenPopup {
+	background-color:yellow;
+	font-weight: normal;
+	color: black;
+}
+
+
+
+
 .polyanno-carousel-controls {
 	padding: 2%;
 }
 
-.navbar {
-	margin-bottom: 0px;
+
+
+.poly-ed-editors-change {
+	width: 100%;
 }
+
+
+
+
+.poly-ed-doc-icon {
+	background-color: white;
+	border-radius: 10px;
+}
+
+#poly-ed-scroll {
+	overflow: scroll;
+}
+
+
+
+
+.tutorialCarousel {
+	background-color: white;
+	border-radius: 30px;
+	margin-top: 5%;
+	padding: 5%;
+	height: 70%;
+}
+
+.polyanno-tutorial-control {
+	background-color: white;
+	width: 40%;
+	margin-top: 5%;
+}
+
+.polyanno-tutorial-control-right {
+	border-radius: 0px 10px 10px 0px;
+	float: right;
+}
+
+.polyanno-tutorial-control-left {
+	border-radius: 10px 0px 0px 10px;
+	float: left;
+}
+
+

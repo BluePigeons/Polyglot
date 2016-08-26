@@ -95,7 +95,10 @@ var vectorSchema   = new Schema({
 			default: "identifying"
 		}
 	},
+	"Annotation": {
+		type: String,
 
+	},
 	"type": {
 		type: "string",
 		default: "Annotation"

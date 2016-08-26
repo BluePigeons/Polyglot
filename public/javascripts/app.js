@@ -1,5 +1,4 @@
 
-
 var currentWebsite = window.location.href;
 var websiteAddress = "http://localhost:8080";
 
@@ -32,12 +31,6 @@ var transcriptionIconHTML = `<span class='glyphicon glyphicon-edit'></span>
 var translationIconHTML = `<span class='glyphicon glyphicon-globe'></span>
                             <span>Translation</span>`;
 
-var polyannoMinBarHTML1 = `<button type="button" class="btn polyannoMinEditor"> 
-                          <span> _ </span>
-                          <span class="polyannoMinTitle">`
-var polyannoMinBarHTML2 =  `</span> 
-                          </button>`;
-
 var imageSelected; //info.json format URL
 var imageSelectedFormats;
 var imageSelectedMetadata = [];
@@ -59,12 +52,83 @@ var targetType = "";
 var childrenArray;
 
 ///[editor, vector, span] colours
-var highlightColoursArray = ["#FFFF00","#FFFF00","#FFFF00"];
+var highlightColoursArray = ["#EC0028","#EC0028","#EC0028"];
 var defaultColoursArray = ["buttonface","#03f","transparent"]; 
 
 var editorsOpen = []; //those targets currently open in editors
 var selectingVector = false; //used to indicate if the user is currently searching for a vector to link or not
 var findingcookies = document.cookie;
+
+var polyannoEditorHTML = `
+
+  <!-- EDITOR BOX -->
+  <div id="theEditor" class="row textEditorBox">
+  <div class="col-md-12">
+
+    <div class="row popupBoxHandlebar polyanno-colour-change ui-draggable-handle">
+      <button class="btn col-md-1 polyanno-colour-change">
+        <span class="closePopupBtn glyphicon glyphicon-remove"></span>
+      </button>
+      <button class="btn col-md-1 polyanno-colour-change polyanno-popup-min">
+        <span> _ </span>
+      </button>
+      <div class="col-md-7">
+        <div class="editorTitle"></div>
+      </div>
+      <button class="btn col-md-1 polyanno-colour-change polyanno-favourite">
+        <span class="glyphicon glyphicon-star-empty"></span>
+      </button>
+      <button class="btn polyanno-options-dropdown-toggle polyanno-colour-change col-md-2" type="button" >
+          <span class="glyphicon glyphicon-cog"></span>
+          <span class="caret"></span>
+      </button>
+    </div>
+
+
+    <div class="textEditorMainBox row ui-content">
+    <div class="col-md-12">
+
+      <div class="row polyanno-options-row">
+        <div class="btn-group polyanno-options-buttons" role="group" aria-label="options_buttons">
+          <button type="button" class="btn btn-success addNewBtn">
+            <span class="glyphicon glyphicon-pencil" ></span> NEW
+          </button>
+          <button class="btn btn-default polyanno-add-keyboard" type="button"><span class="glyphicon glyphicon-th"></span><span class="glyphicon glyphicon-th"></span></button> <!--add keyboard characters-->
+          <button class="btn btn-default polyanno-metadata-btn"><span class="glyphicon glyphicon-tags"></span></button>
+          <button class="btn btn-default polyanno-export-text" type="button"><span class="glyphicon glyphicon-save"></span></button> <!--export as txt or PDF??-->
+          <button class="btn btn-default polyanno-social" type="button"><span class="glyphicon glyphicon-share"></span></button> <!-- social media sharing-->
+          <button class="btn btn-default polyanno-report" type="button"><span class="glyphicon glyphicon-exclamation-sign"></span><!--report inappropriate content--></button>
+        </div>
+      </div>
+
+        <div class="row polyanno-carousel-controls">
+        <button class="polyanno-carousel-prev col-md-3" role="button" >
+            <span class="glyphicon glyphicon-chevron-left"></span>
+        </button>
+        <div class="col-md-6 polyanno-mid-carousel-controls"></div>
+        <button class="polyanno-carousel-next col-md-3" role="button">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+        </button>
+        </div>
+
+      <div class="row editorCarousel carousel slide" data-interval="false">
+        <!-- Wrapper for slides -->
+        <div class="editorCarouselWrapper col-md-12 carousel-inner" role="listbox">
+            <!--appended slides go here-->
+        </div>
+      </div>
+
+      <div class="row polyanno-below-anno-display">
+
+      </div>
+
+    </div>
+    </div>
+
+  </div>
+  </div>
+
+`;
 
 ///// TEXT SELECTION
 
@@ -177,39 +241,6 @@ var insertSpanDivs = function() {
 var findBaseURL = function() {
   if (textTypeSelected == "transcription") {  return transcriptionURL;  }
   else if (textTypeSelected == "translation") {  return translationURL;  };
-};
-
-var addPopup = function(popupClass, popupClone) {
-  //CREATE POPUP BOX
-  var popupBoxDiv = document.createElement("div");
-  popupBoxDiv.classList.add(popupClass);
-  popupBoxDiv.classList.add("annoPopup");
-  popupBoxDiv.classList.add("col-md-4");
-
-  popupBoxDiv.id = "DivTarget-" + Math.random().toString().substring(2);
-  var popupIDstring = "#" + popupBoxDiv.id;
-  popupBoxDiv.appendChild(popupClone);
-
-  var pageBody = document.getElementById("ViewerBox1");
-  pageBody.insertBefore(popupBoxDiv, pageBody.childNodes[0]); 
-
-///
-  $(popupIDstring).draggable();
-  $(popupIDstring).draggable({
-    addClasses: false,
-    handle: ".ui-draggable-handle",
-    revert: function(theObject) {
-      return adjustDragBootstrapGrid($(this));
-    },
-    revertDuration: 0,
-    snap: ".annoPopup",
-    snapMode: "outer"  
-  });
-
-  $(popupIDstring).resizable();
-  $(popupIDstring).resizable( "enable" );
-
-  return popupIDstring;
 };
 
 var newAnnotationFragment = function(baseURL) {
@@ -358,8 +389,15 @@ var findHighestRankingChild = function(parent, locationID) {
 
 var loadImage = function() {
   
-  imageSelected = searchCookie("imageviewing=");
-//  alert(imageSelected);
+  var theCookieImage = searchCookie("imageviewing=");
+  if (isUseless(theCookieImage)) {
+    var thisWebsiteAddress = window.location.href;
+    var theImageID = thisWebsiteAddress.substring( thisWebsiteAddress.indexOf("/editors/") + 9, thisWebsiteAddress.length);
+    imageSelected = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"+theImageID+"/info.json";
+  }
+  else {
+    imageSelected = theCookieImage;
+  };
   var theImage = getTargetJSON(imageSelected);
   imageSelectedFormats = theImage.formats;
   imageSelectedMetadata = theImage.metadata;
@@ -479,9 +517,9 @@ var addEditorsOpen = function(popupIDstring) {
 
 var createEditorPopupBox = function() {
 
-  var popupTranscriptionTemplate = document.getElementById("theEditor");
-  var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
-  var popupIDstring = addPopup("textEditorPopup", newPopupClone);
+//  var popupTranscriptionTemplate = document.getElementById("theEditor");
+//  var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
+  var popupIDstring = addPopup("textEditorPopup", polyannoEditorHTML, "polyanno-page-body");
   var newCarouselID = "Carousel" + Math.random().toString().substring(2);
   $(popupIDstring).find(".editorCarousel").attr("id", newCarouselID);
   $(popupIDstring).find(".polyanno-carousel-controls").attr("href", "#" + newCarouselID);
@@ -510,13 +548,6 @@ var openEditorMenu = function() {
 var resetVectorHighlight = function(thisEditor) {
   var thisVector = fieldMatching(editorsOpen, "editor", thisEditor).vSelected; 
   if(!isUseless(thisVector)){ highlightVectorChosen(thisVector, defaultColoursArray[1]); };
-};
-
-var removeEditorChild = function(thisEditor) {
-  var theParent = document.getElementById("ViewerBox1");
-  var toRemove = document.getElementById(thisEditor);
-  theParent.removeChild(toRemove);
-  if (  isUseless(toRemove) != true ) {  return thisEditor;  };
 };
 
 var removeEditorsOpen = function(popupIDstring) {
@@ -891,7 +922,7 @@ var newSpanClass = function(startParentClass) {
     return "translation-text opentranslationChildrenPopup";
   }
   else {
-    alert("Please select transcription translation text");
+    //alert("Please select transcription translation text");
     return null;
   };
 };
@@ -996,16 +1027,16 @@ var setNewTextVariables = function(selection, classCheck) {
     initialiseOldTextPopovers(outerElementTextIDstring);
   }
   else if (classCheck.includes('opentranslationChildrenPopup')) { 
-    $('.opentranslationChildrenPopup').popover('show');
-  }     
+    initialiseOldTextPopovers(outerElementTextIDstring);
+  }    
   else if (startParentID != endParentID) {
-    alert("you can't select across existing fragments' borders sorry");
+   // alert("you can't select across existing fragments' borders sorry");
   }
   else {
 
     newNodeInsertID = Math.random().toString().substring(2);
 
-    var newSpan = "<a class='" + newSpanClass(startParentClass) + "' id='" + newNodeInsertID + "' >" + selection + "</a>";
+    var newSpan = "<a class='" + newSpanClass(startParentClass) + " ' id='" + newNodeInsertID + "' >" + selection + "</a>";
     var outerElementHTML = $(outerElementTextIDstring).html().toString(); //includes any spans that are contained within this selection 
 
     ///CONTENT BEFORE HIGHLIGHT IN THE TEXT TYPE NODE
@@ -1032,238 +1063,28 @@ var setNewTextVariables = function(selection, classCheck) {
   };
 };
 
-////BUILD KEYBOARDS AND IMES
-var addKeyboard = function() {
+////USERS HANDLING
 
-//need to eventually save HTML as string in JS file but for now cloning
-  var popupTranscriptionTemplate = document.getElementById("fullunicodesupportkeyboard");
-  var newPopupClone = popupTranscriptionTemplate.cloneNode("true");
-
-  var htmlstring = atu_main_HTML;
-
-  var newKeyboardID = addPopup("keyboardPopup", newPopupClone);
-  $(newKeyboardID).addClass("ui-draggable");
-};
-
-var addIMEoptions = function(thisArea) {
-
-  thisArea.ime({
-    showSelector: false
-  });
-  var theCurrentIME = thisArea.data( 'ime' );
-  theCurrentIME.enable();
-  theCurrentIME.getLanguageCodes().forEach( function ( lang ) {
-    $langSelector.append(
-      $( '<option/>' ).attr( 'value', lang ).text( theCurrentIME.getAutonym( lang ) )
-    );
-  } );
-  $langSelector.on( 'change', function () {
-    var lang = $langSelector.find( 'option:selected' ).val() || null;
-    theCurrentIME.setLanguage( lang );
-  } );
-  thisArea.on( 'imeLanguageChange', function () {
-    listInputMethods( theCurrentIME.getLanguage() );
-  } );
-
-  function listInputMethods( lang ) {
-    $imeSelector.empty();
-    theCurrentIME.getInputMethods( lang ).forEach( function ( inputMethod ) {
-      $imeSelector.append(
-        $( '<option/>' ).attr( 'value', inputMethod.id ).text( inputMethod.name )
-      );
-    } );
-    $imeSelector.trigger( 'change' );
-  }
-
-  $imeSelector.on( 'change', function () {
-    var inputMethodId = $imeSelector.find( 'option:selected' ).val();
-    theCurrentIME.load( inputMethodId ).done( function () {
-      theCurrentIME.setIM( inputMethodId );
-    } );
-  } );
-
-};
-
-////UPDATE EDITORS DISPLAY
-
-var updateGridCols = function(newcol, popupDOM) {
-  var newName = "col-md-"+newcol;
-  var theClasses = popupDOM.attr("class").toString();
-  var theStartIndex = theClasses.indexOf("col-md-");
-  var theEndIndex;
-  var spaceIndex = theClasses.indexOf(" ", theStartIndex);
-  var finishingIndex = theClasses.length;
-  if (spaceIndex == -1) {  theEndIndex = finishingIndex;  }
-  else {  theEndIndex = spaceIndex;  };
-  var theClassName = theClasses.substring(theStartIndex, theEndIndex);
-  if ((theStartIndex != -1) && (theClassName != newName)) {
-    popupDOM.removeClass(theClassName).addClass(newName+" ");
-    $("#testingOldCol").html(newcol);
-    return newcol;
-  }
-  else {  return 0  };
-};
-
-var adjustResizeBootstrapGrid = function(parentDOM, popupDOM, theUI) {
-  var gridwidth = Math.round(parentDOM.width() / 12 );
-  var newWidth = theUI.size.width;
-  var colwidth = Math.round(newWidth/gridwidth);
-  return updateGridCols(colwidth, popupDOM);
-};
-
-var findCornerArray = function(theDOM) {
-    ///position or offset?
-  var theLeft = theDOM.position().left;
-  var theRight = theLeft + theDOM.width();
-  var theTop = theDOM.position().top;
-  var theBottom = theTop + theDOM.height(); 
-  return [theLeft, theRight, theTop, theBottom];
-};
-
-var isBetween = function(theNum, theFirst, theLast) {
-  if ((theNum > theFirst) && (theNum < theLast)) { 
-    return theNum - theFirst;
-  }
-  else { return 0 };
-};
-
-var formJumpArray = function(theChecks, popupDOM, nDOM, theNSiblings) {
-  if ( ((theChecks[2] != 0) && (theChecks[3] != 0)) || ((theChecks[2] == 0) && (theChecks[3] == 0)) ){ ///if top and bottom are not overlapping or both are
-    if (theChecks[0] != 0) {  theNSiblings[0] = nDOM; return theNSiblings; }
-    else if (theChecks[1] != 0) {  theNSiblings[1] = nDOM; return theNSiblings; };
-  }
-  else if ( ((theChecks[0] != 0) && (theChecks[1] != 0)) || ((theChecks[0] == 0) && (theChecks[1] == 0)) ){ ///if left and right are inside neighbour and needs to jump above or below
-    if (theChecks[2] != 0) {  return theNSiblings;  }
-    else if (theChecks[3] != 0) { return theNSiblings;  };
-  }
-  else if (theChecks[0] != 0) {  theNSiblings[0] = nDOM; return theNSiblings;  }
-  else if (theChecks[1] != 0) {  theNSiblings[1] = nDOM; return theNSiblings; };
-
-};
-
-var loopBetweenSides = function(popupCorners, otherCorners){
-  return [
-    isBetween(popupCorners[0], otherCorners[0], otherCorners[1]), ///needs to add to left this far to clear left side
-    isBetween(popupCorners[1], otherCorners[0], otherCorners[1]), ///needs to remove from left this far to clear right side
-    isBetween(popupCorners[2], otherCorners[2], otherCorners[3]),
-    isBetween(popupCorners[3], otherCorners[2], otherCorners[3])
-  ];
-};
-
-var hasCornerInside = function(popupCorners, otherCorners) {
-  var theChecks = loopBetweenSides(popupCorners, otherCorners);
-  if (((theChecks[0] != 0) || (theChecks[1] != 0)) && ((theChecks[2] != 0)|| (theChecks[3] != 0))) { 
-    return theChecks;
-  }
-  else {  return false  };
-};
-
-var isReverting = false;
-
-var isEditorOverlap = function(popupDOM, popupCorners, nDOM, theNSiblings) {
-  var otherCorners = findCornerArray(nDOM);
-  var theChecks = hasCornerInside(popupCorners, otherCorners);
-  var outsideChecks = hasCornerInside(otherCorners, popupCorners);
-
-  if ( (theChecks == false) && (outsideChecks == false) ) {
-    return theNSiblings;
-  }
-  else {
-    return formJumpArray(theChecks, popupDOM, nDOM, theNSiblings);
-  };
-  
-};
-
-var getDist = function(thisSide, thatSide) {
-  return thisSide[0] - thatSide[1];
-}
-
-var checkSiblingSides = function(mainSides, checkSides, theNearestSiblings, nDOM) {
-  var checkLeft = getDist(mainSides, checkSides);
-  var checkRight = getDist(checkSides, mainSides);
-  if ( ((theNearestSiblings[0] == -1)&&( checkLeft >= 0)) || ( (theNearestSiblings[0] != -1) && (checkLeft < getDist(mainSides, findCornerArray(theNearestSiblings[0]) ) )) ) {
-    theNearestSiblings[0] = nDOM;
-    theNearestSiblings[2] = checkLeft;
-    return theNearestSiblings;
-  }
-  else if ( ((theNearestSiblings[1] == -1)&&( checkRight >= 0)) || ( (theNearestSiblings[1] != -1) && (checkRight < getDist(findCornerArray(theNearestSiblings[1]), mainSides) )) ) {
-    theNearestSiblings[1] = nDOM;
-    theNearestSiblings[2] = checkRight;
-    return theNearestSiblings;
-  }
-  else { return theNearestSiblings; };
-};
-
-var nearestSiblings = function(popupCorners, nDOM, theNearestSiblings) {
-  var otherCorners = findCornerArray(nDOM);
-  if ((popupCorners[2] < otherCorners[3]) && (popupCorners[3] > otherCorners[2])) { ///higher value for top means lower down hence operators' directions
-    return checkSiblingSides(popupCorners, otherCorners, theNearestSiblings, nDOM);
-  }
-  else {
-    return theNearestSiblings;
-  };
-};
-
-var isReverting = false;
-
-var updateIsReverting = function(theNearestSiblings, popupDOM) {
-  if ((theNearestSiblings[0] != -1) && (theNearestSiblings[0] != popupDOM.prev())) {
-    isReverting = ["insertAfter", theNearestSiblings[0]];
-    popupDOM.addClass("polyanno-was-reverted");
-    return true;
-  }
-  else if ((theNearestSiblings[1] != -1) && (theNearestSiblings[1] != popupDOM.next())) {
-    isReverting = ["insertBefore", theNearestSiblings[1] ];
-    popupDOM.addClass("polyanno-was-reverted");
-    return true;
-  }
-  else {
-    return false;
-  };
-};
-
-var adjustDragBootstrapGrid = function(popupDOM) {
-
-  var popupCorners = findCornerArray(popupDOM);
-  var theNearestSiblings = [-1, -1];
-  if (!isUseless(popupDOM.prev())) { theNearestSiblings == popupDOM.prev(); };
-  if (!isUseless(popupDOM.next())) { theNearestSiblings == popupDOM.next(); };
-
-  popupDOM.siblings().each(function(i) {
-    theNearestSiblings = isEditorOverlap(popupDOM, popupCorners, $(this), theNearestSiblings);
-  });
-
-  if ( ((theNearestSiblings[0] == -1) || (theNearestSiblings[0] == popupDOM.prev())) && ((theNearestSiblings[0] == -1) || (theNearestSiblings[0] == popupDOM.prev()))  ) {
-    popupDOM.siblings().each(function(i) {
-      theNearestSiblings = nearestSiblings(popupCorners, $(this), theNearestSiblings);
-    });
-    return updateIsReverting(theNearestSiblings, popupDOM);
-  }
-  else {
-    return updateIsReverting(theNearestSiblings, popupDOM);
-  };
-  
+var loginAndSetUsername = function() {
+  document.cookie = "theusername=";
 };
 
 var polyannoAddToFavourite = function() {
-
+  $.ajax({
+    type: "PUT",
+    url: targetURL,
+    async: false,
+    dataType: "json",
+    data: targetData,
+    success:
+      function (data) {  }
+  });
 };
 
 var polyannoRemoveFavourite = function() {
 
 };
 
-var polyannoMinimiseEditor = function (thisEditorWithoutHash) {
-  var polyannoMinBarHTML = polyannoMinBarHTML1 + thisEditorWithoutHash + polyannoMinBarHTML2;
-  $(".polyanno-min-bar").append(polyannoMinBarHTML);
-  $(".polyanno-min-bar").find("span:contains("+thisEditorWithoutHash+")").addClass(thisEditorWithoutHash);
-  $("#"+thisEditorWithoutHash).css("display", "none");
-};
-
-var polyannoReopenMin = function (thisEditorWithoutHash) {
-  $("#"+thisEditorWithoutHash).css("display", "block");
-  $(".polyanno-min-bar").find("."+thisEditorWithoutHash).closest(".polyannoMinEditor").remove(); ///
-};
 
 ///SELECTION PROCESS
 $('#polyanno-page-body').on("mouseup", '.content-area', function(event) {
@@ -1285,6 +1106,15 @@ $('#polyanno-page-body').on("mouseup", '.content-area', function(event) {
   else if (classCheck.includes('popover-title')) { 
     $(outerElementTextIDstring).popover('hide'); ///
   } 
+  else if (classCheck.includes("polyanno-add-discuss")) {
+    if ($(outerElementTextIDstring).hasClass("annotator-hl")) {
+
+    }
+    else {
+      var thisSpanText = $(outerElementTextIDstring).html().toString();
+      new TextQuoteAnchor($(outerElementTextIDstring), thisSpanText);
+    };
+  }
   else {
     setNewTextVariables(selection, classCheck);
   };
@@ -1363,7 +1193,6 @@ $('#polyanno-page-body').on("mouseover", ".textEditorBox", function(event){
   $(thisEditor).on("mouseenter", ".opentranscriptionChildrenPopup", function(event){
     $(thisEditor).find(".polyanno-colour-change").css("background-color", defaultColoursArray[0]);
     findAndHighlight("editor", thisEditor, defaultColoursArray);
-
     var thisSpan = $(event.target).attr("id");
     $("#"+thisSpan).css("background-color", highlightColoursArray[2]);
     findAndHighlight("tSelectedID", thisSpan, highlightColoursArray);
@@ -1409,16 +1238,6 @@ $('#polyanno-page-body').on("click", '.addAnnotationSubmit', function(event) {
 });
 
 ////ANNO HEADER BARS
-
-$('#polyanno-page-body').on("click", ".closePopupBtn", function(){
-  var thisEditor = $(event.target).closest(".annoPopup").attr("id");
-  closeEditorMenu(thisEditor);
-});
-
-$( "#polyanno-page-body").on( "click", ".polyanno-popup-min", function(event) {
-  var thisEditor = $(event.target).closest(".annoPopup").attr("id");
-  polyannoMinimiseEditor(thisEditor);
-});
 
 $('#polyanno-page-body').on("click", ".closePopoverMenuBtn", function(){
   $(event.target).closest(".popover").popover("hide"); ///////
@@ -1488,62 +1307,22 @@ $("#polyanno-page-body").on("click", ".polyanno-favourite", function(event) {
   };
 });
 
-$( "#polyanno-page-body" ).on( "resizestop", ".annoPopup", function( event, ui ) {
-  adjustResizeBootstrapGrid($("#ViewerBox1"), $(event.target), ui);
-} );
-
-$( "#polyanno-page-body" ).on( "dragstop", ".annoPopup", function( event, ui ) {
-  if ($(event.target).hasClass("polyanno-was-reverted") && (isReverting[0] == "insertAfter") ) {
-    var theRest = isReverting[1].nextAll();
-    if( !isUseless(theRest) ) { 
-      theRest.insertAfter($(event.target));
-    };
-    $(event.target).insertAfter(isReverting[1]);
-    $(event.target).removeClass("polyanno-was-reverted");
-    isReverting = false;
-  }
-  else if ($(event.target).hasClass("polyanno-was-reverted") && (isReverting[0] == "insertBefore") ) {
-    var theRest = isReverting[1].prevAll();
-    if( !isUseless(theRest) ) { 
-      theRest.insertBefore($(event.target));
-    };
-    $(event.target).insertBefore(isReverting[1]);
-    $(event.target).removeClass("polyanno-was-reverted");
-    isReverting = false;
-  };
-} );
-
-//////HEADER BODY
-
 $("#polyanno-top-bar").on("click", ".polyanno-add-keyboard", function(event){
-  addKeyboard();
+  addKeyboard("polyanno-page-body");
 });
 
-$("#polyanno-top-bar").on("click", ".polyanno-add-ime", function(event){
-  if ($(this).hasClass("polyanno-IME-options-open")) {
-    $(".polyanno-add-ime").addClass("polyanno-IME-options-closed").removeClass("polyanno-IME-options-open");
-    $(".polyanno-enable-IME").css("display", "none");
-  }
-  else {
-    $(".polyanno-add-ime").addClass("polyanno-IME-options-open").removeClass("polyanno-IME-options-closed");
-    $(".polyanno-enable-IME").css("display", "inline-block");
-    // language and input method list box widgets
-    $langSelector = $( 'select#polyanno-lang-selector' );
-    $imeSelector = $( 'select#polyanno-ime-selector' );
-    addIMEoptions($(".ed-poly-search-docs"));
-
-  };
-
+$('#polyanno-page-body').on("click", ".newAnnotation", function(){
+  var theID = $(event.target).attr("id");
+  atu_the_data = document.getElementById(theID);
 });
 
-$("#polyanno-top-bar").on("click", ".polyannoMinEditor", function(event) {
-  var thisEditor = $(this).find(".polyannoMinTitle").html();
-  polyannoReopenMin(thisEditor);
-});
+var polyEdFilters = null; ////for now
+polyEdCurrentDocs.push(imageSelected);
+
+setUpPolyEdChangeBtns();
+
+initialiseDragAndDrop("polyanno-page-body");
 
 
-//////TRANSCRIPTIONS
-
-///////TRANSLATIONS
 
 

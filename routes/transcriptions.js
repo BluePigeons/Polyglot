@@ -3,11 +3,9 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 
-var newVector     = require('./newVector');
-var newTranslate    = require('./newTranslation');
 var newTranscription    = require('./newTranscription');
 
-var websiteAddress = "http://localhost:8080";
+var websiteAddress = "http://localhost:8080"; ///////// <-----
 
 var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
@@ -65,6 +63,8 @@ exports.voting = function(req, res) {
 
         if (err) {res.send(err)};
 
+        ///////ARRAY LOCATION FUNCTIONS
+
         var findLocationIndex = function(loc) {    
             return transcription.children.indexOf(loc);    
         };
@@ -87,9 +87,7 @@ exports.voting = function(req, res) {
             return fieldMatching(transcription.children[thelocationIndex].fragments, "rank", therank);
         };
 
-        var votesChange = function(voteNumber) {
-            return transcription.children[thelocationIndex].fragments[thefragmentIndex].votesUp += voteNumber; 
-        };
+        ///////VOTE AND RANK FUNCTIONS
 
         var rankChange = function(indexNumber, rankChangeNumber) {
             return transcription.children[thelocationIndex].fragments[indexNumber].rank += rankChangeNumber;
@@ -117,56 +115,71 @@ exports.voting = function(req, res) {
             };
         };
 */
+
+        var votingUpNow = function(theNeighbourIndex) {
+            rankChange(theNeighbourIndex, 1);
+            rankChange(thefragmentIndex, -1);
+            return true;
+        };
+        var votingDownNow = function(theNeighbourIndex) {
+            rankChange(theNeighbourIndex, -1);
+            rankChange(thefragmentIndex, 1);    
+            return true;            
+        };
+
         var voteRankChange = function(voteNumber) {
         ///NOTE: the ranking is ONLY changed if the vote is now above or below the neighbour, not if now equal
             var neighbourRank =  theChildDoc.rank - voteNumber; 
-            var theNeighbour = function() {    return fragmentChildByRank(neighbourRank);    };
-            var neighbourIndex = function() {    return findFragmentIndex(theNeighbour());    };
-            var votingUpNow = function() {
-                rankChange(neighbourIndex(), 1);
-                var newChildRank = rankChange(thefragmentIndex, -1);
-                return reload(newChildRank);
-            };
-            var votingDownNow = function() {
-                rankChange(neighbourIndex(), -1);
-                var newChildRank = rankChange(thefragmentIndex, 1);
-                return reload(newChildRank);                 
-            };
+            var theNeighbour = fragmentChildByRank(neighbourRank); 
            
-            if ( (neighbourRank >= 0) && (theChildDoc.rank > neighbourRank) && ( theChildDoc.votesUp > theNeighbour().votesUp ) ) {
-                return votingUpNow();
+            if ( (neighbourRank >= 0) && (theChildDoc.rank > neighbourRank) && ( theChildDoc.votesUp > theNeighbour.votesUp ) ) {
+                return votingUpNow( findFragmentIndex(theNeighbour) );
             }
-            else if ( ( isUseless(fragmentChildByRank(neighbourRank)) == false) && (  theChildDoc.rank < neighbourRank  ) &&  (   theChildDoc.votesUp < theNeighbour().votesUp ) ) {
-                return votingDownNow();               
+            else if ( ( !isUseless(fragmentChildByRank(neighbourRank)) ) && (  theChildDoc.rank < neighbourRank  ) &&  (   theChildDoc.votesUp < theNeighbour.votesUp ) ) {
+                return votingDownNow( findFragmentIndex(theNeighbour) );               
             }
             else {
+                return false;
+            };
+        };
+
+        var rankChangeLoopCheck = function(voteNumber) {
+            var shouldReload = voteRankChange(voteNumber);
+            if (shouldReload == false) {
                 return {"reloadText": false};
+            }
+            else {
+                do {    shouldReload = voteRankChange(voteNumber);    }
+                while ( shouldReload != false );
+                if ( shouldReload == false ) { reload(transcription.children[thelocationIndex].fragments[thefragmentIndex].rank) }; ///fragindex() 
             };
         };
 
         var voteCheckChange = function(voteType) {
             if (voteType == "up") {
-                votesChange(1); /////make this into a promise setup ....?
-                return voteRankChange(1);
+                transcription.children[thelocationIndex].fragments[thefragmentIndex].votesUp += 1 ; ///make into Promise setup??
+                return voteRankChange(1); //reload(newChildRank); 
             }
             else if (voteType == "down") {
-                votesChange(-1);
+                transcription.children[thelocationIndex].fragments[thefragmentIndex].votesUp -= 1 ; 
                 return voteRankChange(-1);
             };
         };
 
-/////make saving more general in this doc....
-        var savingFunction = function() {
+        //Node is synchronous so this ensures that nothing is saved until whole process is done without Promises
+        var savingFunction = function(theNewVotes) {
             transcription.save(function(err) {
                 if (err) {res.send(err)}
                 else {  
-                    res.json(updateVotes);  
+                    res.json(theNewVotes);  
                 };
             });
         };
 
+        ///////START VOTING FUNCTIONS & SAVE
+
         var updateVotes = voteCheckChange(req.params.voteType);
-        savingFunction();
+        savingFunction(updateVotes);
 
     });
 
@@ -197,7 +210,7 @@ exports.deleteAll = function(req, res) {
 };
 
 var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
-    if (isUseless(bodyDoc[bodyField]) == false ) {    return bodyDoc[bodyField];    }
+    if (!isUseless(bodyDoc[bodyField])) {    return bodyDoc[bodyField];    }
     else {    return docField;    };
 };
 
@@ -278,7 +291,7 @@ exports.addNew = function(req, res) {
     var transURL = transcriptionURL.concat(newTransID);
 
     var jsonFieldPush = function(bodyDoc, theField) {
-        if ( isUseless(bodyDoc[theField]) == false ) {
+        if ( !isUseless(bodyDoc[theField]) ) {
             bodyDoc[theField].forEach(function(subdoc){    transcription[theField].addToSet(subdoc);    });
         };
     };
@@ -291,11 +304,11 @@ exports.addNew = function(req, res) {
     jsonFieldPush(req.body, "target");  
 
     var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
-    if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
+    if ( ( !isUseless(transcription.children)) && (!isUseless(newChildrenArray[0]) )
         && (newChildrenArray[0] != -1) ) {
         transcription.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
     }
-    else if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
+    else if ( ( !isUseless(transcription.children) ) && (!isUseless(newChildrenArray[0]) )
         && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
         transcription.children.addToSet(newChildrenArray[1]);
     };

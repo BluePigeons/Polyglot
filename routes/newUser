@@ -2,7 +2,7 @@ var mongoose     = require('mongoose');
 
 var Schema       = mongoose.Schema;
 
-var vectorSchema   = new Schema({
+var userSchema   = new Schema({
 
 	"@context": {
 		type: [], 
@@ -95,7 +95,10 @@ var vectorSchema   = new Schema({
 			default: "identifying"
 		}
 	},
+	"Annotation": {
+		type: String,
 
+	},
 	"type": {
 		type: "string",
 		default: "Annotation"

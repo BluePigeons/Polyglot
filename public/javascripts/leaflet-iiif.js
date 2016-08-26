@@ -1,5 +1,5 @@
 /*
- * Leaflet-IIIF 0.1.2
+ * Leaflet-IIIF 0.2.0
  * IIIF Viewer for Leaflet
  * by Jack Reed, @mejackreed
  */
@@ -51,22 +51,8 @@ L.TileLayer.Iiif = L.TileLayer.extend({
       quality: _this.quality,
       region: [minx, miny, xDiff, yDiff].join(','),
       rotation: 0,
-      size: _this._iiifSizeParam(Math.ceil(xDiff / scale), Math.ceil(yDiff / scale))
+      size: Math.ceil(xDiff / scale) + ','
     }, this.options));
-  },
-  /**
-  * Returns a IIIF size parameter based off of the max dimension of
-  * a tile
-  * @param {Number} x - The width of a tile
-  * @param {Number} y - The height of a tile
-  * @returns {String}
-  */
-  _iiifSizeParam: function(x, y) {
-    if (x >= y) {
-      return x + ',';
-    } else {
-      return ',' + y;
-    }
   },
   onAdd: function(map) {
     var _this = this;

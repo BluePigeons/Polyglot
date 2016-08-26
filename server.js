@@ -2,6 +2,7 @@
 // SETUP REQUIREMENTS
 
 var databaseURL = 'mongodb://localhost:27017/testMongoDB';
+var thisWebsitePort = 8080;
 
 var express    = require('express');
 var bodyParser = require('body-parser');
@@ -13,84 +14,84 @@ var annotations = require('./routes/annotations');
 var vectors = require('./routes/vectors');
 var transcriptions = require('./routes/transcriptions');
 var translations = require('./routes/translations');
-
-//var websiteinfo = require('./leafletiiifanno.json');
-//var websiteAddress = websiteinfo.website;
-
-//just for dev purposes so I don't need to keep opening and closing browsers
-var delCookies = function(req, res) { res.clearCookie('mapset', { path: '/theimage.html' }); res.redirect('/'); };
+var users = require('./routes/usersroutes');
 
 // GET APPLICATION RUNNING
 
 var app        = express();  
+
+////BASIC APP ROUTES & SETUP
 
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 app.use(express.static(__dirname + '/examples'));
 
 app.get('/', function(req, res) {
-
     res.sendFile(__dirname + "/index.html"); 
-
 });
 
 app.use(cors());
 //Currently using cors for all origins just for development but will need to be specific for actual deployment
 
+///////SETUP
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-var port = process.env.PORT || 8080; 
-
-//eventually adjust for any database connection??
+var port = process.env.PORT || thisWebsitePort; 
 mongoose.connect(databaseURL, { config: { autoIndex: false } });
 
-//MIDDLEWARE
-
-//really ought to make a nice 404 page
+//////MIDDLEWARE
 
 var annoRouter = express.Router();
-var gameRouter = express.Router();
 
 annoRouter.use(function(req, res, next) {
-
-    //should have proper logging here but for now just to console
-
-    console.log('something is using the APIs');
-
+    //should have proper logging here 
     next(); 
 });
 
-gameRouter.use(function(req, res, next) {
+var editorRouter = express.Router();
 
-    //should have proper logging here but for now just to console
-
-    console.log('something is using the game routes');
-
+editorRouter.use(function(req, res, next) {
+    //should have proper logging here 
     next(); 
 });
 
-/*
+var userRouter = express.Router();
 
-app.get('/FAQs', function(req, res) {
-    res.redirect("/FAQs.html");
-});
-app.get('/contactus', function(req, res) {
-    res.redirect"/contactus.html");
+userRouter.use(function(req, res, next) {
+    //should have proper logging here 
+    next(); 
 });
 
-*/
+/////////////////PAGE ROUTES
 
-/////////////////IMAGE ROUTES
+editorRouter.get('/:name', function (req, res, next) {
 
-app.get('/theimage', function(req, res) {
-    res.redirect("/theimage.html"); 
+    var fileName = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"+req.params.name+"/info.json";
+    var options = {
+        root: __dirname + '/views/',
+        headers: {
+            'Set-Cookie': "imageviewing="+fileName+"; path=/editors " ///expires todays date???
+        }
+    };
+
+  res.sendFile("theimage.html", options, function (err) {
+    if (err) {
+      console.log(err);
+      res.status(err.status).end();
+    }
+    else {
+      console.log('Sent with '+JSON.stringify(options.headers));
+    }
+  });
+
 });
 
-app.get('/scrolling', function(req, res) {
-    res.redirect("/scrolling.html"); 
-});
+editorRouter.use(express.static(__dirname + '/public'));
+editorRouter.use(express.static(__dirname + '/views'));
+editorRouter.use(express.static(__dirname + '/examples'));
 
 app.get('/beginnertutorial', function(req, res) {
     res.redirect("/beginnertutorial.html"); 
@@ -100,102 +101,59 @@ app.get('/aboutus', function(req, res) {
     res.redirect("/aboutus.html"); 
 });
 
+/////////////////USER ROUTES
+
+userRouter.get('/username/:username', users.getByUsername);
+userRouter.get('/id/:user_id', users.getByID);
+userRouter.post('/', users.addNew);
+userRouter.put('/:username', users.updateOne);
+
 /////////////////API ROUTES
-/*
-app.get('/rules/:langFolder', function(req, res) {
-
-    res.sendFile(__dirname + '/public/javascripts/rules/'+langFolder); 
-
-});
-*/
-//PARAMETERS
-
-//app.param('parent', annotations.parentParams);
-//make a generic trigger for updating rankings?
 
 //VECTOR API
 
-//route /api/vectors GET -> get all vector JSONs
 annoRouter.get('/vectors', vectors.findAll);
-
-//route /api/vectors POST -> add a single new vector JSON
 annoRouter.post('/vectors', vectors.addNew);
-
-//route /api/vectors/:vector_id GET -> get specific vector JSON
 annoRouter.get('/vectors/:vector_id', vectors.getByID);
-
 annoRouter.get('/vectors/targets/:target', vectors.findAllTargetVectors);
-
-//route /api/vectors/:vector_id PUT -> update vector JSON with new info
 annoRouter.put('/vectors/:vector_id', vectors.updateOne);
-
-//route /api/vectors/:vector_id DELETE -> delete vector JSON
 annoRouter.delete('/vectors/:vector_id', vectors.deleteOne);
-
-//exists mainly for testing purposes
 annoRouter.delete('/vectors', vectors.deleteAll);
 
 //TRANSCRIPTION API
 
-//route /api/transcriptions GET -> get all transcriptions JSONs
 annoRouter.get('/transcriptions', transcriptions.findAll);
-
-//route /api/transcriptions POST -> add a single new transcription JSON
 annoRouter.post('/transcriptions', transcriptions.addNew);
-
-//route /api/transcriptions/:transcriptions_id GET -> get specific transcription JSON
 annoRouter.get('/transcriptions/:transcription_id', transcriptions.getByID);
-
 annoRouter.get('/transcriptions/targets/:target', transcriptions.getByTarget);
-
-//route /api/transcriptions/:transcriptions_id PUT -> update transcription JSON with new info
 annoRouter.put('/transcriptions/:transcription_id', transcriptions.updateOne);
-
 annoRouter.put('/transcriptions/voting/:voteType', transcriptions.voting);
-
-//route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
 annoRouter.delete('/transcriptions/:transcription_id', transcriptions.deleteOne);
-
 annoRouter.delete('/transcriptions', transcriptions.deleteAll);
 
 //TRANSLATION API
 
-//route /api/transcriptions GET -> get all transcriptions JSONs
 annoRouter.get('/translations', translations.findAll);
-
-//route /api/transcriptions POST -> add a single new transcription JSON
 annoRouter.post('/translations', translations.addNew);
-
-//route /api/transcriptions/:transcriptions_id GET -> get specific transcription JSON
 annoRouter.get('/translations/:transcription_id', translations.getByID);
-
 annoRouter.get('/translations/targets/:target', translations.getByTarget);
-
-//route /api/transcriptions/:transcriptions_id PUT -> update transcription JSON with new info
 annoRouter.put('/translations/:transcription_id', translations.updateOne);
-
 annoRouter.put('/translations/voting/:voteType', translations.voting);
-
-//route /api/transcriptions/:transcription_id DELETE -> delete vector JSON
 annoRouter.delete('/translations/:transcription_id', translations.deleteOne);
-
 annoRouter.delete('/translations', translations.deleteAll);
-
-/////////////////GAME ROUTES
-/*
-
-gameRouter.get('/', function(req, res) {
-    res.sendFile(__dirname + "/thegame.html");
-});
-
-*/
 
 /////////GET STARTED
 
 app.use('/api', annoRouter);
+app.use('/editors', editorRouter);
+app.use('/user', userRouter);
+
+app.use(function(req, res, next) {
+  res.status(404).redirect("/404page.html");
+});
 
 //tells the server where it should be listening for req and res
-app.listen(8080);
+app.listen(thisWebsitePort);
 
 //will need to configure stuff for actual deployment
 

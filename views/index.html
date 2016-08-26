@@ -2,6 +2,7 @@
 
 <html>
 
+
 <head>
 
 <!-- Meta data -->
@@ -12,15 +13,14 @@
 
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 
 	<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
 
 <!-- Javascript libraries -->
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	<script src="http://airbnb.io/infinity/build/infinity.min.js"></script>
 
 </head>
 
@@ -28,105 +28,138 @@
 
 <body>
 
-<div data-role="page">
 <!--The Page Content-->
-<div class="container">
+<div data-role="main" class="ui-content">
+<div id="main page" class="container polyanno-page-body">
 
-	<div class="row ed-poly-header">
+	<div class="row ">
 
-		<nav class="navbar navbar-default col-md-12">
-		  <div class="row">
-		    <!-- Brand and toggle get grouped for better mobile display -->
-		    <div class="navbar-header">
-		      <a class="navbar-brand" href="/" data-ajax="false">Polyanno</a>
-		    </div>
+		<div class="col-md-2">
 
-		    <!-- Collect the nav links, forms, and other content for toggling -->
-		    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<div class=" row ed-poly-header-obj">
 
-		      <ul class="nav navbar-left">
-		        <li>
-		        	<a href="/aboutus">About Us</a>
-		        </li>
-		      </ul>
+	        	<a href="/" class="ed-poly-header-obj">
+	        		<object class="polyanno-logo-menu-icon" data="stylesheets/images/AnnoSVGHTML.svg" type="image/svg+xml"></object>
+	        	</a>
 
-		      <ul class="nav navbar-left">
-		        <li>
-		        	<a href="/beginnertutorial">Tutorial</a>
-		        </li>
-		      </ul>
+				<div class="dropdown ed-poly-header-obj">
 
-		      <ul class="nav navbar-left">
-		        <li>
-		        	<a href="/theimage">Editor</a>
-		        </li>
-		      </ul>
+				  <button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left dropdown-toggle" type="button" id="poly-ed-title-menu" onclick="if ($('.polyanno-dropdown-menu-items-left').css('display')=='none') { $('.polyanno-dropdown-menu-items-left').css('display','block'); } else { $('.polyanno-dropdown-menu-items-left').css('display','none'); } " >
+				    
+				    <span class="caret"></span>
 
-		      <ul class="nav navbar-left">
-		        <li>
-		        	<span id="testingOldCol"></span>
-		        	<span>Testing</span>
-		        </li>
-		      </ul>
+				  </button>
+				  
+				</div>
 
-		      <form class="navbar-form navbar-right">
-		        <div class="form-group">
-		          <input type="text" class="form-control ed-poly-search-docs" placeholder="Search images">
-		        </div>
-		        <button type="submit" class="btn btn-default ed-poly-search-docs-submit">Submit</button>
-		      </form>
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
+					<a class="polyanno-user-menu-item"  href="/aboutus">About Us</a>
+				</div>
 
-		    </div><!-- /.navbar-collapse -->
-		  </div><!-- /.container-fluid -->
-		</nav>
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
+					<a class="polyanno-user-menu-item "  href="/beginnertutorial">Tutorial</a>
+				</div>
+
+				<div class="dropdown polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
+				  	<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left dropdown-toggle" type="button" id="poly-ed-filters-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				    	Filters
+				    	<span class="caret"></span>
+				  	</button>
+				  	<ul class="dropdown-menu form-group filter-form" aria-labelledby="poly-ed-filters-menu">
+					    <li class="filter">
+							<input type="search" placeholder="Search Images" class="poly-ed-search "><button class="poly-ed-search-submit"><span> Search </span></button>
+						</li>
+					    <li class="filter">
+							<p>Dates</p>
+							<span>From  </span><input class="poly-ed-startYear" type="number"><span> To </span><input class="poly-ed-endYear" type="number" max="2016" >
+						</li>
+					    <li class="filter">
+					    	<span>Languages  </span> <span> <input type="text" class="poly-ed-languages-filter"></span>
+						</li>
+					    <li class="filter">
+		    				<span>Transcription Difficulty  </span>
+							<span><div class="form-group">
+							  <select class="form-control" id="poly-ed-TranscriptionDifficulty">
+							    <option>Easy</option>
+							    <option>Medium</option>
+							    <option>Difficult</option>
+							  </select>
+							</div></span>
+						</li>
+						<li class="filter">
+							<span>Translation Difficulty</span>
+							<span><div class="form-group">
+							  <select class="form-control" id="poly-ed-TranslationDifficulty">
+							    <option>Easy</option>
+							    <option>Medium</option>
+							    <option>Difficult</option>
+							  </select>
+							</div></span>
+						</li>
+				  	</ul>
+				</div>
+			</div>
+			
+		</div>
+
+		<div class="col-md-8" id="poly-ed-scroll">
+
+		</div>
+
+		<div class="col-md-2">
+
+			<div class="row ed-poly-header">
+
+				<div class="dropdown">
+
+			        <button href="#" class="dropdown-toggle btn polyanno-dropdown-menu polyanno-dropdown-menu-right" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+			          	<span class="ed-poly-username">Jane Blogg</span>
+			          	<span class="caret"></span>
+			        </button>
+
+			        <ul class="dropdown-menu polyanno-dropdown-menu">
+
+			          	<li class="media">
+			          		<div class="media-body polyanno-user-icon">
+			          			<!--<img class="media-object" src="..." alt="...">-->
+			          		</div>
+			          	</li>
+
+			            <li>
+			            	<a href="#">
+			            		<span class='glyphicon glyphicon-star'></span>
+			            		<span>  Favourites</span>
+			            	</a>
+			            </li>
+			            <li>		
+			            	<a href="#">
+			            		<span class='glyphicon glyphicon-tasks'></span>
+			            		<span>  Activity</span>
+			            	</a>
+			            </li>
+
+			            <li role="separator" class="divider"></li>
+			            <li>
+			            	<a href="#">Sign Out</a>
+			            </li>
+
+			        </ul>
+
+	    		</div>
+			</div>
+		</div>
 
 	</div>
 
-	<div class="row">
-
-		<div class="col-md-4">
-			<div></div>
-			<a href="/theimage" data-ajax="false" class="openImage" id="http://ids.lib.harvard.edu/ids/iiif/25286610/info.json" >Open to annotate an image</a>
-
-		</div>
-
-
-		<div  class="col-md-4">
-			<div></div>
-			<a href="/theimage"  data-ajax="false" class="openImage" id='https://stacks.stanford.edu/image/iiif/zf275jj8939%2FMartellus_300ppi_natural_color_panorama_WIP2/info.json' >Or another one</a>
-
-
-		</div>
-
-
-		<div class="col-md-4">
-			<a href="/theimage"  data-ajax="false" class="openImage" id='https://stacks.stanford.edu/image/iiif/cv770rd9515%2F0767_23A_SM/info.json' >Or this one</a>
-		</div>
-
-
-	</div>
-
+</div>
 
 </div>
-</div>
-<!-- The Javascript apps-->
 
-<script>
+<script src="javascripts/polyedsearchpage.js"></script>
 
-	var currentImage;
-	var currentSite = window.location.href;
+<script src="javascripts/theCollectionArray.js"></script>
 
-	var openImage = function(image) {
-		document.cookie = "imageviewing="+image+"; path=/theimage";
-	};
-
-	$('.openImage').on("click", function(event) {
-	  	event.stopPropagation();
-	  	currentImage = event.target.id;
-	  	openImage(currentImage);
-	});
-
-</script>
+<script src="javascripts/scrolling.js"></script>
 
 </body>
 
