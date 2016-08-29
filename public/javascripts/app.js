@@ -247,7 +247,8 @@ var newAnnotationFragment = function(baseURL) {
 
   textSelectedHash = textSelectedParent.concat("#"+textSelectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
   targetSelected = [textSelectedHash];
-  var targetData = {body: {text: textSelectedFragment.toString(), format: "text/html"}, target: [{id: textSelectedHash, format: "text/html"}], parent: textSelectedParent};
+  var targetData = {body: {text: textSelectedFragment.toString(), format: "text/html"}, parent: textSelectedParent};
+  var annoData = { target: [{id: textSelectedHash, format: "text/html"}] };
   
   $.ajax({
     type: "POST",
@@ -258,6 +259,17 @@ var newAnnotationFragment = function(baseURL) {
       function (data) {
         textSelected = data.url;
       }
+  });
+
+  annoData.body.id = textSelected;
+
+  $.ajax({
+    type: "POST",
+    url: annoURL,
+    async: false,
+    data: annoData,
+    success: 
+      function (data) {  }
   });
 
   var newHTML = $(outerElementTextIDstring).html();
@@ -301,7 +313,7 @@ var checkForVectorTarget = function(theText) {
 var lookupTargetChildren = function(target, baseURL) {
   var childTexts;
   var targetParam = encodeURIComponent(target);
-  var aSearch = baseURL.concat("targets/"+targetParam);
+  var aSearch = annoURL.concat("targets/"+targetParam);
   $.ajax({
     type: "GET",
     dataType: "json",
@@ -312,7 +324,19 @@ var lookupTargetChildren = function(target, baseURL) {
         childTexts = data.list;
       }
   });
-  return childTexts;
+  var theSearch = baseURL.concat("ids/"+encodeURIComponent(childTexts));
+  var theDocs;
+  $.ajax({
+    type: "GET",
+    dataType: "json",
+    url: theSearch,
+    async: false,
+    success: 
+      function (data) {
+        theDocs = data.list;
+      }
+  });
+  return theDocs;
 };
 
 var updateVectorSelection = function(vectorURL) {
@@ -597,6 +621,21 @@ var addAnnotation = function(thisEditor){
     type: "POST",
     url: findBaseURL(),
     async: false,
+    data: theData,
+    success: 
+      function (data) {
+        createdText = data.url;
+      }
+  });
+
+  var annoData = { };
+  annoData.target = theData.target;
+  annoData.body.id = createdText;
+
+  $.ajax({
+    type: "POST",
+    url: annoURL,
+    async: false,
     data: findNewTextData(editorString),
     success: 
       function (data) {
@@ -799,6 +838,60 @@ if (existingVectors != false) {
   });
 };
 
+var generateIIIFregion = function(coordinates) {
+
+    /////how to encode polygon regions?? Are they allowed in IIIF???
+
+    /*
+
+    NOTE ABOUT COORDINATES
+
+    + Leaflet Simple CRS has (0,0) in top left corner 
+    + GeoJSON coordinates go clockwise from bottom left
+    + IIIF has downwards +y axis
+    _____________________  
+    |*-----> x          |           
+    ||                  |           [2] ---> [3] 
+    |v                  |            ^        |
+    |-y                 |            |        v
+    |                   |           [1] <--- [4]
+    |    L.CRS.Simple   |
+    |                   |        GeoJSON Coordinates
+    |                   | 
+    |                   | 
+    ---------------------    
+
+    */
+    var xy1 = coordinates[0];
+    var xy2 = coordinates[1];
+    var xy3 = coordinates[3];
+
+    var x = xy2[0];
+    var y = -xy2[1];
+    var w = xy3[0] - xy2[0];
+    var h = xy2[1] - xy1[1];
+    var paramURL = x.toString() + "," + y.toString() + "," + w.toString() + "," + h.toString() + "/full/0/";
+
+    return paramURL;
+};
+
+var getIIIFsectionURL = function (imageJSON, coordinates, formats) {
+
+    var imagewithoutinfo = imageJSON.split("/info.json",1);
+    var imagewithoutinfoURL = imagewithoutinfo[0];
+    var splitIndex = imagewithoutinfoURL.lastIndexOf("/");
+    var image_id = imagewithoutinfoURL.substring(splitIndex +1);
+    var baseImageURL = imagewithoutinfoURL.slice(0, splitIndex +1);
+
+    var regionParams = generateIIIFregion(coordinates);
+    var pickAFormat = formats;
+
+    var params = regionParams.concat(image_id + "." + pickAFormat);
+    var theURL = baseImageURL.concat(params);
+
+    return theURL;
+};
+
 map.on('draw:created', function(evt) {
 
 	var layer = evt.layer;
@@ -812,7 +905,17 @@ map.on('draw:created', function(evt) {
     $("#map").popover('show');
   }
   else {
-    var targetData = {geometry: shape.geometry, target: {id: imageSelected, formats: imageSelectedFormats}, metadata: imageSelectedMetadata, parent: vectorOverlapping };
+    var IIIFsection = getIIIFsectionURL(imageSelected, shape.geometry.coordinates[0], "jpg");
+    var targetData = {geometry: shape.geometry, metadata: imageSelectedMetadata, parent: vectorOverlapping };
+    var annoData = {target: []};
+    targetData.target.push({
+        "id": imageSelected,
+        "format": "application/json"
+    });
+    targetData.target.push({
+        "id": IIIFsection,
+        "format": "jpg" ////official jpg file type???
+    });
     if (selectingVector != false) { 
       var theTopText = findHighestRankingChild(textSelectedParent, textSelectedID);
       targetData[textTypeSelected] = theTopText;  
@@ -827,6 +930,18 @@ map.on('draw:created', function(evt) {
           vectorSelected = data.url;
         }
     });
+
+    annoData.body.id = vectorSelected;
+
+    $.ajax({
+      type: "POST",
+      url: annoURL,
+      async: false,
+      data: annoData,
+      success: 
+        function (data) {}
+    });
+
     layer._leaflet_id = vectorSelected;
     if (selectingVector == false) { layer.bindPopup(popupVectorMenu).openPopup(); }
     else {  updateVectorSelection(vectorSelected); };
@@ -1066,25 +1181,36 @@ var setNewTextVariables = function(selection, classCheck) {
 ////USERS HANDLING
 
 var loginAndSetUsername = function() {
-  document.cookie = "theusername=";
+  ///use EASE to setup login and set document.cookie = "theusername="+username+";";
 };
 
-var polyannoAddToFavourite = function() {
+var polyannoAddFavourites = function(the_favourited_type, the_favourited_id) {
+  var targetData = {  "favourites": { "image_id" : imageSelected } };
+  targetData.favourites[the_favourited_type] = the_favourited_id;
+
   $.ajax({
     type: "PUT",
-    url: targetURL,
-    async: false,
+    url: websiteAddress+"/users/"+searchCookie("theusername="),
     dataType: "json",
     data: targetData,
     success:
-      function (data) {  }
+      function (data) {  };
   });
 };
 
-var polyannoRemoveFavourite = function() {
+var polyannoRemoveFavourites = function(the_favourited_type, the_favourited_id) {
+  var targetData = {  "removefavourite": { "image_id" : imageSelected } };
+  targetData.favourites[the_favourited_type] = the_favourited_id;
 
+  $.ajax({
+    type: "PUT",
+    url: websiteAddress+"/users/"+searchCookie("theusername="),
+    dataType: "json",
+    data: targetData,
+    success:
+      function (data) {  };
+  });
 };
-
 
 ///SELECTION PROCESS
 $('#polyanno-page-body').on("mouseup", '.content-area', function(event) {
@@ -1296,13 +1422,23 @@ $("#polyanno-page-body").on("click", ".polyanno-options-dropdown-toggle", functi
 
 $("#polyanno-page-body").on("click", ".polyanno-favourite", function(event) {
   var theSpan = $(this).find(".glyphicon");
-  var thisEditorInfo =  fieldMatching(editorsOpen, "editor", $(this).closest(".textEditorPopup").attr("id"));
   if (theSpan.hasClass("glyphicon-star-empty")) {
-    polyannoAddToFavourite( thisEditorInfo);
+    if ( $(this).closest(".annoPopup").attr("id") == "imageViewer" ) {
+      polyannoAddFavourites("the_image", true);
+    }
+    else {
+      polyannoAddFavourites(textTypeSelected, textSelected);
+    };
     theSpan.removeClass("glyphicon-star-empty").addClass("glyphicon-star");
   }
   else {
-    polyannoRemoveFavourite( thisEditorInfo );
+    if ( $(this).closest(".annoPopup").attr("id") == "imageViewer" ) {
+      polyannoRemoveFavourites("the_image", false);
+    }
+    else {
+      polyannoRemoveFavourites(textTypeSelected, textSelected);
+    };
+    polyannoHandleFavourites("removefavourite", textSelected);
     theSpan.removeClass("glyphicon-star").addClass("glyphicon-star-empty");
   };
 });

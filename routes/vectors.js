@@ -4,14 +4,10 @@ var express    = require('express');
 var bodyParser = require('body-parser');
 
 var newVector     = require('./newVector');
-var newTranslate    = require('./newTranslation');
-var newTranscription    = require('./newTranscription');
 
 var websiteAddress = "http://localhost:8080";
 
 var vectorURL = websiteAddress.concat("/api/vectors/");
-var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
-var translationURL = websiteAddress.concat("/api/translations/");
 
 var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
 
@@ -51,64 +47,6 @@ var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
     else {    return docField;    };
 };
 
-//////IMAGE HANDLING
-
-var generateIIIFregion = function(coordinates) {
-
-    /////how to encode polygon regions?? Are they allowed in IIIF???
-
-    /*
-
-    NOTE ABOUT COORDINATES
-
-    + Leaflet Simple CRS has (0,0) in top left corner 
-    + GeoJSON coordinates go clockwise from bottom left
-    + IIIF has downwards +y axis
-    _____________________  
-    |*-----> x          |           
-    ||                  |           [2] ---> [3] 
-    |v                  |            ^        |
-    |-y                 |            |        v
-    |                   |           [1] <--- [4]
-    |    L.CRS.Simple   |
-    |                   |        GeoJSON Coordinates
-    |                   | 
-    |                   | 
-    ---------------------    
-
-    */
-    var xy1 = coordinates[0];
-    var xy2 = coordinates[1];
-    var xy3 = coordinates[3];
-
-    var x = xy2[0];
-    var y = -xy2[1];
-    var w = xy3[0] - xy2[0];
-    var h = xy2[1] - xy1[1];
-    var paramURL = x.toString() + "," + y.toString() + "," + w.toString() + "," + h.toString() + "/full/0/";
-
-    return paramURL;
-};
-
-var getIIIFsectionURL = function (imageJSON, coordinates, formats) {
-
-    var imagewithoutinfo = imageJSON.split("/info.json",1);
-    var imagewithoutinfoURL = imagewithoutinfo[0];
-    var splitIndex = imagewithoutinfoURL.lastIndexOf("/");
-    var image_id = imagewithoutinfoURL.substring(splitIndex +1);
-    var baseImageURL = imagewithoutinfoURL.slice(0, splitIndex +1);
-
-    var regionParams = generateIIIFregion(coordinates);
-    var pickAFormat = formats;
-
-    var params = regionParams.concat(image_id + "." + pickAFormat);
-    var theURL = baseImageURL.concat(params);
-
-    console.log(theURL);
-
-    return theURL;
-};
-
 //ROUTE FUNCTIONS
 
 exports.findAll = function(req, res) {
@@ -135,31 +73,6 @@ exports.deleteAll = function(req, res) {
     }); 
 };
 
-exports.findAllTargetVectors = function(req, res) {
-
-    var vectorAnnos = [];
-
-    var targetID = req.params.target;
-
-    var vectorSearch = newVector.find({'target.id': targetID});
-
-    vectorSearch.exec(function(err, vectors){
-
-        if (err) {
-            console.log(err);
-            res.json({list: false});
-        }
-        else {
-            vectors.forEach(function(vectorJSON){
-                vectorAnnos.push(vectorJSON);
-            });
-
-            res.json({list: vectorAnnos});
-        };
-    });
-
-};
-
 exports.addNew = function(req, res) {
     
     var vector = new newVector(); 
@@ -183,29 +96,10 @@ exports.addNew = function(req, res) {
         ATCarray += 1;      
     });
 
-    var imageID = req.body.target.id;
     var theCoordinates = vector.notFeature.notGeometry.notCoordinates;
-    var imageFormats = req.body.target.formats;
+    var newVectorURL = vectorURL.concat(vector.id);
 
-    //overall image
-    vector.target.push({
-        "id": imageID,
-        "language": req.body.target.language,
-        "format": "application/json"
-    });
-
-    //IIIF image fragment
-    var IIIFsection = getIIIFsectionURL(imageID, theCoordinates, imageFormats);
-    vector.target.push({
-        "id": IIIFsection,
-        "language": req.body.target.language,
-//need to find official format name for IIIF region
-        "format": "jpg"
-    });
-
-    var newVectorID = vector.id;
-    var newVectorURL = vectorURL.concat(newVectorID);
-    vector.body.id = newVectorURL;
+    vector.id = newVectorURL;
     jsonFieldPush(req.body, "metadata");
     vector.parent = jsonFieldEqual(vector.parent, req.body, "parent");
     vector.translation = jsonFieldEqual(vector.translation, req.body, "translation");
@@ -316,4 +210,16 @@ exports.deleteOne = function(req, res) {
         });
 };
 
+exports.searchByIds = function(req, res) {
+    var otherSearch = newVector.where('id').in(req.params._ids);
+    otherSearch.exec(function(err, texts){
 
+        if (err) {
+            console.log(err);
+            return ({list: false});
+        }
+        else {
+            return ({list: texts});
+        };
+    });
+};

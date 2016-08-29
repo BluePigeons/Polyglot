@@ -5,14 +5,10 @@ var Schema       = mongoose.Schema;
 var vectorSchema   = new Schema({
 
 	"@context": {
-		type: [], 
-		default: [
-		"http://127.0.0.1:8080/context.json",
-		"http://www.w3.org/ns/anno.jsonld"
-		]},
-	"@id": {
-		type: String,
-		default: "http://127.0.0.1:8080/vectors/" 
+		type: []
+    },
+	"id": {
+		type: String
 	},
     "notFeature": {
     	"notType": {
@@ -58,30 +54,6 @@ var vectorSchema   = new Schema({
     	type: String,
     	default: ""
     },
-	"body": {
-		"id": {
-			type: String,
-			default: "https://127.0.0.1:8080/vectors/"
-		},
-		"format": {
-			type: String,
-			default: "application/json"
-		},
-	},
-	"target": 
-		[{
-			"id": {
-				type: String
-			},
-			"format": {
-				type: String,
-				default: "application/json"
-			},
-			"language": {
-				type: String
-			}
-		}]
-	,
 	"created": { type: Date, default: Date.now },
 	"creator": {
 		"id": {
@@ -95,11 +67,6 @@ var vectorSchema   = new Schema({
 			default: "identifying"
 		}
 	},
-
-	"type": {
-		type: "string",
-		default: "Annotation"
-	}
 
 },
 

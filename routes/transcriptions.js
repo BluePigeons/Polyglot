@@ -7,9 +7,7 @@ var newTranscription    = require('./newTranscription');
 
 var websiteAddress = "http://localhost:8080"; ///////// <-----
 
-var vectorURL = websiteAddress.concat("/api/vectors/");
 var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
-var translationURL = websiteAddress.concat("/api/translations/");
 
 var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
 
@@ -182,7 +180,6 @@ exports.voting = function(req, res) {
         savingFunction(updateVotes);
 
     });
-
 };
 
 exports.findAll = function(req, res) {
@@ -214,11 +211,10 @@ var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
     else {    return docField;    };
 };
 
-var bodySetting = function(oldBody, reqDoc, bodyID) {
-    if (( isUseless(bodyID) ) || (isUseless(reqDoc) ) ){    return oldBody;    }
+var bodySetting = function(oldBody, reqDoc) {
+    if ( (isUseless(reqDoc) ) ){    return oldBody;    }
     else {
         var newBody = {};
-        newBody.id = bodyID;
         newBody.text = jsonFieldEqual(oldBody, reqDoc, "text");
         newBody.format = jsonFieldEqual(oldBody, reqDoc, "format");
         newBody.language = jsonFieldEqual(oldBody, reqDoc, "format");
@@ -282,26 +278,96 @@ var childrenLocationChecking = function(oldChildren, newChildren) {
     };
 };
 
-exports.addNew = function(req, res) {
 
-//    console.log("being created "+JSON.stringify(req.body));
+/////////merge as part of idmatching???
+var theIDCheck = function(theArray, doc) {
+    if ( typeof fieldMatching(theArray, "id", doc.body.id) != ('undefined' || null)) {
+        return fieldMatching(theArray, "id", doc.body.id); 
+    }
+    else if ( typeof fieldMatching(theArray, "id", doc.id) != ('undefined' || null)) {
+        return fieldMatching(theArray, "id", doc.id); 
+    }
+    else {
+        return null;
+    };           
+};
+
+/////should return an array of arrays of matching pairs
+var arrayIDCompare = function(arrayA, arrayB) {
+
+    var returnArray =[];
+    var i = 0;
+    arrayA.forEach(function(doc){
+        if (isUseless(theIDCheck(arrayB, doc) )) { i += 1; }
+        else {
+            i += 1;
+            returnArray.push([doc, theIDCheck(arrayB, doc)]); ////push a pair of matching docs
+        };
+    });
+
+    if ( (i == arrayA.length) && ( isUseless(returnArray[0]) ) ) {    return null;    }
+    else if ( (i == arrayA.length) && (isUseless(returnArray[0]) == false ) ) {    return returnArray;    };
+};
+
+var foundParent = function(textParent, spanID, textArray) {
+    var findSpanLocation = function() {    return fieldMatching(textParent.children, "id", spanID);    };
+    return arrayIDCompare(textArray, findSpanLocation().fragments);
+};
+
+var bracketedArray = function(texts) {
+
+    var theArray = [];
+    texts.forEach(function(doc){
+        theArray.push([doc]);
+    });
+    if (theArray.length == texts.length) {
+        return theArray;
+    };
+};
+
+var votingInfoTexts = function(targetID, textArray, res) {
+
+    var parts = targetID.split("#", 2); //////this will work with first two not last two.....
+    var parentID = parts[0];
+    var spanID = parts[1];
+    newTranscription.findOne({'id': parentID}, function(err, textParent){
+        if (err) { 
+            res.json({list: bracketedArray(textArray, res)});
+        }
+        else {
+            var theVoteDocs = foundParent(textParent, spanID, textArray);
+            res.json({list: theVoteDocs});
+        };
+    });
+};
+
+/*
+var generateVoteJSON = function(fragmentChild, theJSON) {
+    ///adds new field before returning
+    var voteDoc = {"votingInfo" : fragmentChild};
+    var JSONadded =  asyncPush([theJSON], []); 
+    return asyncPush([voteDoc], JSONadded);
+
+};
+*/
+
+
+
+exports.addNew = function(req, res) {
     
     var transcription = new newTranscription(); 
-    var newTransID = transcription.id;
-    var transURL = transcriptionURL.concat(newTransID);
 
     var jsonFieldPush = function(bodyDoc, theField) {
         if ( !isUseless(bodyDoc[theField]) ) {
             bodyDoc[theField].forEach(function(subdoc){    transcription[theField].addToSet(subdoc);    });
         };
     };
-
-    transcription.body = bodySetting(transcription.body, req.body.body, transURL);   
+    var transURL = transcriptionURL.concat(transcription.id);
+    transcription.body = bodySetting(transcription.body, req.body.body);   
     transcription.parent = jsonFieldEqual(transcription.parent, req.body, "parent");
     transcription.translation = jsonFieldEqual(transcription.translation, req.body, "translation");
 
     jsonFieldPush(req.body, "metadata");
-    jsonFieldPush(req.body, "target");  
 
     var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
     if ( ( !isUseless(transcription.children)) && (!isUseless(newChildrenArray[0]) )
@@ -314,13 +380,8 @@ exports.addNew = function(req, res) {
     };
 
     transcription.save(function(err) {
-        if (err) {
-            console.log(err);
-            res.send(err);
-        }
-        else {
-            res.json({ "url": transURL });
-        }
+        if (err) {    res.send(err);    }
+        else {    res.json({ "url": transURL });    };
     });
 
 };
@@ -387,103 +448,20 @@ exports.deleteOne = function(req, res) {
     });
 };
 
-/*
-var generateVoteJSON = function(fragmentChild, theJSON) {
-    ///adds new field before returning
-    var voteDoc = {"votingInfo" : fragmentChild};
-    var JSONadded =  asyncPush([theJSON], []); 
-    return asyncPush([voteDoc], JSONadded);
-
-};
-*/
-
-var makeArray = function(anArray) {
-    if (Array.isArray(anArray) == false) {
-        return [anArray];
-    }
-    else { return anArray };
-};
-
-/////////merge as part of idmatching???
-var theIDCheck = function(theArray, doc) {
-    if ( typeof fieldMatching(theArray, "id", doc.body.id) != ('undefined' || null)) {
-        return fieldMatching(theArray, "id", doc.body.id); 
-    }
-    else if ( typeof fieldMatching(theArray, "id", doc.id) != ('undefined' || null)) {
-        return fieldMatching(theArray, "id", doc.id); 
-    }
-    else {
-        return null;
-    };           
-};
-
-/////should return an array of arrays of matching pairs
-var arrayIDCompare = function(arrayA, arrayB) {
-
-    var returnArray =[];
-    var i = 0;
-    arrayA.forEach(function(doc){
-        if (isUseless(theIDCheck(arrayB, doc) )) { i += 1; }
-        else {
-            i += 1;
-            returnArray.push([doc, theIDCheck(arrayB, doc)]); ////push a pair of matching docs
-        };
-    });
-
-    if ( (i == arrayA.length) && ( isUseless(returnArray[0]) ) ) {    return null;    }
-    else if ( (i == arrayA.length) && (isUseless(returnArray[0]) == false ) ) {    return returnArray;    };
-};
-
-var foundParent = function(textParent, spanID, textArray) {
-    var findSpanLocation = function() {    return fieldMatching(textParent.children, "id", spanID);    };
-    return arrayIDCompare(textArray, findSpanLocation().fragments);
-};
-
-var bracketedArray = function(texts) {
-
-    var theArray = [];
-    texts.forEach(function(doc){
-        theArray.push([doc]);
-    });
-    if (theArray.length == texts.length) {
-        return theArray;
-    };
-};
-
-var votingInfoTexts = function(targetID, textArray, res) {
-
-    var parts = targetID.split("#", 2); //////this will work with first two not last two.....
-    var parentID = parts[0];
-    var spanID = parts[1];
-    newTranscription.findOne({'body.id': parentID}, function(err, textParent){
-        if (err) { 
-            res.json({list: bracketedArray(textArray, res)});
-        }
-        else {
-            var theVoteDocs = foundParent(textParent, spanID, textArray);
-            res.json({list: theVoteDocs});
-        };
-    });
-};
-
-exports.getByTarget = function(req, res) {
-
-    var targetID = req.params.target;
-    var theSearch = newTranscription.find({'target.id': targetID});
-
-    theSearch.exec(function(err, texts){
+exports.searchByIds = function(req, res) {
+    var otherSearch = newTranscription.where('id').in(req.params._ids);
+    otherSearch.exec(function(err, texts){
 
         if (err) {
             console.log(err);
-            res.json({list: false});
+            return ({list: false});
         }
         else if (targetID.includes("#")) {
-            votingInfoTexts(targetID, texts, res);            
+            return votingInfoTexts(targetID, texts, res);            
         }
         else {
-            res.json({list: bracketedArray(texts)});
+            return ({list: bracketedArray(texts)});
         };
     });
 };
-
 

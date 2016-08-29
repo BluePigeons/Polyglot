@@ -3,14 +3,10 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 
-var newVector     = require('./newVector');
 var newTranslation    = require('./newTranslation');
-var newTranscription    = require('./newTranscription');
 
 var websiteAddress = "http://localhost:8080";
 
-var vectorURL = websiteAddress.concat("/api/vectors/");
-var transcriptionURL = websiteAddress.concat("/api/transcriptions/");
 var translationURL = websiteAddress.concat("/api/translations/");
 
 var rejectionOptions = new Set(["false",'""' , null , false , 'undefined']);
@@ -60,44 +56,44 @@ var replaceChildText = function(oldText, spanID, newInsert, oldInsert) {
 
 exports.voting = function(req, res) {
 
-    var voteOn = newTranslation.findOne({'body.id':req.body.parent});
-    voteOn.exec(function(err, transcription) {
+    var voteOn = newtranslation.findOne({'body.id':req.body.parent});
+    voteOn.exec(function(err, translation) {
 
         if (err) {res.send(err)};
 
+        ///////ARRAY LOCATION FUNCTIONS
+
         var findLocationIndex = function(loc) {    
-            return transcription.children.indexOf(loc);    
+            return translation.children.indexOf(loc);    
         };
 
-        var theLocation = fieldMatching(transcription.children, "id", req.body.children[0].id);
+        var theLocation = fieldMatching(translation.children, "id", req.body.children[0].id);
         var thelocationIndex = findLocationIndex(theLocation);
 
         var findFragmentIndex = function(thefrag) {
             return theLocation.fragments.indexOf(thefrag); 
         };
 
-        var theChildDoc =  fieldMatching(transcription.children[thelocationIndex].fragments, "id", req.body.children[0].fragments[0].id);
+        var theChildDoc =  fieldMatching(translation.children[thelocationIndex].fragments, "id", req.body.children[0].fragments[0].id);
         var thefragmentIndex = findFragmentIndex(theChildDoc); 
 
         var fragmentChild = function(nIndex) {
-            return transcription.children[thelocationIndex].fragments[nIndex];
+            return translation.children[thelocationIndex].fragments[nIndex];
         };
 
         var fragmentChildByRank = function(therank) {
-            return fieldMatching(transcription.children[thelocationIndex].fragments, "rank", therank);
+            return fieldMatching(translation.children[thelocationIndex].fragments, "rank", therank);
         };
 
-        var votesChange = function(voteNumber) {
-            return transcription.children[thelocationIndex].fragments[thefragmentIndex].votesUp += voteNumber; 
-        };
+        ///////VOTE AND RANK FUNCTIONS
 
         var rankChange = function(indexNumber, rankChangeNumber) {
-            return transcription.children[thelocationIndex].fragments[indexNumber].rank += rankChangeNumber;
+            return translation.children[thelocationIndex].fragments[indexNumber].rank += rankChangeNumber;
         };
 
-        var reload = function(newChildRank) {   //check to see if now highest ranking child and update the main transcription if so
+        var reload = function(newChildRank) {   //check to see if now highest ranking child and update the main translation if so
             if (newChildRank == 0){ 
-                transcription.body.text = replaceChildText(transcription.body.text, req.body.children[0].id, req.body.votedText, req.body.topText);
+                translation.body.text = replaceChildText(translation.body.text, req.body.children[0].id, req.body.votedText, req.body.topText);
                 return {"reloadText": true};
             }
             else {
@@ -109,88 +105,102 @@ exports.voting = function(req, res) {
             var neigbourFrag = fragmentChild(nIndex);
             var voteFrag = theChildDoc;
 
-            transcription.children[thelocationIndex].fragments.set(nIndex, voteFrag); //put the voted fragment in the neighbour's index
-            transcription.children[thelocationIndex].fragments.set(voteIndex, neighbourFrag); //put the neighbour fragment in the old voted fragment's index
+            translation.children[thelocationIndex].fragments.set(nIndex, voteFrag); //put the voted fragment in the neighbour's index
+            translation.children[thelocationIndex].fragments.set(voteIndex, neighbourFrag); //put the neighbour fragment in the old voted fragment's index
 
-            if ((transcription.children[thelocationIndex].fragments[nIndex] == voteFrag) &&(transcription.children[thelocationIndex].fragments[voteIndex] == neighbourFrag)) {
-                return transcription; ///only return once process is done
+            if ((translation.children[thelocationIndex].fragments[nIndex] == voteFrag) &&(translation.children[thelocationIndex].fragments[voteIndex] == neighbourFrag)) {
+                return translation; ///only return once process is done
             };
         };
 */
+
+        var votingUpNow = function(theNeighbourIndex) {
+            rankChange(theNeighbourIndex, 1);
+            rankChange(thefragmentIndex, -1);
+            return true;
+        };
+        var votingDownNow = function(theNeighbourIndex) {
+            rankChange(theNeighbourIndex, -1);
+            rankChange(thefragmentIndex, 1);    
+            return true;            
+        };
+
         var voteRankChange = function(voteNumber) {
         ///NOTE: the ranking is ONLY changed if the vote is now above or below the neighbour, not if now equal
             var neighbourRank =  theChildDoc.rank - voteNumber; 
-            var theNeighbour = function() {    return fragmentChildByRank(neighbourRank);    };
-            var neighbourIndex = function() {    return findFragmentIndex(theNeighbour());    };
-            var votingUpNow = function() {
-                rankChange(neighbourIndex(), 1);
-                var newChildRank = rankChange(thefragmentIndex, -1);
-                return reload(newChildRank);
-            };
-            var votingDownNow = function() {
-                rankChange(neighbourIndex(), -1);
-                var newChildRank = rankChange(thefragmentIndex, 1);
-                return reload(newChildRank);                 
-            };
+            var theNeighbour = fragmentChildByRank(neighbourRank); 
            
-            if ( (neighbourRank >= 0) && (theChildDoc.rank > neighbourRank) && ( theChildDoc.votesUp > theNeighbour().votesUp ) ) {
-                return votingUpNow();
+            if ( (neighbourRank >= 0) && (theChildDoc.rank > neighbourRank) && ( theChildDoc.votesUp > theNeighbour.votesUp ) ) {
+                return votingUpNow( findFragmentIndex(theNeighbour) );
             }
-            else if ( ( isUseless(fragmentChildByRank(neighbourRank)) == false) && (  theChildDoc.rank < neighbourRank  ) &&  (   theChildDoc.votesUp < theNeighbour().votesUp ) ) {
-                return votingDownNow();               
+            else if ( ( !isUseless(fragmentChildByRank(neighbourRank)) ) && (  theChildDoc.rank < neighbourRank  ) &&  (   theChildDoc.votesUp < theNeighbour.votesUp ) ) {
+                return votingDownNow( findFragmentIndex(theNeighbour) );               
             }
             else {
+                return false;
+            };
+        };
+
+        var rankChangeLoopCheck = function(voteNumber) {
+            var shouldReload = voteRankChange(voteNumber);
+            if (shouldReload == false) {
                 return {"reloadText": false};
+            }
+            else {
+                do {    shouldReload = voteRankChange(voteNumber);    }
+                while ( shouldReload != false );
+                if ( shouldReload == false ) { reload(translation.children[thelocationIndex].fragments[thefragmentIndex].rank) }; ///fragindex() 
             };
         };
 
         var voteCheckChange = function(voteType) {
             if (voteType == "up") {
-                votesChange(1); /////make this into a promise setup ....?
-                return voteRankChange(1);
+                translation.children[thelocationIndex].fragments[thefragmentIndex].votesUp += 1 ; ///make into Promise setup??
+                return voteRankChange(1); //reload(newChildRank); 
             }
             else if (voteType == "down") {
-                votesChange(-1);
+                translation.children[thelocationIndex].fragments[thefragmentIndex].votesUp -= 1 ; 
                 return voteRankChange(-1);
             };
         };
 
-/////make saving more general in this doc....
-        var savingFunction = function() {
-            transcription.save(function(err) {
+        //Node is synchronous so this ensures that nothing is saved until whole process is done without Promises
+        var savingFunction = function(theNewVotes) {
+            translation.save(function(err) {
                 if (err) {res.send(err)}
                 else {  
-                    res.json(updateVotes);  
+                    res.json(theNewVotes);  
                 };
             });
         };
 
+        ///////START VOTING FUNCTIONS & SAVE
+
         var updateVotes = voteCheckChange(req.params.voteType);
-        savingFunction();
+        savingFunction(updateVotes);
 
     });
-
 };
 
 exports.findAll = function(req, res) {
-    newTranslation.find(function(err, transcriptions) {
+    newTranslation.find(function(err, translations) {
         if (err) {res.send(err)}
-        else { res.json(transcriptions); };
+        else { res.json(translations); };
     });
 };
 
 exports.deleteAll = function(req, res) {
       
-    newTranslation.find(function(err, transcriptions) {
+    newTranslation.find(function(err, translations) {
         if (err) {res.send(err)};
 
-        transcriptions.forEach(function(transcription){
-            transcription.remove({_id: transcription._id},
+        translations.forEach(function(translation){
+            translation.remove({_id: translation._id},
             function(err){
                 if (err) {res.send(err)};
             });
         });
-        if (transcriptions.length == 0) {
+        if (translations.length == 0) {
             res.send("all gone");
         };
     }); 
@@ -201,11 +211,10 @@ var jsonFieldEqual = function(docField, bodyDoc, bodyField) {
     else {    return docField;    };
 };
 
-var bodySetting = function(oldBody, reqDoc, bodyID) {
-    if (( isUseless(bodyID) ) || (isUseless(reqDoc) ) ){    return oldBody;    }
+var bodySetting = function(oldBody, reqDoc) {
+    if ( (isUseless(reqDoc) ) ){    return oldBody;    }
     else {
         var newBody = {};
-        newBody.id = bodyID;
         newBody.text = jsonFieldEqual(oldBody, reqDoc, "text");
         newBody.format = jsonFieldEqual(oldBody, reqDoc, "format");
         newBody.language = jsonFieldEqual(oldBody, reqDoc, "format");
@@ -269,127 +278,6 @@ var childrenLocationChecking = function(oldChildren, newChildren) {
     };
 };
 
-exports.addNew = function(req, res) {
-
-//    console.log("being created "+JSON.stringify(req.body));
-    
-    var transcription = new newTranslation(); 
-    var newTransID = transcription.id;
-    var transURL = transcriptionURL.concat(newTransID);
-
-    var jsonFieldPush = function(bodyDoc, theField) {
-        if ( isUseless(bodyDoc[theField]) == false ) {
-            bodyDoc[theField].forEach(function(subdoc){    transcription[theField].addToSet(subdoc);    });
-        };
-    };
-
-    transcription.body = bodySetting(transcription.body, req.body.body, transURL);   
-    transcription.parent = jsonFieldEqual(transcription.parent, req.body, "parent");
-    transcription.translation = jsonFieldEqual(transcription.translation, req.body, "translation");
-
-    jsonFieldPush(req.body, "metadata");
-    jsonFieldPush(req.body, "target");  
-
-    var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
-    if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
-        && (newChildrenArray[0] != -1) ) {
-        transcription.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
-    }
-    else if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
-        && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
-        transcription.children.addToSet(newChildrenArray[1]);
-    };
-
-    transcription.save(function(err) {
-        if (err) {
-            console.log(err);
-            res.send(err);
-        }
-        else {
-            res.json({ "url": transURL });
-        }
-    });
-
-};
-
-exports.getByID = function(req, res) {
-    newTranslation.findById(req.params.transcription_id, function(err, transcription) {
-        if (err) {res.send(err) }
-        else { res.json(transcription) };  
-    });
-};
-
-////IMPORTANT NOTE: use updateOne to add new children but NOT to change vote or rank!
-
-exports.updateOne = function(req, res) {
-
-    console.log("to be updated "+JSON.stringify(req.body));
-
-    var updateDoc = newTranslation.findById(req.params.transcription_id);
-    updateDoc.exec(function(err, transcription) {
-
-        if (err) {res.send(err)};
-
-        var jsonFieldPush = function(bodyDoc, theField) {
-            if (!isUseless(bodyDoc[theField])) {
-                bodyDoc[theField].forEach(function(subdoc){
-                    transcription[theField].addToSet(subdoc);
-                });
-            };
-        };
-
-        transcription.body = bodySetting(transcription.body, req.body.body, transcription.body.id);   
-        transcription.parent = jsonFieldEqual(transcription.parent, req.body, "parent");
-        transcription.translation = jsonFieldEqual(transcription.translation, req.body, "translation");
-        jsonFieldPush(req.body, "metadata");
-        jsonFieldPush(req.body, "target"); 
-
-        var newChildrenArray = newChildrenChecking(transcription.children, req.body.children);
-        if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
-            && (newChildrenArray[0] != -1) ) {
-            transcription.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
-        }
-        else if ( ( isUseless(transcription.children) == false) && (isUseless(newChildrenArray[0]) == false )
-            && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
-            transcription.children.addToSet(newChildrenArray[1]);
-        };
-
-        transcription.save(function(err) {
-            if (err) {res.send(err)}
-            else {res.json(transcription)};
-        });
-
-    });
-};
-
-
-exports.deleteOne = function(req, res) {
-    newTranscription.remove({
-        _id: req.params.transcription_id
-    }, 
-    function(err, transcription) {
-        if (err)
-            res.send(err);
-        res.json({ message: 'Successfully deleted' });
-    });
-};
-
-/*
-var generateVoteJSON = function(fragmentChild, theJSON) {
-    ///adds new field before returning
-    var voteDoc = {"votingInfo" : fragmentChild};
-    var JSONadded =  asyncPush([theJSON], []); 
-    return asyncPush([voteDoc], JSONadded);
-
-};
-*/
-
-var makeArray = function(anArray) {
-    if (Array.isArray(anArray) == false) {
-        return [anArray];
-    }
-    else { return anArray };
-};
 
 /////////merge as part of idmatching???
 var theIDCheck = function(theArray, doc) {
@@ -442,7 +330,7 @@ var votingInfoTexts = function(targetID, textArray, res) {
     var parts = targetID.split("#", 2); //////this will work with first two not last two.....
     var parentID = parts[0];
     var spanID = parts[1];
-    newTranslation.findOne({'body.id': parentID}, function(err, textParent){
+    newTranslation.findOne({'id': parentID}, function(err, textParent){
         if (err) { 
             res.json({list: bracketedArray(textArray, res)});
         }
@@ -453,24 +341,130 @@ var votingInfoTexts = function(targetID, textArray, res) {
     });
 };
 
-exports.getByTarget = function(req, res) {
+/*
+var generateVoteJSON = function(fragmentChild, theJSON) {
+    ///adds new field before returning
+    var voteDoc = {"votingInfo" : fragmentChild};
+    var JSONadded =  asyncPush([theJSON], []); 
+    return asyncPush([voteDoc], JSONadded);
 
-    var targetID = req.params.target;
-    var theSearch = newTranslation.find({'target.id': targetID});
+};
+*/
 
-    theSearch.exec(function(err, texts){
+
+
+exports.addNew = function(req, res) {
+    
+    var translation = new newTranslation(); 
+
+    var jsonFieldPush = function(bodyDoc, theField) {
+        if ( isUseless(bodyDoc[theField]) == false ) {
+            bodyDoc[theField].forEach(function(subdoc){    translation[theField].addToSet(subdoc);    });
+        };
+    };
+    var transURL = translationURL.concat(translation.id);
+    translation.body = bodySetting(translation.body, req.body.body);  
+    translation.parent = jsonFieldEqual(translation.parent, req.body, "parent");
+    translation.translation = jsonFieldEqual(translation.translation, req.body, "translation");
+
+    jsonFieldPush(req.body, "metadata");
+
+    var newChildrenArray = newChildrenChecking(translation.children, req.body.children);
+    if ( ( isUseless(translation.children) == false) && (isUseless(newChildrenArray[0]) == false )
+        && (newChildrenArray[0] != -1) ) {
+        translation.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
+    }
+    else if ( ( isUseless(translation.children) == false) && (isUseless(newChildrenArray[0]) == false )
+        && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
+        translation.children.addToSet(newChildrenArray[1]);
+    };
+
+    translation.save(function(err) {
+        if (err) {
+            console.log(err);
+            res.send(err);
+        }
+        else {
+            res.json({ "url": transURL });
+        }
+    });
+
+};
+
+exports.getByID = function(req, res) {
+    newTranslation.findById(req.params.translation_id, function(err, translation) {
+        if (err) {res.send(err) }
+        else { res.json(translation) };  
+    });
+};
+
+////IMPORTANT NOTE: use updateOne to add new children but NOT to change vote or rank!
+
+exports.updateOne = function(req, res) {
+
+    var updateDoc = newTranslation.findById(req.params.translation_id);
+    updateDoc.exec(function(err, translation) {
+
+        if (err) {res.send(err)};
+
+        var jsonFieldPush = function(bodyDoc, theField) {
+            if (!isUseless(bodyDoc[theField])) {
+                bodyDoc[theField].forEach(function(subdoc){
+                    translation[theField].addToSet(subdoc);
+                });
+            };
+        };
+ 
+        translation.parent = jsonFieldEqual(translation.parent, req.body, "parent");
+        translation.transcription = jsonFieldEqual(translation.transcription, req.body, "transcription");
+        jsonFieldPush(req.body, "metadata");
+
+        var newChildrenArray = newChildrenChecking(translation.children, req.body.children);
+        if ( ( isUseless(translation.children) == false) && (isUseless(newChildrenArray[0]) == false )
+            && (newChildrenArray[0] != -1) ) {
+            translation.children[newChildrenArray[0]].fragments.addToSet(newChildrenArray[1]);
+        }
+        else if ( ( isUseless(translation.children) == false) && (isUseless(newChildrenArray[0]) == false )
+            && (newChildrenArray[0] == -1) && (newChildrenArray[1] != -1) ) {
+            translation.children.addToSet(newChildrenArray[1]);
+        };
+
+        translation.save(function(err) {
+            if (err) {res.send(err)}
+            else {res.json(translation)};
+        });
+
+    });
+};
+
+
+exports.deleteOne = function(req, res) {
+    newTranslation.remove({
+        _id: req.params.translation_id
+    }, 
+    function(err, translation) {
+        if (err)
+            res.send(err);
+        res.json({ message: 'Successfully deleted' });
+    });
+};
+
+exports.searchByIds = function(req, res) {
+    var otherSearch = annoModel.where('id').in(req.params._ids);
+    otherSearch.exec(function(err, texts){
 
         if (err) {
             console.log(err);
-            res.json({list: false});
+            return ({list: false});
         }
         else if (targetID.includes("#")) {
-            votingInfoTexts(targetID, texts, res);            
+            return votingInfoTexts(targetID, texts, res);            
         }
         else {
-            res.json({list: bracketedArray(texts)});
+            return ({list: bracketedArray(texts)});
         };
     });
 };
+
 
 

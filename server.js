@@ -14,7 +14,7 @@ var annotations = require('./routes/annotations');
 var vectors = require('./routes/vectors');
 var transcriptions = require('./routes/transcriptions');
 var translations = require('./routes/translations');
-var users = require('./routes/usersroutes');
+var users = require('./routes/usersroute');
 
 // GET APPLICATION RUNNING
 
@@ -47,7 +47,7 @@ mongoose.connect(databaseURL, { config: { autoIndex: false } });
 var annoRouter = express.Router();
 
 annoRouter.use(function(req, res, next) {
-    //should have proper logging here 
+  ///logging here
     next(); 
 });
 
@@ -110,37 +110,54 @@ userRouter.put('/:username', users.updateOne);
 
 /////////////////API ROUTES
 
+//ANNOTATIONS API
+
+annoRouter.post('/annotations', annotations.addNew );
+annoRouter.put( annotations.updateOne ); ///
+annoRouter.get('/annotations', annotations.getAll);
+annoRouter.get('/annotations/vectors', annotations.getAllVectorAnnos);
+annoRouter.get('/annotations/transcriptions', annotations.getAllTranscriptionAnnos);
+annoRouter.get('/annotations/translations', annotations.getAllTranslationAnnos);
+annoRouter.get('/annotations/:anno_id', annotations.getByID);
+annoRouter.get('/annotations/target/:target_id', annotations.getByTarget);
+
 //VECTOR API
 
 annoRouter.get('/vectors', vectors.findAll);
 annoRouter.post('/vectors', vectors.addNew);
 annoRouter.get('/vectors/:vector_id', vectors.getByID);
-annoRouter.get('/vectors/targets/:target', vectors.findAllTargetVectors);
 annoRouter.put('/vectors/:vector_id', vectors.updateOne);
 annoRouter.delete('/vectors/:vector_id', vectors.deleteOne);
 annoRouter.delete('/vectors', vectors.deleteAll);
+
+annoRouter.get('/vectors/targets/:target', annotations.getVectorsByTarget);
+annoRouter.get('/vectors/ids/:_ids', vectors.searchByIds);
 
 //TRANSCRIPTION API
 
 annoRouter.get('/transcriptions', transcriptions.findAll);
 annoRouter.post('/transcriptions', transcriptions.addNew);
 annoRouter.get('/transcriptions/:transcription_id', transcriptions.getByID);
-annoRouter.get('/transcriptions/targets/:target', transcriptions.getByTarget);
 annoRouter.put('/transcriptions/:transcription_id', transcriptions.updateOne);
 annoRouter.put('/transcriptions/voting/:voteType', transcriptions.voting);
 annoRouter.delete('/transcriptions/:transcription_id', transcriptions.deleteOne);
 annoRouter.delete('/transcriptions', transcriptions.deleteAll);
+
+annoRouter.get('/transcriptions/targets/:target', annotations.getTranscriptionsByTarget);
+annoRouter.get('/transcriptions/ids/:_ids', transcriptions.searchByIds);
 
 //TRANSLATION API
 
 annoRouter.get('/translations', translations.findAll);
 annoRouter.post('/translations', translations.addNew);
 annoRouter.get('/translations/:transcription_id', translations.getByID);
-annoRouter.get('/translations/targets/:target', translations.getByTarget);
 annoRouter.put('/translations/:transcription_id', translations.updateOne);
 annoRouter.put('/translations/voting/:voteType', translations.voting);
 annoRouter.delete('/translations/:transcription_id', translations.deleteOne);
 annoRouter.delete('/translations', translations.deleteAll);
+
+annoRouter.get('/translations/targets/:target', annotations.getTranslationsByTarget);
+annoRouter.get('/translations/ids/:_ids', translations.searchByIds);
 
 /////////GET STARTED
 

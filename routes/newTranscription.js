@@ -5,12 +5,10 @@ var transcriptionSchema   = new Schema({
 	"@context": {
 		type: [], 
 		default: [
-		"http://127.0.0.1:8080/context.json",
-		"http://www.w3.org/ns/anno.jsonld"
+		"http://127.0.0.1:8080/context.json"
 		]},
-	"@id": {
+	"id": {
 		type: String,
-		default: "http://127.0.0.1:8080/transcriptions/" 
 	},
     "type": {
     	type: []
@@ -39,38 +37,6 @@ var transcriptionSchema   = new Schema({
     "translation": {
     	type: String
     },
-	"body": {
-		"id": {
-			type: String,
-			default: "https://127.0.0.1:8080/transcriptions/"
-		},
-		"format": {
-			type: String,
-			default: "TextualBody"
-		},
-		"text": {
-			type: String,
-			default: ""
-		},
-		"language": {
-			type: String,
-			default: "en"
-		}
-	},
-	"target": [{
-		"id": {
-			type: String,
-			default: "https://127.0.0.1:8080/transcriptions/"
-		},
-		"format": {
-			type: String,
-			default: "plain"
-		},
-		"language": {
-			type: String,
-			default: "en"
-		}
-	}],
 	"created": { type: Date, default: Date.now },
 	"creator": {
 		"id": {
@@ -83,10 +49,6 @@ var transcriptionSchema   = new Schema({
 			type: String,
 			default: "identifying"
 		}
-	},
-	"Annotation": {
-		type: String,
-		default: "transcription"
 	},
 	"metadata":[]
 

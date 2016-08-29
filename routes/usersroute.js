@@ -88,7 +88,7 @@ exports.addNew = function(req, res) {
     
     var theuser = new newUser(); 
 
-    theuser.username = req.params.username;
+    theuser.username = req.body.username;
 
     theuser.save(function(err) {
         if (err) {
@@ -110,7 +110,7 @@ exports.getByID = function(req, res) {
 };
 
 exports.getByUsername = function(req, res) {
-    newUser.findOne(req.params.username, function(err, theuser) { /////
+    newUser.findOne({ "username" : req.params.username }, function(err, theuser) { /////
         if (err) {res.send(err) }
         else { res.json(theuser) };  
     });
@@ -120,49 +120,48 @@ exports.getByUsername = function(req, res) {
 ////unlike annos, the users are expecting to be updated one piece of info at a time - no arrays
 exports.updateOne = function(req, res) {
 
-    var updateDoc = newUser.findOne(req.params.username); ///////
+    var updateDoc = newUser.findOne({ "username" : req.params.username }); ///////
     updateDoc.exec(function(err, theuser) {
 
         if (err) {res.send(err)};
 
         var updateDocs = function(annoType, editType) {
-        	if ( !isUseless(req.params.docs_edited[annoType][editType]) ) { 
-        		theuser.docs_edited[annoType][editType].addToSet(req.params.docs_edited[annoType][editType]);
+        	if ( !isUseless(req.body.docs_edited[annoType][editType]) ) { 
+        		theuser.docs_edited[annoType][editType].addToSet(req.body.docs_edited[annoType][editType]);
         	};
         };
 
         var updateAllEdits = function(annoType) {
-        	if (!isUseless(req.params.docs_edited[annoType])) {
+        	if (!isUseless(req.body.docs_edited[annoType])) {
 	        	updateDocs(annoType, "created");
 	        	updateDocs(annoType, "edited");
 	        	updateDocs(annoType, "deleted");
         	};
         };
 
-        if (!isUseless(req.params.docs_edited)) {
+        if (!isUseless(req.body.docs_edited)) {
         	updateAllEdits("vectors");
         	updateAllEdits("transcriptions");
         	updateAllEdits("translations");
         };
 
         var updateFavourite = function(theFavourite) {
-        	if (!isUseless(req.params.favourites.the_image)) { theFavourite.the_image = req.params.favourites.the_image };
-        	if (!isUseless(req.params.favourites.translations)) { theFavourite.translations = [req.params.favourites.translations] };
-        	if (!isUseless(req.params.favourites.transcriptions)) { theFavourite.transcriptions = [req.params.favourites.transcriptions] };
-        	if (!isUseless(req.params.favourites.vectors)) { theFavourite.vectors = [req.params.favourites.vectors] };
+        	if (!isUseless(req.body.favourites.the_image)) { theFavourite.the_image = req.body.favourites.the_image };
+        	if (!isUseless(req.body.favourites.translations)) { theFavourite.translations = [req.body.favourites.translations] };
+        	if (!isUseless(req.body.favourites.transcriptions)) { theFavourite.transcriptions = [req.body.favourites.transcriptions] };
         	return theFavourite;
         };
 
         var createNewFavourite = function() {
-        	var theNew = { "image_id" : req.params.favourites.image_id };
+        	var theNew = { "image_id" : req.body.favourites.image_id };
         	var newFavourite = updateFavourite(theNew);
         	theuser.favourites.addToSet(newFavourite);
         };
 
-        if (!isUseless(req.params.favourites)) {
+        if (!isUseless(req.body.favourites)) {
         	var existingFav = false;
         	theuser.favourites.forEach(function(userFavourite) {
-        		if (userFavourite.image_id == req.params.favourites.image_id) {
+        		if (userFavourite.image_id == req.body.favourites.image_id) {
         			userFavourite = updateFavourite(userFavourite);
         			existingFav = true;
         		};
@@ -170,15 +169,14 @@ exports.updateOne = function(req, res) {
         	if (existingFav == false) {	createNewFavourite(); };
         };
 
-        if (!isUseless(req.params.removefavourite)) {
+        if (!isUseless(req.body.removefavourite)) {
         	var thefavourite;
         	theuser.favourites.forEach(function(userFavourite) {
-        		if (theuser.favourites.image_id == req.params.removefavourite.image_id) {	thefavourite = userFavourite;	};
+        		if (theuser.favourites.image_id == req.body.removefavourite.image_id) {	thefavourite = userFavourite;	};
         	});
-        	if (!isUseless(req.params.removefavourite.the_image)) { thefavourite.the_image = false; };
-        	if (!isUseless(req.params.removefavourite.transcriptions)) { thefavourite.transcriptions.pull(req.params.removefavourite.transcriptions); };
-        	if (!isUseless(req.params.removefavourite.translations)) { thefavourite.translations.pull(req.params.removefavourite.translations); };
-         	if (!isUseless(req.params.removefavourite.vectors)) { thefavourite.vectors.pull(req.params.removefavourite.vectors); };
+        	if (!isUseless(req.body.removefavourite.the_image)) { thefavourite.the_image = false; };
+        	if (!isUseless(req.body.removefavourite.transcriptions)) { thefavourite.transcriptions.pull(req.body.removefavourite.transcriptions); };
+        	if (!isUseless(req.body.removefavourite.translations)) { thefavourite.translations.pull(req.body.removefavourite.translations); };
         };
 
         theuser.save(function(err) {
@@ -192,7 +190,7 @@ exports.updateOne = function(req, res) {
 /////necessary?
 exports.deleteOne = function(req, res) {
     newUser.remove({
-        _id: req.params.user_id
+        _id: req.body.user_id
     }, 
     function(err, theuser) {
         if (err)
