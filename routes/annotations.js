@@ -173,16 +173,22 @@ exports.getByTarget = function(req, res) {
 exports.getVectorsByTarget = function(req, res) {
 
     var targetID = req.params.target;
+    console.log(targetID);
     var theSearch = newAnno.where('target.id', targetID).where('body.id', '/.*vector.*/' );
 
     theSearch.exec(function(err, texts){
 
         if (err) {
             console.log(err);
-            res.json({list: false});
+            res.json({"list": false});
         }
         else {
-        	var ids = the_texts.map(function(el) { return el._id } );
+        	//var ids = the_texts.map(function(el) { return el._id } );
+            //console.log(the_texts);
+            var ids = [];
+            texts.forEach(function(doc){
+                ids.push(doc);
+            });
             res.json({"list": ids}); 
         };
     });
@@ -194,9 +200,14 @@ exports.getTranscriptionsByTarget = function(req, res) {
     var theSearch = newAnno.where('target.id', targetID).where('body.id', '/.*transcription.*/' );
 
     theSearch.exec(function(err, texts){
-        if (err) {    res.json({list: false});    }
+        if (err) {    res.json({"list": false});    }
         else {	
-            var ids = the_texts.map(function(el) { return el._id } );
+            //var ids = the_texts.map(function(el) { return el._id } );
+            console.log(texts);
+            var ids = [];
+            texts.forEach(function(doc){
+                ids.push(doc);
+            });
             res.json({"list": ids});   
         };
     });
@@ -208,9 +219,14 @@ exports.getTranslationsByTarget = function(req, res) {
     var theSearch = newAnno.where('target.id', targetID).where('body.id', '/.*translation.*/' );
 
     theSearch.exec(function(err, texts){
-        if (err) {    res.json({list: false});    }
+        if (err) {    res.json({"list": false});    }
         else {	
-            var ids = the_texts.map(function(el) { return el._id } );
+            //var ids = the_texts.map(function(el) { return el._id } );
+            console.log(texts);
+            var ids = [];
+            texts.forEach(function(doc){
+                ids.push(doc);
+            });
             res.json({"list": ids});    
         };
     });

@@ -323,18 +323,18 @@ var searchPolyEdCookie = function(field) {
 var cookieNextDocs = searchPolyEdCookie("upcomingdocs=");
 var cookiePrevDocs = searchPolyEdCookie("previousdocs=");
 
-alert("the next docs are "+cookieNextDocs);
-alert("the prev docs are "+cookiePrevDocs);
+//alert("the next docs are "+cookieNextDocs);
+//alert("the prev docs are "+cookiePrevDocs);
 
 var setUpPolyEdChangeBtns = function() {
 
 	if (isUseless(cookieNextDocs) && isUseless(polyEdNextDocs[0])) {
-		alert("no queue so making and setting");
+		//alert("no queue so making and setting");
 	  	generateQueue(3, false, false, 0);
 	  	$(".poly-ed-editors-next").attr("href", extractLunaIds(polyEdNextDocs[0]));
 	}
 	else if (!isUseless(cookieNextDocs) && isUseless(polyEdNextDocs[0])) {
-		alert("using cookies to set next");
+		//alert("using cookies to set next");
 	  	polyEdNextDocs = cookieNextDocs.split(",");
 	  	$(".poly-ed-editors-next").attr("href", extractLunaIds(polyEdNextDocs[0]));
 	}
