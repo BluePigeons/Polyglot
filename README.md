@@ -33,7 +33,7 @@ Images are defined using [IIIF](http://iiif.io) info.json format with [Leaflet J
 
 The IIIF images for the University of Edinburgh are stored within the University of Edinburgh's experimental LUNA database and presented in the Editing pages of the site by linking to their URL - this means that if loading this code as it is you will need the relevant access credentials to load the University of Edinburgh's Collections. Alternatively you are free to create your own copy edited to link through to your own databases. 
 
-The Polyanno package is looking the variable "imageViewing" to be defined which is done here through firstly checking cookies for an "imageViewing" defined, and then if it is not, it is setting it by reconstructing the unique University of Edinburgh LUNA URL from the URL parameter after "/editors/". 
+The Polyanno package is looking the variable **imageViewing** to be defined which is done here through firstly checking cookies for an **imageViewing** defined, and then if it is not, it is setting it by reconstructing the unique University of Edinburgh LUNA URL from the URL parameter after "/editors/". 
 
 ![alt text](https://github.com/BluePigeons/Polyglot/blob/master/examples/screenshots/Screen%20Shot%202016-09-02%20at%2012.00.57.png "Editing Page URL Screenshot")
 
@@ -45,7 +45,7 @@ The Homepage loads thumbnail images by adjusting the info.json URLs to load smal
 
 The queue of images, i.e. the order in which they appear as thumbnails on the Homepage and which images load next when clicking the up and down buttons on the Editing pages is determined by using the polyedsearchpage.js file. 
 
-This requires firstly for the JSON variable "theFilters" to be defined in the following format:
+This requires firstly for the JSON variable **theFilters** to be defined in the following format:
 
 ```
 var theFilters = {
@@ -67,7 +67,7 @@ var theFilters = {
 }
 ```
 
-Then the array variable "collectionDocArray" to be defined - this must be an array of IIIF info.json URLs from which the queue can be generated. In this case it is defined in a separate file and lists University of Edinburgh Collections LUNA test URLs.
+Then the array variable **collectionDocArray** to be defined - this must be an array of IIIF info.json URLs from which the queue can be generated. In this case it is defined in a separate file and lists University of Edinburgh Collections LUNA test URLs.
 
 For example:
 ```
@@ -84,10 +84,10 @@ collectionDocArray = [
 ```
 
 And then the queue generated using the function generateQueue which takes the following options: 
- - children_no (Number) - The number of items to be selected from the collectionDocArray to be added to the queue.
- - scrolling (Boolean) - [Optional] If true, look for the object defined by variable InfinityListView and fill with thumbnail icons of the queue.
- - reuse (Boolean) - [Optional] If true then will reuse images from the "collectionDocArray" to keep lengthening the queue dynamically, if scrolling is also true then the queue will infinitely lengthen when the thumbnail list is scrolled through.
- - repeat_no (Number) - [Optional] The maximum number of times that objects can be reused to lengthen the queue - if undefined with reuse true then reuse will continue infinitely - this could cause harm to user experience if unlimited icons are loaded into the page.
+ - **children_no** (Number) - The number of items to be selected from the collectionDocArray to be added to the queue.
+ - **scrolling** (Boolean) - [Optional] If true, look for the object defined by variable InfinityListView and fill with thumbnail icons of the queue.
+ - **reuse** (Boolean) - [Optional] If true then will reuse images from the **collectionDocArray** to keep lengthening the queue dynamically, if **scrolling** is also true then the queue will infinitely lengthen when the thumbnail list is scrolled through.
+ - **repeat_no** (Number) - [Optional] The maximum number of times that objects can be reused to lengthen the queue - if undefined with **reuse** true then reuse will continue infinitely - this could cause harm to user experience if unlimited icons are loaded into the page.
 
 ```
 generateQueue(children_no, scrolling, reuse, repeat_no)
