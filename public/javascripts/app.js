@@ -614,7 +614,7 @@ var createEditorPopupBox = function() {
     "initialise_min_bar": false,
     "beforeclose": preBtnClosing
   };
-  var popupIDstring = addPopup("textEditorPopup", polyannoEditorHTML, "polyanno-page-body", dragon_opts, polyannoEditorHandlebarHTML);
+  var popupIDstring = add_dragondrop_pop("textEditorPopup", polyannoEditorHTML, "polyanno-page-body", dragon_opts, polyannoEditorHandlebarHTML);
   $(popupIDstring).find(".dragondrop-handlebar").addClass("polyanno-colour-change");
   $(popupIDstring).find(".dragondrop-handlebar-obj").addClass("polyanno-colour-change"); 
   //id="theEditor" class="row textEditorBox"
