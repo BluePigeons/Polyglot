@@ -2,10 +2,6 @@
   "name": "polyglot",
   "version": "0.0.1",
   "description": "A responsive UI to transcribe and translate images",
-//  "main": "server.js",
-  "scripts": {
-    "start": "server.js"
-  },
   "directories": {
     "examples": "./examples"
   },
@@ -14,13 +10,14 @@
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/BluePigeons/Polyglot.git"
+    "url": "https://github.com/BluePigeons/Polyglot"
   },
   "dependencies": {
     "cookie-parser": "^1.4.3",
     "express": "4.14.0",
     "mongoose": "~3.6.13",
     "body-parser": "~1.0.1",
-    "cors": "~2.7.1"
+    "cors": "~2.7.1",
+    "polyanno_storage": "latest"
   }
 }
