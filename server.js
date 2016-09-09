@@ -8,6 +8,9 @@ var cookieParser = require('cookie-parser');
 var cors = require('cors');
 
 var polyanno = require('polyanno_storage');
+
+////have released polyanno_storage as a separate NPM package so you should be able to simply "npm install" it the same as the other packages
+
 var databaseURL = polyanno.setup.databaseport;
 var thisWebsitePort = polyanno.setup.applicationport;
 
