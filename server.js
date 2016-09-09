@@ -10,7 +10,7 @@ var cors = require('cors');
 var polyanno = require('polyanno_storage');
 
 ////have released polyanno_storage as a separate NPM package so you should be able to simply "npm install" it the same as the other packages
-
+///need to set a function to (re)define those variables here within this package rather than just recalling what is defined in the node_modules package...
 var databaseURL = polyanno.setup.databaseport;
 var thisWebsitePort = polyanno.setup.applicationport;
 
@@ -46,6 +46,7 @@ var annoRouter = express.Router();
 
 annoRouter.use(function(req, res, next) {
   ///logging here
+    console.log("the body is "+JSON.stringify(req.body)+" and params "+JSON.stringify(req.params));
     next(); 
 });
 
@@ -81,7 +82,7 @@ editorRouter.get('/:name', function (req, res, next) {
       res.status(err.status).end();
     }
     else {
-      console.log('Sent with '+JSON.stringify(options.headers));
+      //console.log('Sent with '+JSON.stringify(options.headers));
     }
   });
 
@@ -123,10 +124,11 @@ annoRouter.get('/annotations/target/:target_id', polyanno.annotations.getByTarge
 
 annoRouter.get('/vectors', polyanno.vectors.findAll);
 annoRouter.post('/vectors', polyanno.vectors.addNew);
+annoRouter.delete('/vectors', polyanno.vectors.deleteAll);
+
 annoRouter.get('/vectors/:vector_id', polyanno.vectors.getByID);
 annoRouter.put('/vectors/:vector_id', polyanno.vectors.updateOne);
 annoRouter.delete('/vectors/:vector_id', polyanno.vectors.deleteOne);
-annoRouter.delete('/vectors', polyanno.vectors.deleteAll);
 
 annoRouter.get('/vectors/targets/:target', polyanno.annotations.getVectorsByTarget);
 annoRouter.get('/vectors/ids/:_ids', polyanno.vectors.searchByIds);
