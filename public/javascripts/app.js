@@ -24,6 +24,8 @@ var loginAndSetUsername = function() {
 
   ///for now
   polyanno_current_username = "ErinNolan";
+
+  $(".ed-poly-username").html(polyanno_current_username);
   
 };
 

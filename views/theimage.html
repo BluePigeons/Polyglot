@@ -59,7 +59,7 @@
 <div data-role="main" class="ui-content">
 <div id="main page" class="container polyanno-page-body">
 
-<div class="row ">
+<div class="row ed-poly-page-top">
 
 	<div class="col-md-2">
 
@@ -80,15 +80,27 @@
 			<div class="polyanno-menu-item-obj-list polyanno-dropdown-menu-items-left">
 
 				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
-					<a class="polyanno-user-menu-item"  href="/">Home</a>
+					<a class="polyanno-user-menu-item"  href="/">
+						<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left" type="button">
+					    	Home
+					  	</button>
+				  	</a>
 				</div>
 
 				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
-					<a class="polyanno-user-menu-item"  href="/aboutus">About Us</a>
+					<a class="polyanno-user-menu-item"  href="/aboutus">
+						<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left" type="button">
+					    	About Us
+					  	</button>
+					</a>
 				</div>
 
 				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
-					<a class="polyanno-user-menu-item "  href="/beginnertutorial">Tutorial</a>
+					<a class="polyanno-user-menu-item "  href="/beginnertutorial">
+						<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left" type="button">
+					    	Tutorial
+					  	</button>
+					</a>
 				</div>
 
 				<div class="dropdown polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
@@ -160,50 +172,59 @@
 
 	<div class="col-md-2">
 
-		<div class="row ed-poly-header">
+		<div class=" row ed-poly-header-obj">
 
-				<div class="dropdown">
+			<div class="ed-poly-header-obj">
 
-			        <button href="#" class="dropdown-toggle btn polyanno-dropdown-menu polyanno-dropdown-menu-right" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+			  	<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-right dropdown-toggle" type="button" id="poly-ed-user-menu" onclick="if ($('.polyanno-dropdown-menu-items-right').css('display')=='none') { $('.polyanno-dropdown-menu-items-right').css('display','block'); } else { $('.polyanno-dropdown-menu-items-right').css('display','none'); } " >
+			    
+	          		<span class="caret"></span>
+          			<img class="polyanno-user-icon " src="http://placekitten.com/g/50/50">
 
-			          		<span class="caret"></span>
+			  	</button>
+			  
+			</div>
 
-		          			<img class="polyanno-user-icon " src="http://placekitten.com/g/50/50">
+			<div class="polyanno-menu-item-obj-list polyanno-dropdown-menu-items-right">
 
-			        </button>
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-right">
+					<a class="polyanno-user-username polyanno-user-menu-item"  href="#">
+						<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-right" type="button">
+					    	<span class="ed-poly-username ">Jane Blogg</span>
+					  	</button>
+				  	</a>
+				</div>
 
-			        <ul class="dropdown-menu polyanno-dropdown-menu polyanno-dropdown-menu-items polyanno-dropdown-menu-items-right-all"">
-
-			          	<li class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-right">
-			          		<a href="#" class="polyanno-user-username polyanno-user-menu-item ">
-			          			<span class="ed-poly-username ">Jane Blogg</span>
-			          		</a>
-			          	</li>
-
-			            <li class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-right">
-			            	<a href="#" class="polyanno-user-favourites polyanno-user-menu-item ">
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-right">
+					<a class="polyanno-user-favourites polyanno-user-menu-item"  href="/aboutus">
+						<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-right" type="button">
 			            		<span class='glyphicon glyphicon-star '></span>
 			            		<span >  Favourites</span>
-			            	</a>
-			            </li>
-			            <li class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-right">		
-			            	<a href="#" class="polyanno-user-activity polyanno-user-menu-item ">
+					  	</button>
+					</a>
+				</div>
+
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-right">
+					<a class="polyanno-user-activity polyanno-user-menu-item "  href="/beginnertutorial">
+						<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-right" type="button">
 			            		<span class='glyphicon glyphicon-tasks '></span>
 			            		<span >  Activity</span>
-			            	</a>
-			            </li>
+					  	</button>
+					</a>
+				</div>
 
-			            <li role="separator" class="divider"></li>
-			            <li class="polyanno-user-menu-item-obj">
-			            	<a class="polyanno-user-signout polyanno-user-menu-item polyanno-dropdown-menu-items-right" href="#">Sign Out</a>
-			            </li>
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-right">
+					<a class="polyanno-user-signout polyanno-user-menu-item "  href="/beginnertutorial">
+						<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-right" type="button">
+			            		<span > Sign Out </span>
+					  	</button>
+					</a>
+				</div>
 
-			        </ul>
-
-	    		</div>
 		</div>
 	</div>
 
+</div>
 </div>
 
 <div class="row" id="polyanno-top-bar">

@@ -9,6 +9,11 @@ body {
 	height: 500px;
 }
 
+.ed-poly-page-top {
+	position: relative;
+	z-index: 10000;
+}
+
 .polyanno-logo-menu-icon {
 	width: 100%;
 }
@@ -20,24 +25,27 @@ body {
 
 .polyanno-menu-item-obj-list {
 	position: absolute;
+	z-index: 100000;
 	display: none;
 	width: 100%;
 }
 
 .polyanno-user-menu-item-obj {
-	width: 80%;
+	/*width: 80%;*/
 	background-color: white;
 	margin-top: 2%;
 	margin-bottom: 2%;
-	z-index: 1000000000000000000;
+	/*position: absolute;*/
+	z-index: 100000;
 }
 
 .polyanno-user-menu-item {
 	float: center;
+	background-color: white;
 }
 
 .polyanno-dropdown-menu-items-right-all {
-	margin-left: 20%;
+	margin-right: 0%;
 }
 .polyanno-dropdown-menu-items-left-all {
 	margin-left: 20%;
@@ -66,6 +74,7 @@ body {
 
 .ed-poly-header-obj {
 	display: inline-block;
+	/*position: fixed;*/
 	width: 100%;
 }
 

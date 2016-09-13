@@ -587,7 +587,8 @@ var newAnnotationFragment = function(baseURL) {
 
   polyanno_text_selectedHash = polyanno_text_selectedParent.concat("#"+polyanno_text_selectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
   targetSelected = [polyanno_text_selectedHash];
-  var targetData = {text: polyanno_text_selectedFragment.toString(), parent: polyanno_text_selectedParent};
+  //polyanno_text_selectedFragment 
+  var targetData = {text: newContent, parent: polyanno_text_selectedParent};
   var createdText;
   
   $.ajax({
