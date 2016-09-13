@@ -65,13 +65,11 @@
 
 		<div class=" row ed-poly-header-obj">
 
-        	<a href="/" class="ed-poly-header-obj">
-        		<object class="polyanno-logo-menu-icon" data="stylesheets/images/AnnoSVGHTML.svg" type="image/svg+xml"></object>
-        	</a>
-
 			<div class="ed-poly-header-obj">
 
 			  <button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left dropdown-toggle" type="button" id="poly-ed-title-menu" onclick="if ($('.polyanno-dropdown-menu-items-left').css('display')=='none') { $('.polyanno-dropdown-menu-items-left').css('display','block'); } else { $('.polyanno-dropdown-menu-items-left').css('display','none'); } " >
+
+	        	<object class="polyanno-logo-menu-icon" data="stylesheets/images/AnnoSVGHTML.svg" type="image/svg+xml"></object>
 			    
 			    <span class="caret"></span>
 
@@ -79,52 +77,61 @@
 			  
 			</div>
 
-			<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
-				<a class="polyanno-user-menu-item"  href="/aboutus">About Us</a>
+			<div class="polyanno-menu-item-obj-list polyanno-dropdown-menu-items-left">
+
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
+					<a class="polyanno-user-menu-item"  href="/">Home</a>
+				</div>
+
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
+					<a class="polyanno-user-menu-item"  href="/aboutus">About Us</a>
+				</div>
+
+				<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
+					<a class="polyanno-user-menu-item "  href="/beginnertutorial">Tutorial</a>
+				</div>
+
+				<div class="dropdown polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
+				  	<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left dropdown-toggle" type="button" id="poly-ed-filters-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				    	Filters
+				    	<span class="caret"></span>
+				  	</button>
+				  	<ul class="dropdown-menu form-group filter-form" aria-labelledby="poly-ed-filters-menu">
+					    <li class="filter">
+							<input type="search" placeholder="Search Images" class="poly-ed-search "><button class="poly-ed-search-submit"><span> Search </span></button>
+						</li>
+					    <li class="filter">
+							<p>Dates</p>
+							<span>From  </span><input class="poly-ed-startYear" type="number"><span> To </span><input class="poly-ed-endYear" type="number" max="2016" >
+						</li>
+					    <li class="filter">
+					    	<span>Languages  </span> <span> <input type="text" class="poly-ed-languages-filter"></span>
+						</li>
+					    <li class="filter">
+		    				<span>Transcription Difficulty  </span>
+							<span><div class="form-group">
+							  <select class="form-control" id="poly-ed-TranscriptionDifficulty">
+							    <option>Easy</option>
+							    <option>Medium</option>
+							    <option>Difficult</option>
+							  </select>
+							</div></span>
+						</li>
+						<li class="filter">
+							<span>Translation Difficulty</span>
+							<span><div class="form-group">
+							  <select class="form-control" id="poly-ed-TranslationDifficulty">
+							    <option>Easy</option>
+							    <option>Medium</option>
+							    <option>Difficult</option>
+							  </select>
+							</div></span>
+						</li>
+				  	</ul>
+				</div>
+
 			</div>
 
-			<div class="polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
-				<a class="polyanno-user-menu-item "  href="/beginnertutorial">Tutorial</a>
-			</div>
-
-			<div class="dropdown polyanno-user-menu-item-obj polyanno-dropdown-menu-items-left">
-			  	<button class="btn polyanno-dropdown-menu polyanno-dropdown-menu-left dropdown-toggle" type="button" id="poly-ed-filters-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    	Filters
-			    	<span class="caret"></span>
-			  	</button>
-			  	<ul class="dropdown-menu form-group filter-form" aria-labelledby="poly-ed-filters-menu">
-				    <li class="filter">
-						<input type="search" placeholder="Search Images" class="poly-ed-search "><button class="poly-ed-search-submit"><span> Search </span></button>
-					</li>
-				    <li class="filter">
-						<p>Dates</p>
-						<span>From  </span><input class="poly-ed-startYear" type="number"><span> To </span><input class="poly-ed-endYear" type="number" max="2016" >
-					</li>
-				    <li class="filter">
-				    	<span>Languages  </span> <span> <input type="text" class="poly-ed-languages-filter"></span>
-					</li>
-				    <li class="filter">
-	    				<span>Transcription Difficulty  </span>
-						<span><div class="form-group">
-						  <select class="form-control" id="poly-ed-TranscriptionDifficulty">
-						    <option>Easy</option>
-						    <option>Medium</option>
-						    <option>Difficult</option>
-						  </select>
-						</div></span>
-					</li>
-					<li class="filter">
-						<span>Translation Difficulty</span>
-						<span><div class="form-group">
-						  <select class="form-control" id="poly-ed-TranslationDifficulty">
-						    <option>Easy</option>
-						    <option>Medium</option>
-						    <option>Difficult</option>
-						  </select>
-						</div></span>
-					</li>
-			  	</ul>
-			</div>
 		</div>
 
 	</div>
@@ -158,12 +165,11 @@
 				<div class="dropdown">
 
 			        <button href="#" class="dropdown-toggle btn polyanno-dropdown-menu polyanno-dropdown-menu-right" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-			        	<div >
-		          			<img class="polyanno-user-icon " src="http://placekitten.com/g/50/50">
-		          		</div>
-		          		<div >
+
 			          		<span class="caret"></span>
-			          	</div>
+
+		          			<img class="polyanno-user-icon " src="http://placekitten.com/g/50/50">
+
 			        </button>
 
 			        <ul class="dropdown-menu polyanno-dropdown-menu polyanno-dropdown-menu-items polyanno-dropdown-menu-items-right-all"">

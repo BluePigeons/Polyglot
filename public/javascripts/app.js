@@ -21,16 +21,27 @@ loadImage();
 var loginAndSetUsername = function() {
   ///use EASE to setup login and set document.cookie = "theusername="+username+";";
   //set polyanno_current_username
+
+  ///for now
+  polyanno_current_username = "ErinNolan";
+  
 };
 
 polyanno_setup({"highlighting": true});
+
 
 var polyEdFilters = null; ////for now
 polyEdCurrentDocs.push(imageSelected);
 
 setUpPolyEdChangeBtns();
 
+////log out when sign out is clicked
 
+///load username into HTML where necessary
+
+///redirect to favourites page
+
+///redirect to activity page
 
 
 

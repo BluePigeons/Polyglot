@@ -18,12 +18,18 @@ body {
 	background-color: white;
 }
 
-.polyanno-user-menu-item-obj {
+.polyanno-menu-item-obj-list {
+	position: absolute;
 	display: none;
+	width: 100%;
+}
+
+.polyanno-user-menu-item-obj {
 	width: 80%;
 	background-color: white;
 	margin-top: 2%;
 	margin-bottom: 2%;
+	z-index: 1000000000000000000;
 }
 
 .polyanno-user-menu-item {
@@ -55,7 +61,7 @@ body {
 
 .polyanno-user-icon {
 	/*width: 50%;*/
-	margin-top: 5%;
+	margin-top: 2%;
 }
 
 .ed-poly-header-obj {

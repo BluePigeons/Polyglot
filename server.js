@@ -119,6 +119,9 @@ annoRouter.get('/annotations/transcriptions', polyanno.annotations.getAllTranscr
 annoRouter.get('/annotations/translations', polyanno.annotations.getAllTranslationAnnos);
 annoRouter.get('/annotations/:anno_id', polyanno.annotations.getByID);
 annoRouter.get('/annotations/target/:target_id', polyanno.annotations.getByTarget);
+annoRouter.get('/annotations/body/:body_id', polyanno.annotations.getByBody);
+annoRouter.delete('/annotations', polyanno.annotations.deleteAll);
+annoRouter.delete('/annotations/:anno_id', polyanno.annotations.deleteOne);
 
 //VECTOR API
 
@@ -131,7 +134,7 @@ annoRouter.put('/vectors/:vector_id', polyanno.vectors.updateOne);
 annoRouter.delete('/vectors/:vector_id', polyanno.vectors.deleteOne);
 
 annoRouter.get('/vectors/targets/:target', polyanno.annotations.getVectorsByTarget);
-annoRouter.get('/vectors/ids/:_ids', polyanno.vectors.searchByIds);
+annoRouter.get('/vectors/ids/:_ids/target/:target_id', polyanno.vectors.searchByIds);
 
 //TRANSCRIPTION API
 
@@ -144,7 +147,7 @@ annoRouter.delete('/transcriptions/:transcription_id', polyanno.transcriptions.d
 annoRouter.delete('/transcriptions', polyanno.transcriptions.deleteAll);
 
 annoRouter.get('/transcriptions/targets/:target', polyanno.annotations.getTranscriptionsByTarget);
-annoRouter.get('/transcriptions/ids/:_ids', polyanno.transcriptions.searchByIds);
+annoRouter.get('/transcriptions/ids/:_ids/target/:target_id', polyanno.transcriptions.searchByIds);
 
 //TRANSLATION API
 
@@ -157,7 +160,7 @@ annoRouter.delete('/translations/:transcription_id', polyanno.translations.delet
 annoRouter.delete('/translations', polyanno.translations.deleteAll);
 
 annoRouter.get('/translations/targets/:target', polyanno.annotations.getTranslationsByTarget);
-annoRouter.get('/translations/ids/:_ids', polyanno.translations.searchByIds);
+annoRouter.get('/translations/ids/:_ids/target/:target_id', polyanno.translations.searchByIds);
 
 /////////GET STARTED
 
