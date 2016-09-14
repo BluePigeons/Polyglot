@@ -9,17 +9,17 @@
 	background-color: grey;
 	border-radius: 5px;
 	position: relative;
-	z-index: -1000;
+	/*z-index: -1000;*/
 }
-
 
 .popover {
-	/*z-index: 100000;*/
+	z-index: 100000;
 }
+
 
 .dragondrop-handlebar {
 	position: relative;
-	z-index: -10000;
+	/*z-index: -10000;*/
 }
 .textEditorMainBox {
 	position: relative;
@@ -118,4 +118,12 @@
 .poly-ed-editors-change {
 	width: 100%;
 }
+
+#imageViewer {
+  -webkit-user-select: none;  
+  -moz-user-select: none;    
+  -ms-user-select: none;      
+  user-select: none;
+}
+
 

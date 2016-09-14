@@ -588,7 +588,7 @@ var newAnnotationFragment = function(baseURL) {
   polyanno_text_selectedHash = polyanno_text_selectedParent.concat("#"+polyanno_text_selectedID); //need to refer specifically to body text of that transcription - make body independent soon so no need for the ridiculously long values??
   targetSelected = [polyanno_text_selectedHash];
   //polyanno_text_selectedFragment 
-  var targetData = {text: newContent, parent: polyanno_text_selectedParent};
+  var targetData = {text: polyanno_text_selectedFragment, parent: polyanno_text_selectedParent};
   var createdText;
   
   $.ajax({
@@ -1508,10 +1508,8 @@ var polyanno_image_popovers_setup = function() {
 
 $('#polyanno-page-body').on("click", '.newAnnotation', function(event) {
 
-  if ($langSelector != false) {
-    atu_the_input = $(this);
-    atu_initialise_IMEs();
-  };
+  atu_the_input = this;
+  atu_initialise_IMEs();
 
 });
 
@@ -1520,10 +1518,8 @@ $("#polyanno-top-bar").on("click", ".polyanno-add-keyboard", function(event){
       "minimise": true,
       "initialise_min_bar": false
     };
-    addKeyboard(dragon_opts);
+    addKeyboard(dragon_opts, false);
 });
-
-addIMEs(true, true, true);
 
 ////HIGHLIGHTING
 var polyanno_setup_highlighting = function() {
@@ -1743,6 +1739,9 @@ var polyanno_setup_editor_events = function() {
 
 var polyanno_setup = function(opts) {
 
+  if (opts.minimising == false) {  polyanno_minimising = false;  };
+  addIMEs(true, true, true); //why is this not working??????
+
   document.getElementById("polyanno-top-bar").innerHTML = polyanno_top_bar_HTML;
 
   polyanno_setup_storage(opts.storage);
@@ -1756,7 +1755,7 @@ var polyanno_setup = function(opts) {
   var polyanno_image_title = polyanno_metadata_title_search[0].value;
   var polyanno_image_title_HTML = "<span>"+polyanno_image_title+"</span>";
 
-  var image_viewer_id = add_dragondrop_pop( "polyanno-image-box", polyanno_image_viewer_HTML , "polyanno-page-body", opts.minimising, polyanno_image_title_HTML );
+  var image_viewer_id = add_dragondrop_pop( "polyanno-image-box", polyanno_image_viewer_HTML , "polyanno-page-body", polyanno_minimising, polyanno_image_title_HTML );
   //$(".polyanno-image-box").find("") find handlebar and remove close button
   $(image_viewer_id).attr("id", "imageViewer");
 
@@ -1767,8 +1766,7 @@ var polyanno_setup = function(opts) {
   polyanno_vector_edit_setup();
   polyanno_image_popovers_setup();
 
-
-  if (opts.minimising == false) {  polyanno_minimising = false;  };
+  initialise_dragondrop("polyanno-page-body", {"minimise": polyanno_minimising });
 
   if (!isUseless(opts.users)) { polyanno_setup_users(opts.users); };
 
