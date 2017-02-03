@@ -190,11 +190,11 @@ var openImgHTML = `<img src=`;
 var endDivHTML = `</div>`;
 var endAnchorHTML = `</a>`;
 
-var theThumbnailIIIF = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/";
+var theThumbnailIIIF = "http://images.is.ed.ac.uk/luna/servlet/iiif/";
 var thumbnailFileExt = "/full/100,100/0/default.jpg"; /////???????
 
 var generateIconHTML = function(theURL) {
-	var theDocID = theURL.substring( 57, theURL.lastIndexOf("/info.json") ); ///the 57 comes from length of LUNA Test URL length
+	var theDocID = theURL.substring( 44, theURL.lastIndexOf("/info.json") ); ///the 57 comes from length of LUNA Test URL length
 	var theDOMID = " id='"+theDocID+"' ";
 	var theHREF = " href='/editors/"+encodeURI(theDocID)+"' ";
 	var theTitle = "<p >" + "</p>"; ///////find title

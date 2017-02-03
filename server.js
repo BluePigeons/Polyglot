@@ -69,7 +69,7 @@ userRouter.use(function(req, res, next) {
 editorRouter.get('/:name', function (req, res, next) {
 
   ////specific to University of Edinburgh application to prevent general spamming with any old info.json through the website
-    var fileName = "http://images.is.ed.ac.uk:8181/luna/servlet/iiif/"+req.params.name+"/info.json";
+    var fileName = "http://images.is.ed.ac.uk/luna/servlet/iiif/"+req.params.name+"/info.json";
     var options = {
         root: __dirname + '/views/',
         headers: {
