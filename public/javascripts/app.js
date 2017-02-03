@@ -5,7 +5,7 @@ var loadImage = function() {
   if (isUseless(theCookieImage)) {
     var thisWebsiteAddress = window.location.href;
     var theImageID = thisWebsiteAddress.substring( thisWebsiteAddress.indexOf("/editors/") + 9, thisWebsiteAddress.length);
-    imageSelected = "http://lac-luna-test2.is.ed.ac.uk:8181/luna/servlet/iiif/"+theImageID+"/info.json";
+    imageSelected = "http://images.is.ed.ac.uk/luna/servlet/iiif/"+theImageID+"/info.json";
   }
   else {
     imageSelected = theCookieImage;
