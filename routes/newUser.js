@@ -8,19 +8,46 @@ var userSchema   = new Schema({
 
 	"docs_edited": {
 		"vectors" : {
-			"created" : [],
-			"edited" : [],
-			"deleted" : []
+			"created" : [{
+				"id": String,
+				"date": Date
+			}],
+			"edited" : [{
+				"id": String,
+				"date": Date
+			}],
+			"deleted" : [{
+				"id": String,
+				"date": Date
+			}]
 		},
 		"transcriptions" : {
-			"created" : [],
-			"edited" : [],
-			"deleted" : []
+			"created" : [{
+				"id": String,
+				"date": Date
+			}],
+			"edited" : [{
+				"id": String,
+				"date": Date
+			}],
+			"deleted" : [{
+				"id": String,
+				"date": Date
+			}]
 		},
 		"translations" : {
-			"created" : [],
-			"edited" : [],
-			"deleted" : []
+			"created" : [{
+				"id": String,
+				"date": Date
+			}],
+			"edited" : [{
+				"id": String,
+				"date": Date
+			}],
+			"deleted" : [{
+				"id": String,
+				"date": Date
+			}]
 		}
 	},
 

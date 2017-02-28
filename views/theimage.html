@@ -13,8 +13,9 @@
 
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+
+	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/leaflet.draw.css" />
 
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
@@ -22,7 +23,7 @@
 	<link rel="stylesheet" type="text/css" href="https://rawgit.com/BluePigeons/dragon_drop/master/dragondrop.css" />
 	<link rel="stylesheet" type="text/css" href="https://rawgit.com/BluePigeons/alltheunicode/master/alltheunicode.css" />
 
-	<link rel="stylesheet" type="text/css" href="stylesheets/polyanno.css" />
+	<link rel="stylesheet" type="text/css" href="https://rawgit.com/UoEMainLibrary/polyanno/master/polyanno.css" />
 	<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
 
 <!-- Javascript libraries -->
@@ -32,16 +33,55 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
     <script src="https://rawgit.com/mejackreed/Leaflet-IIIF/master/leaflet-iiif.js"></script>
-	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
+    
+
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/Leaflet.draw.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/Leaflet.Draw.Event.js"></script>
+
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/handler/Edit.Poly.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/handler/Edit.SimpleShape.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/handler/Edit.Circle.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/handler/Edit.Rectangle.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/handler/Edit.Marker.js"></script>
+
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/handler/Draw.Feature.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/handler/Draw.Polyline.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/handler/Draw.Polygon.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/handler/Draw.SimpleShape.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/handler/Draw.Rectangle.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/handler/Draw.Circle.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/handler/Draw.Marker.js"></script>
+
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/ext/TouchEvents.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/ext/LatLngUtil.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/ext/GeometryUtil.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/ext/LineUtil.Intersect.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/ext/Polyline.Intersect.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/ext/Polygon.Intersect.js"></script>
+
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/Control.Draw.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/Tooltip.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/Toolbar.js"></script>
+
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/draw/DrawToolbar.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/EditToolbar.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/handler/EditToolbar.Edit.js"></script>
+    <script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/src/edit/handler/EditToolbar.Delete.js"></script>
+
 <!--
+	<script src="https://cdn.rawgit.com/Leaflet/Leaflet.draw/master/dist/leaflet.draw.js"></script>
+
 	<script src="javascripts/rangy-core.js"></script>
 	<script src="javascripts/jquery.ime.js"></script>
 	<script src="javascripts/jquery.ime.selector.js"></script>
 	<script src="javascripts/jquery.ime.preferences.js"></script>
 	<script src="javascripts/jquery.ime.inputmethods.js"></script>
 -->
+
+<!--
 	<script> window.hypothesisConfig = function () { return {showHighlights: false}; };</script>
 	<script type="application/json" class="js-hypothesis-config">
 	  {
@@ -50,6 +90,8 @@
 	</script>
 	<script async defer src="https://hypothes.is/embed.js"></script>
 	<script src="javascripts/TextQuoteAnchor.js"></script>
+
+-->
 
 </head>
 
@@ -290,7 +332,7 @@
 <script src="https://rawgit.com/BluePigeons/alltheunicode/master/alltheunicode.js"></script>
 <script src="javascripts/polyedsearchpage.js"></script>
 <script src="javascripts/theCollectionArray.js"></script>
-<script src="javascripts/polyanno.js"></script>
+<script src="https://rawgit.com/UoEMainLibrary/polyanno/master/polyanno.js"></script>
 <script src="javascripts/app.js"></script>
 
 </body>

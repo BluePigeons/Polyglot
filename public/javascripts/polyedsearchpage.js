@@ -186,19 +186,44 @@ var endOfPageHTML = `<div class="poly-ed-end-scroll">
 var iconRowHTML = `<div class="poly-ed-icon-row row">`;
 var openAnchorHTML = `<a `
 var docIconHTML = `<div class="poly-ed-doc-icon col-md-4">`;
+
+var imgMetadataHTMLopening = `<div class="poly-ed-thumbnail-meta" style="text-align:center;position:absolute;width:100%;z-index:20;background-color:#EC0028;opacity:0.5;top:0">`;
+var imgMetadataHTMLclosing = `</div>`;
+var imgMetadataDataHTML = `<h3>Boop</h3>`;
+
+var imgMetadataHTML = imgMetadataHTMLopening + imgMetadataDataHTML + imgMetadataHTMLclosing;
+
 var openImgHTML = `<img src=`;
+////
+var closeImgHTML = ` style="border-radius:30px;z-index:10" >`;
+
 var endDivHTML = `</div>`;
 var endAnchorHTML = `</a>`;
 
 var theThumbnailIIIF = "http://images.is.ed.ac.uk/luna/servlet/iiif/";
-var thumbnailFileExt = "/full/100,100/0/default.jpg"; /////???????
+
+///need to adjust the size!!
+
+var thumbnailFileExt = "/full/225,225/0/default.jpg"; /////???????
+
+$(".poly-ed-doc-icon").on("mouseover", function(event){
+	$(event.target).find(".poly-ed-thumbnail-meta").css("display", "inline");
+});
+$(".poly-ed-doc-icon").on("mouseout", function(event){
+	$(event.target).find(".poly-ed-thumbnail-meta").css("display", "none");
+});
 
 var generateIconHTML = function(theURL) {
-	var theDocID = theURL.substring( 44, theURL.lastIndexOf("/info.json") ); ///the 57 comes from length of LUNA Test URL length
+	var theDocID = theURL.substring( 44, theURL.lastIndexOf("/info.json") ); ///the 44 comes from length of LUNA URL length
 	var theDOMID = " id='"+theDocID+"' ";
 	var theHREF = " href='/editors/"+encodeURI(theDocID)+"' ";
-	var theTitle = "<p >" + "</p>"; ///////find title
-	return openAnchorHTML+theDOMID+theHREF+" >"+docIconHTML+theTitle+openImgHTML+theThumbnailIIIF+theDocID+thumbnailFileExt+" >"+endDivHTML+endAnchorHTML;
+	var openingThumbnailHTML = docIconHTML+openAnchorHTML+theDOMID+theHREF+" >";
+	var closingThumbnailHTML = endAnchorHTML+endDivHTML;
+	var imgHTML = openImgHTML+theThumbnailIIIF+theDocID+thumbnailFileExt+closeImgHTML;
+
+
+
+	return openingThumbnailHTML+imgMetadataHTML+imgHTML+closingThumbnailHTML;
 };
 
 var loopImageFilter = function(filters) {
@@ -263,7 +288,7 @@ var generateQueue = function(childrenNo, scrolling, reuse, repeatNo) {
 		shouldScrollLoop = true;
 		if (collectionDocArray.length < (childrenNo * repeatNo)) {
 			collectionDocArray.forEach(function(doc){
-				addToQueue(doc);
+				addToNextQueue(doc);
 			});
 			collectionDocArray = polyEdNextDocs;
 			generateQueue(childrenNo * repeatNo, true, true);
@@ -283,7 +308,7 @@ $('#poly-ed-scroll').on("scroll", function(){
 		infinityListView.find(".poly-ed-end-scroll")[0].remove();
 		if (collectionDocArray.length < 12) {
 			collectionDocArray.forEach(function(doc){
-				addToQueue(doc);
+				addToNextQueue(doc);
 			});
 			collectionDocArray = polyEdNextDocs;
 			generateQueue(12, true, true);
