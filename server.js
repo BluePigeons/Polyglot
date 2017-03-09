@@ -120,8 +120,7 @@ annoRouter.get('/annotations/transcriptions', polyanno.annotations.getAllTranscr
 annoRouter.get('/annotations/translations', polyanno.annotations.getAllTranslationAnnos);
 annoRouter.get('/annotations/:anno_id', polyanno.annotations.getByID);
 annoRouter.get('/annotations/target/:target_id', polyanno.annotations.getByTarget);
-/////This function doesn't exist yet!
-//annoRouter.get('/annotations/body/:body_id', polyanno.annotations.getByBody);
+annoRouter.get('/annotations/body/:body_id', polyanno.annotations.getByBody);
 annoRouter.delete('/annotations', polyanno.annotations.deleteAll);
 annoRouter.delete('/annotations/:anno_id', polyanno.annotations.deleteOne);
 
