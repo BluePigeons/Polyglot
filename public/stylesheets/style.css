@@ -99,30 +99,10 @@ body {
 }
 
 
-
-
-.tutorialCarousel {
-	background-color: white;
-	border-radius: 30px;
-	margin-top: 5%;
-	padding: 5%;
-	height: 70%;
-}
-
-.polyanno-tutorial-control {
-	background-color: white;
-	width: 40%;
-	margin-top: 5%;
-}
-
-.polyanno-tutorial-control-right {
-	border-radius: 0px 10px 10px 0px;
-	float: right;
-}
-
-.polyanno-tutorial-control-left {
-	border-radius: 10px 0px 0px 10px;
-	float: left;
+.footer-policies {
+	text-align: center;
+	background-color: buttonface;
+	padding: 20px;
 }
 
 
