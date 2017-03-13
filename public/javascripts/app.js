@@ -315,3 +315,65 @@ polyEdCurrentDocs.push(imageSelected);
 
 setUpPolyEdChangeBtns();
 
+///Extracting Image
+
+var polyanno_open_the_image_sub_section = function() {
+  var shape = polyanno_map.getLayer(vectorSelected).toGeoJSON();
+  var IIIFsection = getIIIFsectionURL(imageSelected, shape.geometry.coordinates[0], "jpg");
+  window.open(IIIFsection, "imageExtract");
+};
+
+///Downloading Text Files
+
+//https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications
+
+/*! modernizr 3.3.1 (Custom Build) | MIT *
+ * https://modernizr.com/download/?-setclasses !*/
+!function(n,e,s){function o(n){var e=r.className,s=Modernizr._config.classPrefix||"";if(c&&(e=e.baseVal),Modernizr._config.enableJSClass){var o=new RegExp("(^|\\s)"+s+"no-js(\\s|$)");e=e.replace(o,"$1"+s+"js$2")}Modernizr._config.enableClasses&&(e+=" "+s+n.join(" "+s),c?r.className.baseVal=e:r.className=e)}function a(n,e){return typeof n===e}function i(){var n,e,s,o,i,l,r;for(var c in f)if(f.hasOwnProperty(c)){if(n=[],e=f[c],e.name&&(n.push(e.name.toLowerCase()),e.options&&e.options.aliases&&e.options.aliases.length))for(s=0;s<e.options.aliases.length;s++)n.push(e.options.aliases[s].toLowerCase());for(o=a(e.fn,"function")?e.fn():e.fn,i=0;i<n.length;i++)l=n[i],r=l.split("."),1===r.length?Modernizr[r[0]]=o:(!Modernizr[r[0]]||Modernizr[r[0]]instanceof Boolean||(Modernizr[r[0]]=new Boolean(Modernizr[r[0]])),Modernizr[r[0]][r[1]]=o),t.push((o?"":"no-")+r.join("-"))}}var t=[],f=[],l={_version:"3.3.1",_config:{classPrefix:"",enableClasses:!0,enableJSClass:!0,usePrefixes:!0},_q:[],on:function(n,e){var s=this;setTimeout(function(){e(s[n])},0)},addTest:function(n,e,s){f.push({name:n,fn:e,options:s})},addAsyncTest:function(n){f.push({name:null,fn:n})}},Modernizr=function(){};Modernizr.prototype=l,Modernizr=new Modernizr;var r=e.documentElement,c="svg"===r.nodeName.toLowerCase();i(),o(t),delete l.addTest,delete l.addAsyncTest;for(var u=0;u<Modernizr._q.length;u++)Modernizr._q[u]();n.Modernizr=Modernizr}(window,document);
+//////Copied to detect for use of File type because stupid Safari..
+
+
+var generate_export_text = function(editorString, text_type) {
+  var the_text = `
+  The image json: `+imageSelected;
+  var the_top_text = $(editorString).find("polyanno-top-voted").html();
+  the_text.concat(` 
+    The most popular `+text_type+": "+the_top_text);
+  if ((!isUseless(polyanno_siblingArray)) && (!isUseless(polyanno_siblingArray[0]))) {
+    for (var i=0; i < polyanno_siblingArray.length; i++) {
+      var child = polyanno_siblingArray[i][0];
+      var alt_text = `
+      Alternative: `+child.text;
+      the_text.concat(alt_text);
+    };
+  };
+  if (!isUseless(vectorSelected)) {
+    var shape = allDrawnItems.getLayer(vectorSelected).toGeoJSON();
+    var IIIFsection = getIIIFsectionURL(imageSelected, shape.geometry.coordinates[0], "jpg");
+    the_text.concat(` 
+      The image sub-section: `+IIIFsection);
+  };
+  if (Modernizr.filereader) {
+    var generatedFile = new File([the_text], "new_annotation.txt", {type: "text/plain"});
+    var objectURL = URL.createObjectURL(generatedFile);
+    window.open(objectURL, "ExportedText");
+  } else {
+    // not-supported
+    alert("Get a better browser!!!!!!");
+  };
+
+};
+
+$("#polyanno-page-body").on("click", ".polyanno-export-text", function(event){
+    var theEditor = "#"+ $(this).closest(".textEditorPopup").attr("id");
+    generate_export_text(polyanno_text_type_selected);
+});
+
+
+///Reporting or Flagging Up Inappropriate Content
+
+
+
+
+
+
