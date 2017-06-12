@@ -2,7 +2,7 @@
 
 This is a project aiming to enable to crowdsourced transcription and translation of the awesome collections at the University of Edinburgh. Maybe gamifying if I get time. This has the University of Edinburgh specific website but individual components developed during this project are being released as separate packages to make it more accessible for others to reuse the code.
 
-##Getting Started
+## Getting Started
 
 The project is written using Node.js and Express to build the framework and as a package.json is defined, you should be able to simply clone this repo and use NPM to install dependencies.
 
@@ -25,7 +25,7 @@ $ npm start
 ```
 
 
-##Front End Development
+## Front End Development
 
 **Editing Pages**
 
@@ -93,7 +93,7 @@ And then the queue generated using the function generateQueue which takes the fo
 generateQueue(children_no, scrolling, reuse, repeat_no)
 ```
 
-##Further Information
+## Further Information
 
 For more information about the project, the research done and decisions made then you can read the series of posts about it here - [https://pigeonsblue.com/2016/08/22/polyanno-adventures-in-annotation/](https://pigeonsblue.com/2016/08/22/polyanno-adventures-in-annotation/) and you can tweet your compliments and complaints to Erin Nolan for creating the mess [@TheGreySkies](https://twitter.com/TheGreySkies).
 
